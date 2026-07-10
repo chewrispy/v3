@@ -1,0 +1,638 @@
+<!doctype html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>부서 회의비 관리 앱</title><style>
+html,body,#root{margin:0;min-height:100%;} body{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f8fafc;color:#18181b;} button,input,select,textarea{font:inherit;} button{cursor:pointer;} @media(max-width:1100px){.parts-grid{grid-template-columns:1fr!important;}}
+</style></head><body><div id="root"></div><script>
+(function () {
+  let hooks = [];
+  let hookIndex = 0;
+  let rootElement = null;
+  let rootVNode = null;
+  let scheduled = false;
+  let pendingEffects = [];
+  const unitless = new Set(['opacity','zIndex','fontWeight','lineHeight','flex','flexGrow','flexShrink','order','zoom']);
+  function flattenChildren(input, out) {
+    input.forEach(child => { if (Array.isArray(child)) flattenChildren(child, out); else out.push(child); });
+    return out;
+  }
+  function createElement(type, props, ...children) {
+    props = props || {};
+    const flat = flattenChildren(children, []);
+    return { type, props: Object.assign({}, props, { children: flat }) };
+  }
+  function depsChanged(prev, next) {
+    if (!next || !prev || prev.length !== next.length) return true;
+    for (let i = 0; i < next.length; i++) if (!Object.is(prev[i], next[i])) return true;
+    return false;
+  }
+  function useState(initial) {
+    const i = hookIndex++;
+    if (hooks[i] === undefined) hooks[i] = typeof initial === 'function' ? initial() : initial;
+    const setState = value => {
+      const next = typeof value === 'function' ? value(hooks[i]) : value;
+      if (!Object.is(hooks[i], next)) { hooks[i] = next; scheduleRender(); }
+    };
+    return [hooks[i], setState];
+  }
+  function useRef(initial) {
+    const i = hookIndex++;
+    if (hooks[i] === undefined) hooks[i] = { current: initial };
+    return hooks[i];
+  }
+  function useEffect(effect, deps) {
+    const i = hookIndex++;
+    const prev = hooks[i];
+    if (depsChanged(prev, deps)) { hooks[i] = deps; pendingEffects.push(effect); }
+  }
+  function useCallback(fn, deps) {
+    const i = hookIndex++;
+    const prev = hooks[i];
+    if (!prev || depsChanged(prev.deps, deps)) hooks[i] = { fn, deps };
+    return hooks[i].fn;
+  }
+  function setStyle(el, style) {
+    if (!style) return;
+    for (const key in style) {
+      let value = style[key];
+      if (value == null || value === false) continue;
+      if (typeof value === 'number' && !unitless.has(key)) value = value + 'px';
+      try { el.style[key] = String(value); } catch (e) {}
+    }
+  }
+  function setProp(el, key, value) {
+    if (key === 'children' || key === 'key' || key === 'ref') return;
+    if (key === 'className') { el.setAttribute('class', value || ''); return; }
+    if (key === 'htmlFor') { el.setAttribute('for', value || ''); return; }
+    if (key === 'style' && value && typeof value === 'object') { setStyle(el, value); return; }
+    if (key.startsWith('on') && typeof value === 'function') {
+      const eventName = key.slice(2).toLowerCase();
+      el.addEventListener(eventName, ev => { if (!ev.nativeEvent) ev.nativeEvent = ev; value(ev); });
+      return;
+    }
+    if (value == null || value === false) return;
+    if (value === true) { el.setAttribute(key, ''); try { el[key] = true; } catch(e) {} return; }
+    try { if (key in el && key !== 'list' && key !== 'type') el[key] = value; else el.setAttribute(key, String(value)); }
+    catch (e) { el.setAttribute(key, String(value)); }
+  }
+  function renderVNode(vnode) {
+    if (vnode == null || vnode === false || vnode === true) return document.createTextNode('');
+    if (typeof vnode === 'string' || typeof vnode === 'number') return document.createTextNode(String(vnode));
+    if (Array.isArray(vnode)) { const frag = document.createDocumentFragment(); vnode.forEach(child => frag.appendChild(renderVNode(child))); return frag; }
+    if (typeof vnode.type === 'function') return renderVNode(vnode.type(vnode.props || {}));
+    if (vnode.type === React.Fragment) { const frag = document.createDocumentFragment(); (vnode.props.children || []).forEach(child => frag.appendChild(renderVNode(child))); return frag; }
+    const el = document.createElement(vnode.type);
+    const props = vnode.props || {};
+    for (const key in props) setProp(el, key, props[key]);
+    (props.children || []).forEach(child => el.appendChild(renderVNode(child)));
+    if (props.ref && typeof props.ref === 'object') props.ref.current = el;
+    return el;
+  }
+  function renderRoot() {
+    if (!rootElement || !rootVNode) return;
+    scheduled = false; hookIndex = 0; pendingEffects = [];
+    rootElement.textContent = '';
+    rootElement.appendChild(renderVNode(rootVNode));
+    const effects = pendingEffects.slice(); pendingEffects = [];
+    effects.forEach(fn => { try { fn(); } catch(e) { console.error(e); } });
+  }
+  function scheduleRender() { if (scheduled) return; scheduled = true; Promise.resolve().then(renderRoot); }
+  window.React = { createElement, Fragment: Symbol('Fragment'), useState, useEffect, useRef, useCallback };
+  window.ReactDOM = { createRoot(el) { rootElement = el; return { render(vnode) { rootVNode = vnode; renderRoot(); } }; }, render(vnode, el) { rootElement = el; rootVNode = vnode; renderRoot(); } };
+})();
+const React = window.React;
+const ReactDOM = window.ReactDOM;
+const { useState, useEffect, useRef, useCallback } = React;
+
+
+const Papa = { parse(text, options = {}) {
+  const rows = [];
+  let row = [], cell = '', quote = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quote) {
+      if (ch === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+      else if (ch === '"') quote = false;
+      else cell += ch;
+    } else {
+      if (ch === '"') quote = true;
+      else if (ch === ',') { row.push(cell); cell = ''; }
+      else if (ch === '\n') { row.push(cell); const clean = row.map(v => String(v).replace(/\r$/, '')); if (!options.skipEmptyLines || clean.some(v => v.trim())) rows.push(clean); row = []; cell = ''; }
+      else cell += ch;
+    }
+  }
+  row.push(cell); const clean = row.map(v => String(v).replace(/\r$/, '')); if (!options.skipEmptyLines || clean.some(v => v.trim())) rows.push(clean);
+  return { data: rows, errors: [] };
+}};
+
+const uid = () => Math.random().toString(36).substr(2, 9);
+const won = (n) => n.toLocaleString("ko-KR", { style: "currency", currency: "KRW", maximumFractionDigits: 0 });
+const monthLabel = (ym) => {
+    if (!ym)
+        return "";
+    const [year, month] = ym.split("-");
+    return `${year}년 ${Number.parseInt(month)}월`;
+};
+const CATEGORY = {
+    org: { label: "조직관리비", perHead: 20000 },
+    meeting: { label: "회의비", perHead: 50000 },
+};
+const PARTS = {
+    uxs: { name: "UXS(전략)", color: "#E3F2FD" },
+    uxd: { name: "UXD(디자인)", color: "#F3E5F5" },
+    uxo: { name: "UXO(운영)", color: "#E8F5E9" },
+};
+const STORAGE_KEY = "ux-budget-data-v2";
+function BudgetTracker() {
+    const [data, setData] = useState({
+        uxs: { currentMonth: "", months: {} },
+        uxd: { currentMonth: "", months: {} },
+        uxo: { currentMonth: "", months: {} },
+    });
+    const [error, setError] = useState("");
+    const [uploadMsg, setUploadMsg] = useState("");
+    const [uploadCategory, setUploadCategory] = useState("meeting");
+    const [showTeamManager, setShowTeamManager] = useState(null);
+    const [showEntries, setShowEntries] = useState(new Set());
+    const fileInputRef = useRef(null);
+    // 초기화 - 현재 월로 설정 + 저장된 데이터 로드
+    useEffect(() => {
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+        try {
+            const savedValue = window.localStorage.getItem(STORAGE_KEY);
+            if (savedValue) {
+                const parsed = JSON.parse(savedValue);
+                for (const partKey of Object.keys(PARTS)) {
+                    if (!parsed[partKey])
+                        parsed[partKey] = { currentMonth, months: {} };
+                    if (!parsed[partKey].currentMonth)
+                        parsed[partKey].currentMonth = currentMonth;
+                    if (!parsed[partKey].months)
+                        parsed[partKey].months = {};
+                }
+                setData(parsed);
+                return;
+            }
+        }
+        catch (e) {
+            console.error("데이터 로드 오류:", e);
+        }
+        setData((prev) => {
+            const next = { ...prev };
+            for (const partKey of Object.keys(PARTS)) {
+                if (!next[partKey].currentMonth) {
+                    next[partKey] = { ...next[partKey], currentMonth };
+                }
+            }
+            return next;
+        });
+    }, []);
+    // 데이터 저장
+    const persist = useCallback((nextData) => {
+        try {
+            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextData));
+        }
+        catch (e) {
+            console.error("저장 오류:", e);
+        }
+    }, []);
+    // 한글 이름 추출
+    const extractKoreanName = (str) => {
+        const match = String(str).match(/\(([^)]+)\)/);
+        return match ? match[1] : String(str).trim();
+    };
+    // CSV 업로드
+    const handleFileUpload = async (file) => {
+        var _a;
+        setError("");
+        setUploadMsg("");
+        try {
+            if (!file.name.endsWith(".csv")) {
+                setError("CSV 파일만 가능합니다.");
+                return;
+            }
+            let text;
+            try {
+                const buffer = await file.arrayBuffer();
+                const decoder = new TextDecoder("utf-8");
+                text = decoder.decode(buffer);
+                const brokenCharCount = (text.match(/\ufffd/g) || []).length;
+                if (brokenCharCount > 10) {
+                    const decoder2 = new TextDecoder("euc-kr");
+                    text = decoder2.decode(buffer);
+                }
+            }
+            catch {
+                text = await file.text();
+            }
+            const parseResult = Papa.parse(text, {
+                header: false,
+                skipEmptyLines: true,
+            });
+            const lines = parseResult.data;
+            if (lines.length < 2) {
+                setError("데이터 없음");
+                return;
+            }
+            const headers = lines[0];
+            const periodIdx = headers.findIndex((h) => h && h.toLowerCase().includes("period"));
+            const dateIdx = headers.findIndex((h) => h === "Created On");
+            const creatorIdx = headers.findIndex((h) => h === "Creator");
+            const amountIdx = headers.findIndex((h) => h === "Amount(local)");
+            const memoIdx = headers.findIndex((h) => h === "FM Doc Text");
+            if (creatorIdx === -1 || amountIdx === -1 || dateIdx === -1) {
+                setError(`필수 컬럼 없음 - Creator:${creatorIdx}, Amount:${amountIdx}, Date:${dateIdx}`);
+                return;
+            }
+            // 팀원 맵 생성
+            const teamMemberMap = {
+                uxs: new Set(),
+                uxd: new Set(),
+                uxo: new Set(),
+            };
+            for (const [partKey, partData] of Object.entries(data)) {
+                for (const month of Object.values(partData.months)) {
+                    for (const member of month.teamMembers || []) {
+                        teamMemberMap[partKey].add(member);
+                    }
+                }
+            }
+            // CSV 파싱
+            const byPart = { uxs: {}, uxd: {}, uxo: {} };
+            const monthsFound = new Set();
+            for (let i = 1; i < lines.length; i++) {
+                const cells = lines[i];
+                if (!cells || cells.length === 0)
+                    continue;
+                let monthKey = "";
+                if (periodIdx >= 0 && cells[periodIdx]) {
+                    const period = String(cells[periodIdx]).trim();
+                    const dateStr = cells[dateIdx] ? String(cells[dateIdx]).replace(/\//g, "-").split(" ")[0] : "";
+                    if (period.match(/^\d{1,2}$/) && dateStr) {
+                        const dateParts = dateStr.split("-");
+                        const year = dateParts[2] || dateParts[0];
+                        monthKey = `${year}-${period.padStart(2, "0")}`;
+                    }
+                    else if (period.length === 7 && period[4] === "-") {
+                        monthKey = period;
+                    }
+                }
+                if (!monthKey && cells[dateIdx]) {
+                    const dateStr = String(cells[dateIdx]).replace(/\//g, "-").split(" ")[0];
+                    const dateParts = dateStr.split("-");
+                    if (dateParts.length === 3) {
+                        const year = dateParts[2];
+                        const month = dateParts[0];
+                        monthKey = `${year}-${month.padStart(2, "0")}`;
+                    }
+                    else {
+                        monthKey = dateStr.slice(0, 7);
+                    }
+                }
+                if (!monthKey)
+                    continue;
+                monthsFound.add(monthKey);
+                const creator = extractKoreanName(cells[creatorIdx]);
+                const amountStr = String(cells[amountIdx]).replace(/[^0-9.\-]/g, "");
+                let amount = Number.parseInt(amountStr) || 0;
+                amount = amount > 0 ? Math.round(amount * 1.1) : 0;
+                if (!creator || amount <= 0)
+                    continue;
+                // 파트 찾기
+                let foundPart = null;
+                for (const [partKey, members] of Object.entries(teamMemberMap)) {
+                    if (members.has(creator)) {
+                        foundPart = partKey;
+                        break;
+                    }
+                }
+                // 모든 파트에 추가 (파트원이 없으면)
+                const partsToAdd = foundPart ? [foundPart] : Object.keys(byPart);
+                for (const partKey of partsToAdd) {
+                    if (!byPart[partKey][monthKey])
+                        byPart[partKey][monthKey] = [];
+                    byPart[partKey][monthKey].push({
+                        id: uid(),
+                        category: uploadCategory,
+                        name: creator,
+                        amount,
+                        date: monthKey,
+                        memo: memoIdx >= 0 ? cells[memoIdx] : "",
+                        source: "excel",
+                    });
+                }
+            }
+            // 데이터 저장 - 기존 teamMembers 보존
+            const next = { ...data };
+            const allExistingTeamMembers = {
+                uxs: {},
+                uxd: {},
+                uxo: {},
+            };
+            for (const [partKey, partData] of Object.entries(next)) {
+                for (const [monthKey, monthData] of Object.entries(partData.months)) {
+                    allExistingTeamMembers[partKey][monthKey] = monthData.teamMembers || [];
+                }
+            }
+            for (const [partKey, monthData] of Object.entries(byPart)) {
+                for (const [monthKey, entries] of Object.entries(monthData)) {
+                    const existing = next[partKey].months[monthKey] || { entries: [] };
+                    const keepEntries = (existing.entries || []).filter((e) => e.source !== "excel" || e.category !== uploadCategory);
+                    const preservedTeamMembers = ((_a = allExistingTeamMembers[partKey]) === null || _a === void 0 ? void 0 : _a[monthKey]) || [];
+                    next[partKey].months[monthKey] = {
+                        teamMembers: preservedTeamMembers,
+                        entries: [...entries, ...keepEntries],
+                        headcount: preservedTeamMembers.length,
+                    };
+                }
+            }
+            setData(next);
+            persist(next);
+            const totalAdded = Object.values(byPart).reduce((s, m) => s + Object.values(m).reduce((ss, a) => ss + a.length, 0), 0);
+            const months = Array.from(monthsFound).sort();
+            setUploadMsg(`${totalAdded}건 추가됨 (${months.map((m) => monthLabel(m)).join(", ")})`);
+        }
+        catch (e) {
+            setError("파일 오류: " + e.message);
+        }
+    };
+    return (React.createElement("div", { style: { maxWidth: 1400, margin: "0 auto", padding: "20px", fontFamily: "system-ui" } },
+        React.createElement("h1", { style: { fontSize: "28px", fontWeight: "bold", marginBottom: "30px", textAlign: "center" } }, "\uD83C\uDFE2 UX \uADF8\uB8F9 \uD68C\uC758\uBE44 \uC870\uC9C1\uAD00\uB9AC\uBE44 \uAD00\uB9AC"),
+        error && (React.createElement("div", { style: { padding: 12, background: "#FFE5E5", color: "#C41C1C", borderRadius: 4, marginBottom: 15 } },
+            "\u274C ",
+            error)),
+        uploadMsg && (React.createElement("div", { style: { padding: 12, background: "#E5F5E5", color: "#2E7D32", borderRadius: 4, marginBottom: 15 } },
+            "\u2705 ",
+            uploadMsg)),
+        React.createElement("div", { style: { marginBottom: 20, padding: 15, background: "#F5F1E8", borderRadius: 8 } },
+            React.createElement("label", { style: { fontWeight: 600, marginRight: 10 } }, "CSV \uC5C5\uB85C\uB4DC:"),
+            React.createElement("select", { value: uploadCategory, onChange: (e) => setUploadCategory(e.target.value), style: { padding: "8px 10px", marginRight: 10 } },
+                React.createElement("option", { value: "meeting" }, "\uD68C\uC758\uBE44"),
+                React.createElement("option", { value: "org" }, "\uC870\uC9C1\uAD00\uB9AC\uBE44")),
+            React.createElement("input", { ref: fileInputRef, type: "file", accept: ".csv", onChange: (e) => {
+                    var _a;
+                    if ((_a = e.target.files) === null || _a === void 0 ? void 0 : _a[0])
+                        handleFileUpload(e.target.files[0]);
+                    e.target.value = "";
+                }, style: { display: "none" } }),
+            React.createElement("button", { onClick: () => { var _a; return (_a = fileInputRef.current) === null || _a === void 0 ? void 0 : _a.click(); }, style: {
+                    padding: "8px 16px",
+                    background: "#1976D2",
+                    color: "#FFF",
+                    border: "none",
+                    borderRadius: 4,
+                    cursor: "pointer",
+                } }, "\uD30C\uC77C \uC120\uD0DD")),
+        React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "20px" }, className: "parts-grid" }, Object.entries(PARTS).map(([partKey, part]) => {
+            var _a;
+            const partData = data[partKey];
+            const currentMonth = partData.currentMonth;
+            const months = partData.months;
+            let monthData = months[currentMonth];
+            if (!monthData) {
+                const monthKeys = Object.keys(months).sort();
+                if (monthKeys.length > 0) {
+                    const lastMonth = monthKeys[monthKeys.length - 1];
+                    monthData = { teamMembers: ((_a = months[lastMonth]) === null || _a === void 0 ? void 0 : _a.teamMembers) || [], entries: [], headcount: 0 };
+                }
+                else {
+                    monthData = { teamMembers: [], entries: [], headcount: 0 };
+                }
+            }
+            const teamMembers = monthData.teamMembers || [];
+            const entries = monthData.entries || [];
+            const headcount = teamMembers.length;
+            const totals = {};
+            const budgets = {};
+            let filteredEntries = entries;
+            if (headcount > 0) {
+                for (const [key, cat] of Object.entries(CATEGORY)) {
+                    budgets[key] = cat.perHead * headcount;
+                    const catEntries = entries.filter((e) => e.category === key && teamMembers.includes(e.name));
+                    totals[key] = catEntries.reduce((s, e) => s + e.amount, 0);
+                }
+                filteredEntries = entries.filter((e) => teamMembers.includes(e.name));
+            }
+            else {
+                for (const [key] of Object.entries(CATEGORY)) {
+                    budgets[key] = 0;
+                    totals[key] = 0;
+                }
+                filteredEntries = [];
+            }
+            return (React.createElement("div", { key: partKey, style: {
+                    background: part.color,
+                    padding: "20px",
+                    borderRadius: "8px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                } },
+                React.createElement("h2", { style: { marginBottom: "15px", fontSize: "18px", fontWeight: "bold", textAlign: "center" } }, part.name),
+                React.createElement("div", { style: {
+                        marginBottom: "15px",
+                        display: "flex",
+                        gap: "8px",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "13px",
+                    } },
+                    React.createElement("button", { onClick: () => {
+                            const d = new Date(currentMonth + "-01");
+                            d.setMonth(d.getMonth() - 1);
+                            const newMonth = d.toISOString().slice(0, 7);
+                            const next = { ...data };
+                            next[partKey] = { ...next[partKey], currentMonth: newMonth };
+                            setData(next);
+                            persist(next);
+                        }, style: {
+                            background: "transparent",
+                            border: "none",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                            padding: "2px 6px",
+                            color: "#666",
+                            fontWeight: "bold",
+                        } }, "<"),
+                    React.createElement("span", { onClick: () => {
+                            const input = document.createElement("input");
+                            input.type = "month";
+                            input.value = currentMonth;
+                            input.onchange = () => {
+                                const next = { ...data };
+                                next[partKey] = { ...next[partKey], currentMonth: input.value };
+                                setData(next);
+                                persist(next);
+                            };
+                            input.click();
+                        }, style: {
+                            fontWeight: "600",
+                            cursor: "pointer",
+                            minWidth: "100px",
+                            textAlign: "center",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            userSelect: "none",
+                        }, onMouseEnter: (e) => (e.currentTarget.style.backgroundColor = "#f0f0f0"), onMouseLeave: (e) => (e.currentTarget.style.backgroundColor = "transparent") }, monthLabel(currentMonth)),
+                    React.createElement("button", { onClick: () => {
+                            const d = new Date(currentMonth + "-01");
+                            d.setMonth(d.getMonth() + 1);
+                            const newMonth = d.toISOString().slice(0, 7);
+                            const next = { ...data };
+                            next[partKey] = { ...next[partKey], currentMonth: newMonth };
+                            setData(next);
+                            persist(next);
+                        }, style: {
+                            background: "transparent",
+                            border: "none",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                            padding: "2px 6px",
+                            color: "#666",
+                            fontWeight: "bold",
+                        } }, ">")),
+                React.createElement("div", { style: { marginBottom: "15px", padding: "10px", background: "#FFF", borderRadius: "4px", fontSize: "11px" } },
+                    React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+                        React.createElement("span", { style: { fontWeight: "600" } }, "\uC7AC\uC9C1 \uC778\uC6D0"),
+                        React.createElement("span", { style: { fontWeight: "600" } },
+                            headcount,
+                            "\uBA85"),
+                        React.createElement("button", { onClick: () => setShowTeamManager(showTeamManager === partKey ? null : partKey), style: {
+                                background: "transparent",
+                                border: "none",
+                                cursor: "pointer",
+                                fontSize: "14px",
+                                padding: 0,
+                                marginLeft: "auto",
+                            } }, showTeamManager === partKey ? "▲" : "▼")),
+                    showTeamManager === partKey && (React.createElement("div", { style: { marginTop: "8px", paddingTop: "8px", borderTop: "1px solid #ddd" } },
+                        React.createElement("input", { type: "text", placeholder: "\uC774\uB984 \uC785\uB825", onKeyDown: (e) => {
+                                if (e.key === "Enter" && !e.nativeEvent.isComposing && e.keyCode !== 229) {
+                                    const target = e.target;
+                                    const inputVal = target.value.trim();
+                                    if (inputVal) {
+                                        const names = inputVal.split(",").map((n) => n.trim()).filter((n) => n);
+                                        const newMembers = [...teamMembers];
+                                        for (const name of names) {
+                                            if (!newMembers.includes(name))
+                                                newMembers.push(name);
+                                        }
+                                        const next = { ...data };
+                                        next[partKey].months[currentMonth] = {
+                                            ...monthData,
+                                            teamMembers: newMembers,
+                                            headcount: newMembers.length,
+                                        };
+                                        setData(next);
+                                        persist(next);
+                                        target.value = "";
+                                    }
+                                }
+                            }, style: {
+                                width: "100%",
+                                padding: "4px",
+                                fontSize: "11px",
+                                marginBottom: "8px",
+                                borderRadius: "3px",
+                                border: "1px solid #ddd",
+                            } }),
+                        teamMembers.length > 0 && (React.createElement("div", { style: { display: "flex", flexWrap: "wrap", gap: "4px" } }, teamMembers.map((m) => (React.createElement("div", { key: m, style: {
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                padding: "2px 8px",
+                                background: "#E8F5E9",
+                                borderRadius: "12px",
+                                fontSize: "10px",
+                            } },
+                            m,
+                            React.createElement("button", { onClick: () => {
+                                    const newMembers = teamMembers.filter((mem) => mem !== m);
+                                    const next = { ...data };
+                                    next[partKey].months[currentMonth] = {
+                                        ...monthData,
+                                        teamMembers: newMembers,
+                                        headcount: newMembers.length,
+                                    };
+                                    setData(next);
+                                    persist(next);
+                                }, style: {
+                                    background: "transparent",
+                                    border: "none",
+                                    cursor: "pointer",
+                                    color: "#666",
+                                    padding: 0,
+                                    fontSize: "12px",
+                                } }, "\u00D7"))))))))),
+                React.createElement("div", { style: { marginBottom: "15px", fontSize: "12px" } },
+                    React.createElement("h4", { style: { marginBottom: "8px", fontWeight: "600" } }, "\uD83D\uDCCA \uC608\uC0B0"),
+                    Object.entries(CATEGORY).map(([key, cat]) => {
+                        const used = totals[key];
+                        const budget = budgets[key];
+                        const remaining = budget - used;
+                        const pct = budget > 0 ? (used / budget) * 100 : 0;
+                        return (React.createElement("div", { key: key, style: { marginBottom: "10px", padding: "8px", background: "#FFF", borderRadius: "4px" } },
+                            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "11px" } },
+                                React.createElement("span", { style: { fontWeight: "600" } }, cat.label),
+                                React.createElement("span", { style: { color: remaining < 0 ? "#C41C1C" : "#333" } },
+                                    won(used),
+                                    "/",
+                                    won(budget))),
+                            React.createElement("div", { style: { height: "6px", background: "#eee", borderRadius: "3px", overflow: "hidden" } },
+                                React.createElement("div", { style: {
+                                        height: "100%",
+                                        width: `${Math.min(pct, 100)}%`,
+                                        background: remaining < 0 ? "#C41C1C" : "#4CAF50",
+                                    } })),
+                            remaining < 0 ? (React.createElement("div", { style: { fontSize: "10px", color: "#C41C1C", marginTop: "4px", fontWeight: "600" } },
+                                "\u26A0\uFE0F \uCD08\uACFC: ",
+                                won(Math.abs(remaining)))) : (React.createElement("div", { style: { fontSize: "10px", color: "#4CAF50", marginTop: "4px", fontWeight: "600" } },
+                                "\u2713 \uC794\uC561: ",
+                                won(remaining)))));
+                    })),
+                filteredEntries.length > 0 && (React.createElement("div", { style: { fontSize: "12px" } },
+                    React.createElement("button", { onClick: () => {
+                            const newSet = new Set(showEntries);
+                            if (newSet.has(partKey))
+                                newSet.delete(partKey);
+                            else
+                                newSet.add(partKey);
+                            setShowEntries(newSet);
+                        }, style: {
+                            background: "transparent",
+                            border: "none",
+                            cursor: "pointer",
+                            fontSize: "12px",
+                            color: "#333",
+                            padding: 0,
+                            fontWeight: "600",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            marginBottom: "8px",
+                        } },
+                        React.createElement("span", null,
+                            "\uD83D\uDCDD \uD56D\uBAA9 (",
+                            filteredEntries.length,
+                            "\uAC74)"),
+                        React.createElement("span", { style: { fontSize: "14px" } }, showEntries.has(partKey) ? "▲" : "▼")),
+                    showEntries.has(partKey) && (React.createElement("div", { style: {
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "6px",
+                            maxHeight: "300px",
+                            overflowY: "auto",
+                            paddingRight: "4px",
+                        } }, filteredEntries.map((entry) => (React.createElement("div", { key: entry.id, style: {
+                            padding: "6px",
+                            background: "#FFF",
+                            borderRadius: "4px",
+                            lineHeight: "1.3",
+                            borderLeft: "3px solid #4CAF50",
+                        } },
+                        React.createElement("div", { style: { fontWeight: "600", fontSize: "11px" } }, entry.name),
+                        React.createElement("div", { style: { color: "#666", fontSize: "10px" } },
+                            entry.date,
+                            " ",
+                            entry.memo && `· ${entry.memo}`),
+                        React.createElement("div", { style: { color: "#2E7D32", fontWeight: "600", fontSize: "11px" } }, won(entry.amount)))))))))));
+        }))));
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(BudgetTracker));</script></body></html>

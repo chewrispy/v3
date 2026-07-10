@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PeachCode</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px);} to {opacity:1; transform:translateY(0);} }
+    body { margin:0; background:#faf7f4; }
+    ::-webkit-scrollbar { display:none; }
+  </style>
+</helmet>
+
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,Arial,sans-serif; background:#faf7f4; min-height:100vh; color:#1c1a19;">
+
+  <!-- HEADER -->
+  <div style="position:sticky; top:0; z-index:50; background:rgba(250,247,244,0.85); backdrop-filter:blur(14px); border-bottom:1px solid rgba(0,0,0,0.06);">
+    <div style="max-width:1080px; margin:0 auto; padding:14px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px;">
+      <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onClick="{{ goHome }}">
+        <div style="font-size:26px; display:flex; align-items:center; justify-content:center;">🍑</div>
+        <div style="font-size:19px; font-weight:700; letter-spacing:-0.02em;">PeachCode</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px; background:rgba(0,0,0,0.045); padding:4px; border-radius:12px;">
+        <div style="{{ homeTabStyle }}" onClick="{{ goHome }}">홈</div>
+        <div style="{{ aboutTabStyle }}" onClick="{{ goAbout }}">소개</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOME VIEW -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <div style="max-width:1080px; margin:0 auto; padding:28px 24px 80px; animation:fadeUp .35s ease;">
+
+      <!-- FEATURED HERO -->
+      <div style="border-radius:28px; padding:36px 32px; margin-bottom:36px; position:relative; overflow:hidden; background:linear-gradient(135deg, rgba(125,211,252,.35), rgba(165,180,252,.22), rgba(196,181,253,.22)), #fff; border:1px solid rgba(0,0,0,0.06); cursor:pointer;" onClick="{{ openFeatured }}">
+        <div style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#ff6b5a; margin-bottom:14px;">오늘의 앱</div>
+        <div style="display:flex; align-items:center; gap:22px; flex-wrap:wrap;">
+          <div style="width:88px; height:88px; border-radius:22px; background:linear-gradient(135deg,#7dd3fc,#a5b4fc,#c4b5fd); display:flex; align-items:center; justify-content:center; font-size:44px; box-shadow:0 8px 20px rgba(0,0,0,0.12); flex-shrink:0;">🃏</div>
+          <div style="flex:1; min-width:220px;">
+            <div style="font-size:28px; font-weight:800; letter-spacing:-0.02em; margin-bottom:6px;">캐주얼 카드 게임</div>
+            <div style="font-size:16px; line-height:1.5; color:#4a4542; max-width:520px;">의료진 캐릭터 카드로 상황을 해결하고 영향력을 겨루는 TCG예요. 몇 년간 묵혀둔 기획을 바이브코딩으로 처음 완성한 첫 작품.</div>
+          </div>
+          <div style="background:#1c1a19; color:#fff; padding:12px 22px; border-radius:100px; font-size:15px; font-weight:600; white-space:nowrap;">자세히 보기 →</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:22px; overflow-x:auto; margin-bottom:28px; border-bottom:1px solid rgba(0,0,0,0.07);">
+        <sc-for list="{{ chips }}" as="chip" hint-placeholder-count="5">
+          <div style="{{ chip.style }}" onClick="{{ chip.onClick }}">{{ chip.label }}</div>
+        </sc-for>
+      </div>
+
+      <sc-for list="{{ visibleCategories }}" as="cat" hint-placeholder-count="3">
+        <div style="margin-bottom:38px;">
+          <div style="font-size:21px; font-weight:800; letter-spacing:-0.01em; margin-bottom:14px;">{{ cat.label }}</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:14px;">
+            <sc-for list="{{ cat.apps }}" as="app" hint-placeholder-count="2">
+              <div style="display:flex; align-items:center; gap:14px; background:#fff; border:1px solid rgba(0,0,0,0.06); border-radius:18px; padding:14px; cursor:pointer; transition:transform .15s ease;" onClick="{{ app.open }}">
+                <div style="width:56px; height:56px; border-radius:14px; background:{{ app.iconBg }}; display:flex; align-items:center; justify-content:center; font-size:28px; flex-shrink:0;">{{ app.emoji }}</div>
+                <div style="min-width:0; flex:1;">
+                  <div style="font-size:15px; font-weight:700; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ app.shortTitle }}</div>
+                  <div style="font-size:12px; color:#918c88; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ app.featuresLabel }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+
+    </div>
+  </sc-if>
+
+  <!-- DETAIL VIEW -->
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:720px; margin:0 auto; padding:20px 24px 80px; animation:fadeUp .3s ease;">
+      <div style="display:flex; align-items:center; gap:6px; color:#ff6b5a; font-weight:600; font-size:15px; cursor:pointer; margin-bottom:20px; width:fit-content;" onClick="{{ goHome }}">
+        <span>←</span><span>홈으로</span>
+      </div>
+
+      <div style="display:flex; gap:20px; align-items:center; margin-bottom:24px; flex-wrap:wrap;">
+        <div style="width:96px; height:96px; border-radius:24px; background:{{ selected.iconBg }}; display:flex; align-items:center; justify-content:center; font-size:48px; box-shadow:0 8px 24px rgba(0,0,0,0.1); flex-shrink:0;">{{ selected.emoji }}</div>
+        <div style="flex:1; min-width:200px;">
+          <div style="font-size:26px; font-weight:800; letter-spacing:-0.02em; margin-bottom:6px;">{{ selected.title }}</div>
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <div style="font-size:12px; font-weight:700; color:#ff6b5a; background:rgba(255,107,90,0.1); padding:5px 10px; border-radius:100px;">{{ selected.tagLabel }}</div>
+          </div>
+        </div>
+      </div>
+
+      <sc-if value="{{ selected.hasUrl }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#1c1a19; color:#fff; text-align:center; padding:15px; border-radius:16px; font-size:16px; font-weight:700; cursor:pointer; margin-bottom:28px;" onClick="{{ selected.openUrl }}">앱 열어보기 ↗</div>
+      </sc-if>
+      <sc-if value="{{ selected.hasNoUrl }}" hint-placeholder-val="{{ false }}">
+        <div style="background:rgba(0,0,0,0.05); color:#918c88; text-align:center; padding:15px; border-radius:16px; font-size:16px; font-weight:700; margin-bottom:28px;">아직 배포 링크가 없어요</div>
+      </sc-if>
+
+      <div style="font-size:16px; line-height:1.7; color:#332f2c; margin-bottom:28px;">{{ selected.longDescription }}</div>
+
+      <div style="font-size:15px; font-weight:800; margin-bottom:12px;">주요 기능</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:32px;">
+        <sc-for list="{{ selected.features }}" as="feat" hint-placeholder-count="3">
+          <div style="background:#fff; border:1px solid rgba(0,0,0,0.08); padding:9px 14px; border-radius:100px; font-size:13px; font-weight:600;">{{ feat }}</div>
+        </sc-for>
+      </div>
+
+      <div style="font-size:15px; font-weight:800; margin-bottom:12px;">개발 정보</div>
+      <div style="background:#fff; border:1px solid rgba(0,0,0,0.06); border-radius:18px; padding:6px 20px; margin-bottom:24px;">
+        <div style="display:flex; justify-content:space-between; padding:13px 0; border-bottom:1px solid rgba(0,0,0,0.06); font-size:14px;">
+          <span style="color:#918c88;">사용 도구</span><span style="font-weight:600;">{{ selected.buildInfo.tool }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:13px 0; border-bottom:1px solid rgba(0,0,0,0.06); font-size:14px;">
+          <span style="color:#918c88;">제작일</span><span style="font-weight:600;">{{ selected.buildInfo.dateLabel }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:13px 0; border-bottom:1px solid rgba(0,0,0,0.06); font-size:14px;">
+          <span style="color:#918c88;">배포</span><span style="font-weight:600;">{{ selected.buildInfo.deploy }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; padding:13px 0; font-size:14px;">
+          <span style="color:#918c88;">스택</span><span style="font-weight:600; text-align:right;">{{ selected.buildInfo.stackLabel }}</span>
+        </div>
+      </div>
+
+      <div style="font-size:15px; font-weight:800; margin-bottom:12px;">비하인드 스토리</div>
+      <div style="background:linear-gradient(135deg, rgba(255,107,90,0.08), rgba(255,107,90,0.03)); border-radius:18px; padding:20px; font-size:14px; line-height:1.7; color:#4a4542;">{{ selected.buildInfo.notes }}</div>
+    </div>
+  </sc-if>
+
+  <!-- ABOUT VIEW -->
+  <sc-if value="{{ isAbout }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:640px; margin:0 auto; padding:40px 24px 80px; animation:fadeUp .3s ease; text-align:center;">
+      <div style="font-size:76px; margin-bottom:16px;">🍑</div>
+      <div style="font-size:26px; font-weight:800; letter-spacing:-0.02em; margin-bottom:8px;">PeachCode</div>
+      <div style="font-size:15px; color:#918c88; margin-bottom:24px;">심리학과 출신 바이브코더</div>
+
+      <div style="display:flex; justify-content:center; gap:12px; margin-bottom:28px; flex-wrap:wrap;">
+        <div style="background:#fff; border:1px solid rgba(0,0,0,0.06); border-radius:16px; padding:14px 22px;">
+          <div style="font-size:20px; font-weight:800;">8개</div>
+          <div style="font-size:12px; color:#918c88;">만든 앱</div>
+        </div>
+        <div style="background:#fff; border:1px solid rgba(0,0,0,0.06); border-radius:16px; padding:14px 22px;">
+          <div style="font-size:20px; font-weight:800;">2026.06</div>
+          <div style="font-size:12px; color:#918c88;">시작한 달</div>
+        </div>
+        <div style="background:#fff; border:1px solid rgba(0,0,0,0.06); border-radius:16px; padding:14px 22px;">
+          <div style="font-size:20px; font-weight:800;">심리학</div>
+          <div style="font-size:12px; color:#918c88;">원래 전공</div>
+        </div>
+      </div>
+
+      <div style="background:#fff; border:1px solid rgba(0,0,0,0.06); border-radius:20px; padding:26px; text-align:left; font-size:15px; line-height:1.8; color:#332f2c; margin-bottom:32px;">
+        코딩은 전혀 몰랐던 심리학과 출신 문과생이 "바이브코딩"이라는 말 한마디에 꽂혀서 시작한 좌충우돌 개발기입니다. 2026년 6월, 처음으로 앱을 하나 만들어봤어요. 회의비 정산, 회식 장소 추천처럼 회사에서 겪는 소소한 불편함부터, 몇 년 전 병원을 다니며 구상만 해두고 방치했던 카드게임까지 — 떠오르는 아이디어를 하나씩 앱으로 만들어 이곳에 아카이빙하고 있습니다.
+      </div>
+
+      <div style="font-size:15px; font-weight:800; margin-bottom:14px; text-align:left;">제작 기록</div>
+      <div style="display:flex; flex-direction:column; gap:0; text-align:left;">
+        <sc-for list="{{ timeline }}" as="t" hint-placeholder-count="6">
+          <div style="display:flex; gap:16px; align-items:flex-start; padding:12px 0; border-bottom:1px solid rgba(0,0,0,0.06);">
+            <div style="font-size:13px; font-weight:700; color:#ff6b5a; width:76px; flex-shrink:0; padding-top:2px;">{{ t.dateLabel }}</div>
+            <div style="font-size:14px; font-weight:600;">{{ t.title }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="text-align:center; padding:24px; font-size:12px; color:#b5b0ac;">Made with curiosity · 2026 🍑</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const FALLBACK_APPS = [
+  {
+    slug: "app-portfolio-test", emoji: "📃", title: "앱 포트폴리오 구축 v1", shortTitle: "나만의 앱스토어 v1",
+    description: "AI툴로 제작한 앱을 한데 모아볼 수 있는 나만의 앱스토어 첫번째 버전",
+    longDescription: "나만의 앱스토어를 구상하고 구현하는데 단 5분! 이미 배포가 된 앱들을 가볍게 연결하는 수준으로 가볍게 테스트 해본 페이지.",
+    tag: "Productivity", gradient: ["rgba(203,213,225,.6)", "rgba(226,232,240,.5)", "rgba(241,245,249,.5)"],
+    features: ["앱 리스트", "기록용", "아카이빙"], sourceUrl: "https://app-store-portfolio.vercel.app/",
+    buildInfo: { tool: "v0", date: "2026-07-06", deploy: "v0", stack: ["v0"], notes: "다양한 종류의 바이브코딩 툴을 사용해보기 위해 시도해본 v0. 웹사이트에서 바이브코딩과 프리뷰, 배포까지 모두 가능한 가볍고 강력한 무료툴이라는 말에 도전!" }
+  },
+  {
+    slug: "meeting-budget", emoji: "💰", title: "부서 회의비 관리 앱", shortTitle: "회의비 관리",
+    description: "회의비와 조직관리비를 파트별로 기록하고 한눈에 정산해요.",
+    longDescription: "CSV 업로드, 월별 예산 계산, 파트별 재직 인원 관리까지 한 화면에서 처리할 수 있는 업무 도우미입니다.",
+    tag: "Finance", gradient: ["rgba(52,211,153,.5)", "rgba(94,234,212,.4)", "rgba(103,232,249,.4)"],
+    features: ["CSV 업로드", "월별 예산 현황", "파트별 인원 관리"], sourceUrl: "meeting-budget.html",
+    buildInfo: { tool: "Claude", date: "2026-06-30", deploy: "GitHub Pages", stack: ["React", "localStorage"], notes: "파트 회의비 관리 담당자가 되고 나서 비용 파악의 어려움을 느껴서 만듦." }
+  },
+  {
+    slug: "restaurant-picker", emoji: "🍻", title: "회식 장소 추천 앱", shortTitle: "회식 추천",
+    description: "예산과 음식 취향에 맞춰 회식 장소를 랜덤으로 추천해요.",
+    longDescription: "선택 장애가 오는 회식 장소 정하기를 더 가볍게 만들어주는 추천 앱입니다. 마음에 드는 장소에는 투표도 남길 수 있어요.",
+    tag: "Lifestyle", gradient: ["rgba(252,211,77,.55)", "rgba(253,186,116,.4)", "rgba(253,164,175,.4)"],
+    features: ["예산 기반 추천", "음식 카테고리 필터", "맛있어/별로 투표"], sourceUrl: "restaurant-picker.html",
+    buildInfo: { tool: "Claude + ChatGPT", date: "2026-07-01", deploy: "GitHub Pages", stack: ["React", "웹크롤링"], notes: "파트 회식 장소를 매번 고르기 어려워서, 주변에서 추천받은 식당 이름 목록을 활용해보고 싶어 제작. 이름만 있던 정보에 별점·대표메뉴·가격대를 웹크롤링으로 채우고, 랜덤 추천으로 재미를 더함." }
+  },
+  {
+    slug: "casual-card-game", emoji: "🃏", title: "캐주얼 카드 게임", shortTitle: "카드 게임",
+    description: "의료진 캐릭터 카드로 상황을 해결하고 영향력을 겨루는 TCG예요.",
+    longDescription: "각 상황에 맞는 의사 카드를 선택해 파벌 영향력을 쌓고, 간호사를 영입하며 엔딩까지 진행하는 캐주얼 전략 카드 게임입니다.",
+    tag: "Game", gradient: ["rgba(125,211,252,.6)", "rgba(165,180,252,.4)", "rgba(196,181,253,.4)"],
+    features: ["상황 카드 해결", "간호사 영입", "파벌 영향력 경쟁"], sourceUrl: "https://z43n73.csb.app/",
+    buildInfo: { tool: "Claude + Gemini", date: "2026-06-05", deploy: "StackBlitz", stack: ["React"], notes: "2023년, 정형외과 병원을 다니며 실제 선생님들의 특징을 보고 카드트레이딩게임으로 만들고 싶다는 아이디어에서 시작. 당시엔 코딩을 몰라 기획안만 구글시트에 만들어두고 몇 년간 방치. 2026년 초 바이브 코딩을 알게 되면서 가장 먼저 구현해본 앱." }
+  },
+  {
+    slug: "snack-shelf", emoji: "🍪", title: "파트 다과 선반 관리 앱", shortTitle: "다과 선반",
+    description: "파트 다과 선반의 재고를 확인하고 보충이 필요한 품목을 관리해요.",
+    longDescription: "기존에 만들어둔 다과 선반 재고 관리 웹페이지를 포트폴리오 앱스토어 안에서 바로 열어볼 수 있도록 연결한 업무 지원 앱입니다.",
+    tag: "Inventory", gradient: ["rgba(253,164,175,.55)", "rgba(249,168,212,.4)", "rgba(253,186,116,.4)"],
+    features: ["재고 확인", "보충 관리", "웹앱 연결"], sourceUrl: "https://chewrispy.github.io/snack/",
+    buildInfo: { tool: "Claude", date: "2026-06-23", deploy: "GitHub Pages", stack: ["Google Sheets", "Apps Script"], notes: "다과 담당은 아니지만 파트 다과 선반에 개인적으로 다과를 많이 채워두는 편. 맛있는 걸 갖다놔도 있는 줄 몰라서 사람들이 안 찾아먹는 게 안타까워, 어떤 다과가 있는지 현황을 알려주기 위해 제작." }
+  },
+  {
+    slug: "app-portfolio-v2", emoji: "🏪", title: "앱 포트폴리오 구축 v2", shortTitle: "나만의 앱스토어 v2",
+    description: "카테고리 분류와 앱 내장 실행까지 갖춘 두번째 버전의 앱스토어 포트폴리오",
+    longDescription: "첫 테스트 버전 이후 만든 정식 버전. 카테고리별로 앱을 정리하고, 회의비 관리·회식 추천 앱은 새 탭 없이 화면 안에서 바로 열어볼 수 있도록 내장했어요.",
+    tag: "Productivity", gradient: ["rgba(203,213,225,.6)", "rgba(226,232,240,.5)", "rgba(241,245,249,.5)"],
+    features: ["카테고리별 정리", "앱 내장 실행", "GitHub Pages 배포"], sourceUrl: "https://chewrispy.github.io/portfolio/",
+    buildInfo: { tool: "ChatGPT, Claude, Playcode", date: "2026-07-07", deploy: "GitHub Pages", stack: ["HTML", "JS"], notes: "여러 AI 툴을 섞어 써보면서 완성한 두번째 버전. 앱 목록 페이지 하나에 그치지 않고 카테고리 분류, 상세 페이지, 앱 내장 실행까지 직접 구현해보고 싶어서 도전." }
+  },
+  {
+    slug: "app-portfolio-v3", emoji: "🍑", title: "나만의 앱스토어 v3 (PeachCode)", shortTitle: "나만의 앱스토어 v3 (PeachCode)",
+    description: "지금 보고 있는 이 페이지! Claude Design 베타로 만든 세번째 버전",
+    longDescription: "v1, v2를 거쳐 만든 세번째 정식 버전이에요. 카테고리, 상세 페이지, 소개 페이지에 더해 GitHub와 연동된 'PeachCode Farm' 관리자 페이지까지 갖췄어요. Claude Design의 새 베타 기능 소식을 듣자마자 바로 적용해봤습니다.",
+    tag: "Productivity", gradient: ["rgba(255,138,117,.5)", "rgba(255,107,90,.35)", "rgba(196,181,253,.3)"],
+    features: ["카테고리 분류", "앱 상세 페이지", "GitHub 연동 관리자 페이지"], sourceUrl: "",
+    buildInfo: { tool: "Claude Design (베타)", date: "2026-07-09", deploy: "GitHub Pages", stack: ["HTML", "JS", "GitHub API"], notes: "Claude에 새로운 디자인 베타 기능이 나왔다는 안내를 보자마자 바로 적용해서 만든 버전. v1·v2의 경험을 살려 실제 앱스토어에 가까운 구조로 다시 설계했어요." }
+  },
+  {
+    slug: "research-management", emoji: "🏢", title: "리서치 업무 관리 앱", shortTitle: "리서치 업무 관리",
+    description: "리서치 업무의 전체 프로세스를 한 눈에 보고 관리해요.",
+    longDescription: "리서치 업무의 전체 프로세스를 한 눈에 보고 관리해요. 단계 별 필요한 산출물도 자동 생성해서 업무 생산성을 높여줍니다.",
+    tag: "Productivity", gradient: ["rgba(125,211,252,.55)", "rgba(165,180,252,.4)", "rgba(196,181,253,.4)"],
+    features: ["업무 관리", "일정 관리", "결과물 자동 생성"], sourceUrl: "",
+    buildInfo: { tool: "Claude", date: "2026-07-08", deploy: "GitHub Pages", stack: ["React"], notes: "이직 후 리서치 업무를 혼자 담당하며 회사 시스템·업체 사용법·업무 체크리스트를 매뉴얼화하고 싶었고, 회사의 AX 효율화 논의도 계기가 됨." }
+  }
+];
+
+const TAG_LABELS = { Productivity: "생산성", Finance: "재무", Lifestyle: "라이프스타일", Game: "게임", Inventory: "재고관리" };
+const CATEGORY_ORDER = ["Productivity", "Finance", "Lifestyle", "Game", "Inventory"];
+
+function fmtDate(d) {
+  return d.replaceAll("-", ".");
+}
+
+class Component extends DCLogic {
+  state = { view: "home", selectedSlug: null, filterCategory: null, apps: null, loadError: false };
+
+  componentDidMount() {
+    fetch("./apps.json")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("not ok"))))
+      .then((apps) => this.setState({ apps }))
+      .catch(() => this.setState({ apps: FALLBACK_APPS }));
+  }
+
+  goHome = () => this.setState({ view: "home", selectedSlug: null });
+  goAbout = () => this.setState({ view: "about" });
+  openApp = (slug) => this.setState({ view: "detail", selectedSlug: slug });
+  openFeatured = () => this.setState({ view: "detail", selectedSlug: "casual-card-game" });
+  setFilter = (cat) => this.setState({ filterCategory: cat });
+
+  buildApp(a) {
+    return {
+      ...a,
+      tagLabel: TAG_LABELS[a.tag] || a.tag,
+      iconBg: `linear-gradient(135deg, ${a.gradient[0]}, ${a.gradient[1]}, ${a.gradient[2]})`,
+      hasUrl: !!a.sourceUrl,
+      hasNoUrl: !a.sourceUrl,
+      featuresLabel: a.features.join(" · "),
+      open: () => this.openApp(a.slug),
+      openUrl: () => window.open(a.sourceUrl, "_blank"),
+      buildInfo: {
+        ...a.buildInfo,
+        dateLabel: fmtDate(a.buildInfo.date),
+        stackLabel: a.buildInfo.stack.join(", ")
+      }
+    };
+  }
+
+  renderVals() {
+    const rawApps = this.state.apps || [];
+    const apps = rawApps.map((a) => this.buildApp(a));
+    const isLoading = this.state.apps === null && !this.state.loadError;
+    const filterCategory = this.state.filterCategory;
+
+    const chips = [{ key: "all", label: "전체" }, ...CATEGORY_ORDER.map((c) => ({ key: c, label: TAG_LABELS[c] }))].map((c) => {
+      const isActive = (c.key === "all" && !filterCategory) || c.key === filterCategory;
+      return {
+        label: c.label,
+        onClick: () => this.setFilter(c.key === "all" ? null : c.key),
+        style: isActive
+          ? "flex-shrink:0; padding:8px 2px; font-size:14px; font-weight:800; color:#1c1a19; border-bottom:2px solid #ff6b5a; cursor:pointer;"
+          : "flex-shrink:0; padding:8px 2px; font-size:14px; font-weight:600; color:#a39e9a; border-bottom:2px solid transparent; cursor:pointer;"
+      };
+    });
+
+    const categoriesAll = CATEGORY_ORDER.map((tag) => ({
+      key: tag,
+      label: TAG_LABELS[tag],
+      apps: apps.filter((a) => a.tag === tag)
+    })).filter((c) => c.apps.length > 0);
+
+    const visibleCategories = filterCategory ? categoriesAll.filter((c) => c.key === filterCategory) : categoriesAll;
+
+    const selected = apps.find((a) => a.slug === this.state.selectedSlug) || apps[0] || {
+      emoji: "📦", title: "", tagLabel: "", iconBg: "linear-gradient(135deg,#eee,#ddd)",
+      hasUrl: false, hasNoUrl: false, longDescription: "", features: [],
+      buildInfo: { tool: "", dateLabel: "", deploy: "", stackLabel: "", notes: "" }, openUrl: () => {}
+    };
+
+    const timeline = [...apps]
+      .sort((a, b) => a.buildInfo.date.localeCompare(b.buildInfo.date))
+      .map((a) => ({ dateLabel: fmtDate(a.buildInfo.date), title: a.shortTitle }));
+
+    const view = this.state.view;
+    const activeTabStyle = "padding:7px 16px; border-radius:9px; font-size:14px; font-weight:700; background:#fff; color:#1c1a19; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.08);";
+    const inactiveTabStyle = "padding:7px 16px; border-radius:9px; font-size:14px; font-weight:600; color:#7a7572; cursor:pointer;";
+
+    return {
+      chips,
+      visibleCategories,
+      selected,
+      timeline,
+      isLoading,
+      loadError: this.state.loadError,
+      isHome: view === "home",
+      isDetail: view === "detail",
+      isAbout: view === "about",
+      goHome: this.goHome,
+      goAbout: this.goAbout,
+      openFeatured: this.openFeatured,
+      homeTabStyle: view !== "about" ? activeTabStyle : inactiveTabStyle,
+      aboutTabStyle: view === "about" ? activeTabStyle : inactiveTabStyle
+    };
+  }
+}
+
+</script>
+</body>
+</html>

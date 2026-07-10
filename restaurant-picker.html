@@ -1,0 +1,769 @@
+<!doctype html><html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>회식 장소 추천 앱</title><style>
+html,body,#root{margin:0;min-height:100%;} body{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f8fafc;color:#18181b;} button,input,select,textarea{font:inherit;} button{cursor:pointer;} @media(max-width:1100px){.parts-grid{grid-template-columns:1fr!important;}}
+
+:root{--card:#fff;--card-foreground:#18181b;--background:#fff;--foreground:#18181b;--border:#e4e4e7;--primary:#18181b;--primary-foreground:#fff;--secondary:#f4f4f5;--secondary-foreground:#18181b;--muted:#f4f4f5;--muted-foreground:#71717a;}
+body{background:linear-gradient(180deg,#fafafa,#f4f4f5);padding:28px;box-sizing:border-box;}*{box-sizing:border-box;}
+[class~="mx-auto"]{margin-left:auto;margin-right:auto;}[class~="w-full"]{width:100%;}[class~="max-w-2xl"]{max-width:42rem;}[class~="rounded-3xl"]{border-radius:1.5rem;}[class~="rounded-2xl"]{border-radius:1rem;}[class~="rounded-xl"]{border-radius:.75rem;}[class~="rounded-lg"]{border-radius:.5rem;}[class~="rounded-md"]{border-radius:.375rem;}[class~="bg-card"]{background:var(--card);}[class~="bg-background"]{background:var(--background);}[class~="bg-primary"]{background:var(--primary);}[class~="bg-secondary"]{background:var(--secondary);}[class~="bg-muted/50"]{background:rgba(244,244,245,.72);}[class~="p-8"]{padding:2rem;}[class~="p-6"]{padding:1.5rem;}[class~="p-5"]{padding:1.25rem;}[class~="px-5"]{padding-left:1.25rem;padding-right:1.25rem;}[class~="py-3.5"]{padding-top:.875rem;padding-bottom:.875rem;}[class~="px-4"]{padding-left:1rem;padding-right:1rem;}[class~="py-3"]{padding-top:.75rem;padding-bottom:.75rem;}[class~="px-3"]{padding-left:.75rem;padding-right:.75rem;}[class~="py-2"]{padding-top:.5rem;padding-bottom:.5rem;}[class~="py-8"]{padding-top:2rem;padding-bottom:2rem;}[class~="py-5"]{padding-top:1.25rem;padding-bottom:1.25rem;}[class~="shadow-lg"]{box-shadow:0 14px 34px rgba(24,24,27,.12);}[class~="shadow-sm"]{box-shadow:0 1px 3px rgba(24,24,27,.1);}[class~="mb-8"]{margin-bottom:2rem;}[class~="mb-5"]{margin-bottom:1.25rem;}[class~="mb-4"]{margin-bottom:1rem;}[class~="mb-3"]{margin-bottom:.75rem;}[class~="mb-2"]{margin-bottom:.5rem;}[class~="mt-10"]{margin-top:2.5rem;}[class~="text-center"]{text-align:center;}[class~="text-2xl"]{font-size:1.5rem;line-height:2rem;}[class~="text-lg"]{font-size:1.125rem;line-height:1.75rem;}[class~="text-base"]{font-size:1rem;}[class~="text-sm"]{font-size:.875rem;}[class~="text-xs"]{font-size:.75rem;}[class~="text-[13px]"]{font-size:13px;}[class~="font-bold"]{font-weight:800;}[class~="font-semibold"]{font-weight:700;}[class~="font-medium"]{font-weight:600;}[class~="italic"]{font-style:italic;}[class~="text-card-foreground"]{color:var(--card-foreground);}[class~="text-muted-foreground"]{color:var(--muted-foreground);}[class~="text-foreground"]{color:var(--foreground);}[class~="text-primary"]{color:var(--primary);}[class~="text-primary-foreground"]{color:var(--primary-foreground);}[class~="text-secondary-foreground"]{color:var(--secondary-foreground);}[class~="text-emerald-600"]{color:#059669;}[class~="text-red-500"]{color:#ef4444;}[class~="block"]{display:block;}[class~="flex"]{display:flex;}[class~="grid"]{display:grid;}[class~="flex-col"]{flex-direction:column;}[class~="flex-wrap"]{flex-wrap:wrap;}[class~="items-center"]{align-items:center;}[class~="gap-5"]{gap:1.25rem;}[class~="gap-4"]{gap:1rem;}[class~="gap-3"]{gap:.75rem;}[class~="gap-2"]{gap:.5rem;}[class~="gap-1.5"]{gap:.375rem;}[class~="flex-1"]{flex:1 1 0%;}[class~="min-w-14"]{min-width:3.5rem;}[class~="break-words"]{overflow-wrap:break-word;}[class~="grid-cols-1"]{grid-template-columns:repeat(1,minmax(0,1fr));}[class~="border"]{border:1px solid var(--border);}[class~="border-2"]{border:2px solid var(--border);}[class~="border-l-4"]{border-left-width:4px;}[class~="border-primary"]{border-color:var(--primary);}[class~="border-border"]{border-color:var(--border);}[class~="border-emerald-500"]{border-color:#10b981;}[class~="border-red-400"]{border-color:#f87171;}[class~="outline-none"]{outline:0;}[class~="transition-colors"],[class~="transition-all"]{transition:all .18s ease;}[class~="size-12"]{width:3rem;height:3rem;}[class~="animate-spin"]{animation:spin 1s linear infinite;}[class~="border-4"]{border-width:4px;border-style:solid;}[class~="border-t-primary"]{border-top-color:var(--primary);}@keyframes spin{to{transform:rotate(360deg)}}input{border:2px solid var(--border);border-radius:.7rem;}button:hover{filter:brightness(.98);transform:translateY(-1px);}@media(min-width:640px){[class~="sm:grid-cols-2"]{grid-template-columns:repeat(2,minmax(0,1fr));}}@media(max-width:640px){body{padding:14px;}[class~="p-8"]{padding:1.25rem;}}
+</style></head><body><div id="root"></div><script>
+(function () {
+  let hooks = [];
+  let hookIndex = 0;
+  let rootElement = null;
+  let rootVNode = null;
+  let scheduled = false;
+  let pendingEffects = [];
+  const unitless = new Set(['opacity','zIndex','fontWeight','lineHeight','flex','flexGrow','flexShrink','order','zoom']);
+  function flattenChildren(input, out) {
+    input.forEach(child => { if (Array.isArray(child)) flattenChildren(child, out); else out.push(child); });
+    return out;
+  }
+  function createElement(type, props, ...children) {
+    props = props || {};
+    const flat = flattenChildren(children, []);
+    return { type, props: Object.assign({}, props, { children: flat }) };
+  }
+  function depsChanged(prev, next) {
+    if (!next || !prev || prev.length !== next.length) return true;
+    for (let i = 0; i < next.length; i++) if (!Object.is(prev[i], next[i])) return true;
+    return false;
+  }
+  function useState(initial) {
+    const i = hookIndex++;
+    if (hooks[i] === undefined) hooks[i] = typeof initial === 'function' ? initial() : initial;
+    const setState = value => {
+      const next = typeof value === 'function' ? value(hooks[i]) : value;
+      if (!Object.is(hooks[i], next)) { hooks[i] = next; scheduleRender(); }
+    };
+    return [hooks[i], setState];
+  }
+  function useRef(initial) {
+    const i = hookIndex++;
+    if (hooks[i] === undefined) hooks[i] = { current: initial };
+    return hooks[i];
+  }
+  function useEffect(effect, deps) {
+    const i = hookIndex++;
+    const prev = hooks[i];
+    if (depsChanged(prev, deps)) { hooks[i] = deps; pendingEffects.push(effect); }
+  }
+  function useCallback(fn, deps) {
+    const i = hookIndex++;
+    const prev = hooks[i];
+    if (!prev || depsChanged(prev.deps, deps)) hooks[i] = { fn, deps };
+    return hooks[i].fn;
+  }
+  function setStyle(el, style) {
+    if (!style) return;
+    for (const key in style) {
+      let value = style[key];
+      if (value == null || value === false) continue;
+      if (typeof value === 'number' && !unitless.has(key)) value = value + 'px';
+      try { el.style[key] = String(value); } catch (e) {}
+    }
+  }
+  function setProp(el, key, value) {
+    if (key === 'children' || key === 'key' || key === 'ref') return;
+    if (key === 'className') { el.setAttribute('class', value || ''); return; }
+    if (key === 'htmlFor') { el.setAttribute('for', value || ''); return; }
+    if (key === 'style' && value && typeof value === 'object') { setStyle(el, value); return; }
+    if (key.startsWith('on') && typeof value === 'function') {
+      const eventName = key.slice(2).toLowerCase();
+      el.addEventListener(eventName, ev => { if (!ev.nativeEvent) ev.nativeEvent = ev; value(ev); });
+      return;
+    }
+    if (value == null || value === false) return;
+    if (value === true) { el.setAttribute(key, ''); try { el[key] = true; } catch(e) {} return; }
+    try { if (key in el && key !== 'list' && key !== 'type') el[key] = value; else el.setAttribute(key, String(value)); }
+    catch (e) { el.setAttribute(key, String(value)); }
+  }
+  function renderVNode(vnode) {
+    if (vnode == null || vnode === false || vnode === true) return document.createTextNode('');
+    if (typeof vnode === 'string' || typeof vnode === 'number') return document.createTextNode(String(vnode));
+    if (Array.isArray(vnode)) { const frag = document.createDocumentFragment(); vnode.forEach(child => frag.appendChild(renderVNode(child))); return frag; }
+    if (typeof vnode.type === 'function') return renderVNode(vnode.type(vnode.props || {}));
+    if (vnode.type === React.Fragment) { const frag = document.createDocumentFragment(); (vnode.props.children || []).forEach(child => frag.appendChild(renderVNode(child))); return frag; }
+    const el = document.createElement(vnode.type);
+    const props = vnode.props || {};
+    for (const key in props) setProp(el, key, props[key]);
+    (props.children || []).forEach(child => el.appendChild(renderVNode(child)));
+    if (props.ref && typeof props.ref === 'object') props.ref.current = el;
+    return el;
+  }
+  function renderRoot() {
+    if (!rootElement || !rootVNode) return;
+    scheduled = false; hookIndex = 0; pendingEffects = [];
+    rootElement.textContent = '';
+    rootElement.appendChild(renderVNode(rootVNode));
+    const effects = pendingEffects.slice(); pendingEffects = [];
+    effects.forEach(fn => { try { fn(); } catch(e) { console.error(e); } });
+  }
+  function scheduleRender() { if (scheduled) return; scheduled = true; Promise.resolve().then(renderRoot); }
+  window.React = { createElement, Fragment: Symbol('Fragment'), useState, useEffect, useRef, useCallback };
+  window.ReactDOM = { createRoot(el) { rootElement = el; return { render(vnode) { rootVNode = vnode; renderRoot(); } }; }, render(vnode, el) { rootElement = el; rootVNode = vnode; renderRoot(); } };
+})();
+const React = window.React;
+const ReactDOM = window.ReactDOM;
+const { useState, useEffect, useRef, useCallback } = React;
+
+
+const CATEGORIES = ["한식", "고기", "회/해산물", "양식", "일식", "중식"];
+const restaurants = {
+    전체: [
+        {
+            name: "장수한우프라자",
+            cuisine: "고기",
+            budget: 80000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.5,
+            reaction: "팀의 최애! 자주 가는 곳입니다 🔥",
+            menu: "한우 구이, 한우 갈비",
+        },
+        {
+            name: "다이닝 류",
+            cuisine: "양식",
+            budget: 75000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.6,
+            reaction: "럭셔리한 분위기, 특별한 날씨 좋습니다 ✨",
+            menu: "스테이크, 파스타",
+        },
+        {
+            name: "최가네 낙지한마당",
+            cuisine: "회/해산물",
+            budget: 85000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.4,
+            reaction: "신선한 맛! 바다 내음이 돕니다 🌊",
+            menu: "낙지 볶음, 낙지 숙회",
+        },
+        {
+            name: "정담명가",
+            cuisine: "한식",
+            budget: 50000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.3,
+            reaction: "깔끔한 맛, 편하게 즐기는 한식 😋",
+            menu: "한우 소불고기, 된장찌개",
+        },
+        {
+            name: "스이렌",
+            cuisine: "일식",
+            budget: 70000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.5,
+            reaction: "섬세한 맛의 세계, 정갈합니다 🍣",
+            menu: "오마카세, 연어회",
+        },
+        {
+            name: "금화루",
+            cuisine: "중식",
+            budget: 42000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.2,
+            reaction: "가성비 끝판왕! 푸짐한 양 🤤",
+            menu: "짜장면, 마라탕",
+        },
+    ],
+    한식: [
+        {
+            name: "정담명가",
+            cuisine: "한식",
+            budget: 50000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.3,
+            reaction: "깔끔한 맛, 편하게 즐기는 한식 😋",
+            menu: "한우 소불고기, 된장찌개",
+        },
+        {
+            name: "삼학도",
+            cuisine: "한식",
+            budget: 48000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.2,
+            reaction: "정성 가득한 집밥 같은 맛 🏠",
+            menu: "갈비탕, 소불고기",
+        },
+        {
+            name: "소곱친구",
+            cuisine: "한식",
+            budget: 45000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.4,
+            reaction: "친구들 데리고 가고 싶은 맛 👯",
+            menu: "소곱창, 주물럭",
+        },
+        {
+            name: "택이네",
+            cuisine: "한식",
+            budget: 40000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.1,
+            reaction: "오래된 단골들의 사랑을 받는 곳 ❤️",
+            menu: "우골국, 우곱창",
+        },
+        {
+            name: "고매옥",
+            cuisine: "한식",
+            budget: 55000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.5,
+            reaction: "고기 맛이 살아있는 한식 🔝",
+            menu: "소불고기, 갈비",
+        },
+        {
+            name: "선운산 민물장어",
+            cuisine: "한식",
+            budget: 52000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.4,
+            reaction: "정력 충전! 특별한 경험 💪",
+            menu: "민물장어구이, 장어튀김",
+        },
+        {
+            name: "양고을",
+            cuisine: "한식",
+            budget: 43000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.2,
+            reaction: "따뜻한 밥과 반찬의 조화 🍚",
+            menu: "집밥, 반찬",
+        },
+        {
+            name: "인계수제비",
+            cuisine: "한식",
+            budget: 38000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.0,
+            reaction: "예술인 수제비, 한 끼 가성비 최고 👨‍🍳",
+            menu: "수제비, 콩국수",
+        },
+        {
+            name: "서재명가",
+            cuisine: "한식",
+            budget: 48000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.3,
+            reaction: "조용한 분위기, 미식의 시간 🤐",
+            menu: "육전, 떡갈비",
+        },
+        {
+            name: "천지연",
+            cuisine: "한식",
+            budget: 46000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.2,
+            reaction: "소박하지만 맛있는 한끼 😊",
+            menu: "국밥, 보쌈",
+        },
+        {
+            name: "정강",
+            cuisine: "한식",
+            budget: 49000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.4,
+            reaction: "입맛까지 고급지는 한식 🌟",
+            menu: "등갈비, 갈비",
+        },
+        {
+            name: "서현실비",
+            cuisine: "한식",
+            budget: 51000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.3,
+            reaction: "건강식! 디톡스하러 가는 곳 🥬",
+            menu: "건강한반찬정식, 나물",
+        },
+    ],
+    고기: [
+        {
+            name: "장수한우프라자",
+            cuisine: "고기",
+            budget: 80000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.5,
+            reaction: "팀의 최애! 자주 가는 곳입니다 🔥",
+            menu: "한우 구이, 한우 갈비",
+        },
+        {
+            name: "흑돈상회",
+            cuisine: "고기",
+            budget: 70000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.4,
+            reaction: "흑돼지의 진정한 맛 🐷",
+            menu: "흑돼지 삼겹살, 흑돼지 목살",
+        },
+        {
+            name: "동산참숯갈비",
+            cuisine: "고기",
+            budget: 75000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.6,
+            reaction: "숯불의 향이 살아있는 갈비 🔥",
+            menu: "소 갈비, 소 등갈비",
+        },
+        {
+            name: "만덕숯닭92",
+            cuisine: "고기",
+            budget: 65000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.3,
+            reaction: "닭다리의 탱탱한 식감 🍗",
+            menu: "닭다리 구이, 닭가슴살",
+        },
+        {
+            name: "청춘껍데기",
+            cuisine: "고기",
+            budget: 68000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.4,
+            reaction: "청춘의 에너지! 신나는 분위기 🎉",
+            menu: "닭껍데기, 닭발",
+        },
+        {
+            name: "농우본갈비",
+            cuisine: "고기",
+            budget: 85000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.7,
+            reaction: "프리미엄 한우의 진정한 가치 👑",
+            menu: "한우 갈비, 한우 안심",
+        },
+        {
+            name: "100년한우갈비",
+            cuisine: "고기",
+            budget: 90000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.6,
+            reaction: "100년의 노하우, 최고의 맛 🏆",
+            menu: "한우 갈비, 한우 등심",
+        },
+    ],
+    "회/해산물": [
+        {
+            name: "최가네 낙지한마당",
+            cuisine: "회/해산물",
+            budget: 85000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.4,
+            reaction: "신선한 맛! 바다 내음이 돕니다 🌊",
+            menu: "낙지 볶음, 낙지 숙회",
+        },
+        {
+            name: "아장아장 아빠가만든전복장",
+            cuisine: "회/해산물",
+            budget: 95000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.5,
+            reaction: "아빠의 손맛, 따뜻한 경험 🫂",
+            menu: "전복죽, 전복 숙회",
+        },
+        {
+            name: "온수골이호낙지",
+            cuisine: "회/해산물",
+            budget: 80000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.3,
+            reaction: "낙지의 쫄깃함, 중독성 있는 맛 🐙",
+            menu: "낙지 볶음밥, 낙지 수육",
+        },
+        {
+            name: "선주횟집",
+            cuisine: "회/해산물",
+            budget: 100000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.6,
+            reaction: "신선도 최고! 회의 참맛 🍣",
+            menu: "생선회, 횟감 모둠",
+        },
+        {
+            name: "물고기자리",
+            cuisine: "회/해산물",
+            budget: 90000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.4,
+            reaction: "별자리를 따라 바다로, 낭만이 있는 곳 ✨",
+            menu: "생선회, 해물탕",
+        },
+    ],
+    양식: [
+        {
+            name: "다이닝 류",
+            cuisine: "양식",
+            budget: 75000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.6,
+            reaction: "럭셔리한 분위기, 특별한 날씨 좋습니다 ✨",
+            menu: "스테이크, 파스타",
+        },
+        {
+            name: "플루토플루토x언덜",
+            cuisine: "양식",
+            budget: 65000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.4,
+            reaction: "신비로운 이름, 독특한 맛 🌙",
+            menu: "하우스 스페셜, 리소토",
+        },
+        {
+            name: "꼰떼넨네 더 광교",
+            cuisine: "양식",
+            budget: 70000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.5,
+            reaction: "프렌치 감성, 우아한 한끼 🇫🇷",
+            menu: "스테이크, 비프 부르기뇽",
+        },
+        {
+            name: "라온 아시안 다이닝 바",
+            cuisine: "양식",
+            budget: 68000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.3,
+            reaction: "아시안 감성, 편하고 맛있는 곳 🌏",
+            menu: "팟타이, 카레",
+        },
+        {
+            name: "라그로서리",
+            cuisine: "양식",
+            budget: 62000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.2,
+            reaction: "감성 카페, 함께하는 시간이 특별 ☕",
+            menu: "파스타, 샐러드",
+        },
+        {
+            name: "베이콜로지",
+            cuisine: "양식",
+            budget: 58000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.1,
+            reaction: "건강한 선택, 자연의 맛 🌿",
+            menu: "샐러드보울, 스무디",
+        },
+        {
+            name: "더레이크뷰",
+            cuisine: "양식",
+            budget: 80000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.7,
+            reaction: "호수가 보이는 뷰, 프리미엄 경험 🏞️",
+            menu: "프렌치 디너, 와인",
+        },
+    ],
+    일식: [
+        {
+            name: "교와동",
+            cuisine: "일식",
+            budget: 72000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.5,
+            reaction: "일본 감성, 정갈한 맛 🗾",
+            menu: "니기리 스시, 우동",
+        },
+        {
+            name: "스이렌",
+            cuisine: "일식",
+            budget: 70000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.5,
+            reaction: "섬세한 맛의 세계, 정갈합니다 🍣",
+            menu: "오마카세, 연어회",
+        },
+        {
+            name: "후라토식당",
+            cuisine: "일식",
+            budget: 68000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.4,
+            reaction: "따뜻한 일식, 마음까지 편해져요 🔥",
+            menu: "우동, 라멘",
+        },
+        {
+            name: "정정 구루",
+            cuisine: "일식",
+            budget: 65000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.3,
+            reaction: "스승의 손맛, 기술의 집대성 👨‍🏫",
+            menu: "오마카세, 스시",
+        },
+        {
+            name: "오또꼬",
+            cuisine: "일식",
+            budget: 75000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.6,
+            reaction: "문어의 진가, 신선도 최고 🐙",
+            menu: "문어 숙회, 문어 구이",
+        },
+        {
+            name: "나고야 스시덕",
+            cuisine: "일식",
+            budget: 80000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.5,
+            reaction: "스시 덕후들의 천국 😍",
+            menu: "오마카세, 특선 스시",
+        },
+        {
+            name: "긴자",
+            cuisine: "일식",
+            budget: 85000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.7,
+            reaction: "도쿄의 맛, 프리미엄 오마카세 👑",
+            menu: "프리미엄 오마카세, 우니",
+        },
+        {
+            name: "간사이등심",
+            cuisine: "일식",
+            budget: 88000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.6,
+            reaction: "소가 우는 등심, 최고의 부위 🥩",
+            menu: "소 등심 구이, 규카츠",
+        },
+    ],
+    중식: [
+        {
+            name: "금화루",
+            cuisine: "중식",
+            budget: 42000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.2,
+            reaction: "가성비 끝판왕! 푸짐한 양 🤤",
+            menu: "짜장면, 마라탕",
+        },
+        {
+            name: "울금향",
+            cuisine: "중식",
+            budget: 40000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.1,
+            reaction: "편한 맛, 자주 찾아가는 곳 🏠",
+            menu: "짬뽕, 짜장면",
+        },
+        {
+            name: "후이후이",
+            cuisine: "중식",
+            budget: 45000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.3,
+            reaction: "중독성 강한 맛, 자꾸 생각나 🔄",
+            menu: "마라탕, 마라샹궈",
+        },
+        {
+            name: "타이테라스",
+            cuisine: "중식",
+            budget: 48000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.4,
+            reaction: "테라스에서 즐기는 태국 감성 🌴",
+            menu: "팟타이, 그린카레",
+        },
+        {
+            name: "운멜로",
+            cuisine: "중식",
+            budget: 38000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.0,
+            reaction: "행운을 부르는 이름, 기분까지 좋아져 🍀",
+            menu: "양장피, 탄탄면",
+        },
+        {
+            name: "금금",
+            cuisine: "중식",
+            budget: 43000,
+            address: "수원시 영통구",
+            tel: "031-XXX-XXXX",
+            rating: 4.2,
+            reaction: "황금빛 음식, 재물운 상승 💰",
+            menu: "마라탕, 깐풍기",
+        },
+    ],
+};
+const VOTES_KEY = "restaurantVotes";
+function loadVotes() {
+    if (typeof window === "undefined")
+        return {};
+    try {
+        return JSON.parse(window.localStorage.getItem(VOTES_KEY) || "{}");
+    }
+    catch {
+        return {};
+    }
+}
+function RestaurantPicker() {
+    const [budget, setBudget] = useState(50000);
+    const [selectedCategory, setSelectedCategory] = useState("전체");
+    const [loading, setLoading] = useState(false);
+    const [results, setResults] = useState(null);
+    const [noResults, setNoResults] = useState(false);
+    const [votes, setVotes] = useState({});
+    useEffect(() => {
+        setVotes(loadVotes());
+    }, []);
+    const getVotes = (name) => votes[name] || { good: 0, bad: 0 };
+    const vote = (name, type) => {
+        setVotes((prev) => {
+            const next = { ...prev, [name]: { ...(prev[name] || { good: 0, bad: 0 }) } };
+            next[name][type] += 1;
+            try {
+                window.localStorage.setItem(VOTES_KEY, JSON.stringify(next));
+            }
+            catch {
+                // ignore write errors
+            }
+            return next;
+        });
+    };
+    const recommend = () => {
+        if (!budget) {
+            return;
+        }
+        setLoading(true);
+        setResults(null);
+        setNoResults(false);
+        const minBudget = budget * 0.7;
+        const maxBudget = budget * 1.3;
+        // 1.2초 후 결과 표시 (원본 동작 유지)
+        setTimeout(() => {
+            if (selectedCategory === "전체") {
+                const recommendations = [];
+                for (const category of CATEGORIES) {
+                    const filtered = (restaurants[category] || []).filter((r) => r.budget >= minBudget && r.budget <= maxBudget);
+                    if (filtered.length > 0) {
+                        recommendations.push(filtered[Math.floor(Math.random() * filtered.length)]);
+                    }
+                }
+                setLoading(false);
+                if (recommendations.length === 0) {
+                    setNoResults(true);
+                    return;
+                }
+                setResults(recommendations);
+            }
+            else {
+                const filtered = (restaurants[selectedCategory] || []).filter((r) => r.budget >= minBudget && r.budget <= maxBudget);
+                setLoading(false);
+                if (filtered.length === 0) {
+                    setNoResults(true);
+                    return;
+                }
+                setResults([filtered[Math.floor(Math.random() * filtered.length)]]);
+            }
+        }, 1200);
+    };
+    const reset = () => {
+        setBudget(50000);
+        setSelectedCategory("전체");
+        setResults(null);
+        setNoResults(false);
+        setLoading(false);
+    };
+    const single = (results === null || results === void 0 ? void 0 : results.length) === 1;
+    return (React.createElement("div", { className: "mx-auto w-full max-w-2xl rounded-3xl bg-card p-8 shadow-lg" },
+        React.createElement("h1", { className: "mb-8 text-center text-2xl font-bold text-card-foreground text-balance" }, "\uD68C\uC2DD\uC7A5\uC18C \uB79C\uB364 \uCD94\uCC9C"),
+        React.createElement("div", { className: "mb-5" },
+            React.createElement("label", { htmlFor: "budget", className: "mb-2 block text-sm font-medium text-muted-foreground" }, "\uC608\uC0B0 (1\uC778 \uAE30\uC900)"),
+            React.createElement("div", { className: "flex items-center gap-2" },
+                React.createElement("input", { id: "budget", type: "number", min: 0, value: budget, onChange: (e) => setBudget(Number(e.target.value)), onKeyDown: (e) => {
+                        if (e.key === "Enter" && !e.nativeEvent.isComposing && e.keyCode !== 229)
+                            recommend();
+                    }, className: "flex-1 rounded-lg border-2 border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors focus:border-primary" }),
+                React.createElement("span", { className: "text-muted-foreground" }, "\uC6D0"))),
+        React.createElement("div", { className: "mb-8" },
+            React.createElement("span", { className: "mb-2 block text-sm font-medium text-muted-foreground" }, "\uC74C\uC2DD \uCE74\uD14C\uACE0\uB9AC"),
+            React.createElement("div", { className: "flex flex-wrap gap-2" }, ["전체", ...CATEGORIES].map((category) => {
+                const active = selectedCategory === category;
+                return (React.createElement("button", { key: category, type: "button", onClick: () => setSelectedCategory(category), className: `rounded-md border px-3 py-2 text-xs font-medium transition-colors ${active
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border bg-card text-card-foreground hover:border-primary hover:bg-secondary"}` }, category));
+            }))),
+        React.createElement("div", { className: "flex gap-3" },
+            React.createElement("button", { type: "button", onClick: recommend, className: "flex-1 rounded-lg bg-primary px-5 py-3.5 text-base font-semibold text-primary-foreground transition-all hover:-translate-y-0.5 hover:shadow-lg" }, "\uCD94\uCC9C\uBC1B\uAE30"),
+            React.createElement("button", { type: "button", onClick: reset, className: "flex-1 rounded-lg bg-secondary px-5 py-3.5 text-base font-semibold text-secondary-foreground transition-colors hover:bg-muted" }, "\uCD08\uAE30\uD654")),
+        (loading || results || noResults) && (React.createElement("div", { className: "mt-10 rounded-2xl bg-muted/50 p-6" },
+            loading && (React.createElement("div", { className: "flex flex-col items-center gap-5 py-8" },
+                React.createElement("div", { className: "size-12 animate-spin rounded-full border-4 border-border border-t-primary" }),
+                React.createElement("p", { className: "text-sm font-semibold text-primary" }, "\uB9DB\uC788\uB294 \uACF3\uC744 \uCC3E\uACE0 \uC788\uC2B5\uB2C8\uB2E4..."))),
+            !loading && noResults && (React.createElement("p", { className: "py-5 text-center text-sm text-muted-foreground text-pretty" }, "\uC870\uAC74\uC5D0 \uB9DE\uB294 \uC2DD\uB2F9\uC774 \uC5C6\uC2B5\uB2C8\uB2E4. \uC608\uC0B0\uC744 \uC870\uC815\uD574\uBCF4\uC138\uC694.")),
+            !loading && results && (React.createElement("div", { className: `grid gap-4 ${single ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}` }, results.map((r) => {
+                const v = getVotes(r.name);
+                return (React.createElement("div", { key: r.name, className: "rounded-xl border-l-4 border-primary bg-card p-5 shadow-sm" },
+                    React.createElement("div", { className: "mb-2 text-xs font-medium text-muted-foreground" }, r.cuisine),
+                    React.createElement("div", { className: "mb-2 text-lg font-bold text-card-foreground" }, r.name),
+                    React.createElement("div", { className: "mb-3 text-sm font-semibold italic text-primary" }, `"${r.reaction}"`),
+                    React.createElement("div", { className: "mb-4 grid gap-1.5 text-[13px] text-muted-foreground" },
+                        React.createElement("div", { className: "flex gap-2" },
+                            React.createElement("span", { className: "min-w-14 font-semibold text-foreground" }, "\uB300\uD45C\uBA54\uB274"),
+                            React.createElement("span", { className: "flex-1 break-words" }, r.menu)),
+                        React.createElement("div", { className: "flex gap-2" },
+                            React.createElement("span", { className: "min-w-14 font-semibold text-foreground" }, "\uAC00\uACA9"),
+                            React.createElement("span", { className: "flex-1" },
+                                r.budget.toLocaleString(),
+                                "\uC6D0 (1\uC778)")),
+                        React.createElement("div", { className: "flex gap-2" },
+                            React.createElement("span", { className: "min-w-14 font-semibold text-foreground" }, "\uC704\uCE58"),
+                            React.createElement("span", { className: "flex-1" }, r.address)),
+                        React.createElement("div", { className: "flex gap-2" },
+                            React.createElement("span", { className: "min-w-14 font-semibold text-foreground" }, "\uD3C9\uC810"),
+                            React.createElement("span", { className: "flex-1" }, `⭐ ${r.rating}`))),
+                    React.createElement("div", { className: "flex gap-2" },
+                        React.createElement("button", { type: "button", onClick: () => vote(r.name, "good"), className: "flex-1 rounded-md border border-emerald-500 px-3 py-2 text-xs font-medium text-emerald-600 transition-colors hover:bg-emerald-50" }, `맛있어! (${v.good})`),
+                        React.createElement("button", { type: "button", onClick: () => vote(r.name, "bad"), className: "flex-1 rounded-md border border-red-400 px-3 py-2 text-xs font-medium text-red-500 transition-colors hover:bg-red-50" }, `별로 (${v.bad})`))));
+            })))))));
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(RestaurantPicker));</script></body></html>

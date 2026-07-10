@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PeachCode Farm</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { margin:0; background:#f4f2ef; }
+    input, textarea, select { font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,Arial,sans-serif; }
+    ::-webkit-scrollbar { display:none; }
+  </style>
+</helmet>
+
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Helvetica,Arial,sans-serif; background:#f4f2ef; min-height:100vh; color:#1c1a19; padding:32px 20px 80px;">
+  <div style="max-width:640px; margin:0 auto;">
+
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+      <div style="font-size:22px;">🍑</div>
+      <div style="font-size:20px; font-weight:800;">PeachCode Farm</div>
+    </div>
+    <div style="font-size:13px; color:#918c88; margin-bottom:28px;">여기서 새 복숭아(앱)를 심으면 GitHub 저장소의 apps.json에 바로 커밋돼요. 이 페이지 링크는 본인만 사용하세요.</div>
+
+    <!-- GITHUB CONFIG -->
+    <div style="background:#fff; border:1px solid rgba(0,0,0,0.07); border-radius:16px; padding:20px; margin-bottom:24px;">
+      <div style="font-size:14px; font-weight:800; margin-bottom:14px;">GitHub 연결 설정</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <input placeholder="owner (예: chewrispy)" value="{{ config.owner }}" onChange="{{ onOwnerChange }}" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px;">
+        <input placeholder="repo (예: peachcode-portfolio)" value="{{ config.repo }}" onChange="{{ onRepoChange }}" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px;">
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <input placeholder="branch (기본 main)" value="{{ config.branch }}" onChange="{{ onBranchChange }}" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px;">
+        <input placeholder="파일 경로 (기본 apps.json)" value="{{ config.path }}" onChange="{{ onPathChange }}" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px;">
+      </div>
+      <input type="password" placeholder="GitHub Personal Access Token" value="{{ config.token }}" onChange="{{ onTokenChange }}" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px; margin-bottom:8px;">
+      <div style="font-size:12px; color:#b5b0ac;">토큰은 이 브라우저의 localStorage에만 저장돼요. 서버로 전송되지 않아요.</div>
+    </div>
+
+    <!-- EXISTING APPS -->
+    <div style="background:#fff; border:1px solid rgba(0,0,0,0.07); border-radius:16px; padding:20px; margin-bottom:24px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+        <div style="font-size:14px; font-weight:800;">기존 앱 수정</div>
+        <div style="font-size:13px; font-weight:700; color:#ff6b5a; cursor:pointer;" onClick="{{ loadExisting }}">{{ loadButtonLabel }}</div>
+      </div>
+      <sc-if value="{{ hasApps }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <sc-for list="{{ appOptions }}" as="opt" hint-placeholder-count="4">
+            <div style="{{ opt.style }}" onClick="{{ opt.onClick }}">{{ opt.label }}</div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ isEditMode }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:12px; font-size:13px; font-weight:700; color:#918c88; cursor:pointer; width:fit-content;" onClick="{{ startNewApp }}">← 새 앱 추가로 전환</div>
+      </sc-if>
+    </div>
+
+    <!-- APP FORM -->
+    <div style="background:#fff; border:1px solid rgba(0,0,0,0.07); border-radius:16px; padding:20px; margin-bottom:24px;">
+      <div style="font-size:14px; font-weight:800; margin-bottom:14px;">{{ formTitle }}</div>
+
+      <div style="display:grid; grid-template-columns:60px 1fr; gap:10px; margin-bottom:10px;">
+        <input placeholder="🍑" value="{{ form.emoji }}" onChange="{{ onEmojiChange }}" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:16px; text-align:center;">
+        <input placeholder="앱 이름 (예: 회의비 관리 앱)" value="{{ form.title }}" onChange="{{ onTitleChange }}" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px;">
+      </div>
+
+      <input placeholder="카드에 짧게 보일 이름 (예: 회의비 관리)" value="{{ form.shortTitle }}" onChange="{{ onShortTitleChange }}" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px; margin-bottom:10px;">
+
+      <input placeholder="한 줄 설명" value="{{ form.description }}" onChange="{{ onDescriptionChange }}" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px; margin-bottom:10px;">
+
+      <textarea placeholder="상세 설명" value="{{ form.longDescription }}" onChange="{{ onLongDescriptionChange }}" rows="3" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px; margin-bottom:10px; resize:vertical;"></textarea>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <select value="{{ form.tag }}" onChange="{{ onTagChange }}" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px;">
+          <option value="Productivity">생산성</option>
+          <option value="Finance">재무</option>
+          <option value="Lifestyle">라이프스타일</option>
+          <option value="Game">게임</option>
+          <option value="Inventory">재고관리</option>
+        </select>
+        <input placeholder="배포 URL (없으면 비워두기)" value="{{ form.sourceUrl }}" onChange="{{ onSourceUrlChange }}" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px;">
+      </div>
+
+      <input placeholder="주요 기능 (쉼표로 구분: 기능1, 기능2, 기능3)" value="{{ form.featuresText }}" onChange="{{ onFeaturesTextChange }}" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px; margin-bottom:14px;">
+
+      <div style="font-size:13px; font-weight:700; color:#918c88; margin-bottom:8px;">개발 정보</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <input placeholder="사용 도구 (예: Claude)" value="{{ form.buildTool }}" onChange="{{ onBuildToolChange }}" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px;">
+        <input placeholder="제작일 (YYYY-MM-DD)" value="{{ form.buildDate }}" onChange="{{ onBuildDateChange }}" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px;">
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+        <input placeholder="배포 방식 (예: GitHub Pages)" value="{{ form.buildDeploy }}" onChange="{{ onBuildDeployChange }}" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px;">
+        <input placeholder="스택 (쉼표 구분: React, localStorage)" value="{{ form.buildStackText }}" onChange="{{ onBuildStackTextChange }}" style="padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px;">
+      </div>
+      <textarea placeholder="비하인드 스토리" value="{{ form.buildNotes }}" onChange="{{ onBuildNotesChange }}" rows="3" style="width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px; border:1px solid rgba(0,0,0,0.12); font-size:14px; resize:vertical;"></textarea>
+    </div>
+
+    <div style="{{ saveButtonStyle }}" onClick="{{ handleSave }}">{{ saveButtonLabel }}</div>
+
+    <sc-if value="{{ hasStatusMessage }}" hint-placeholder-val="{{ false }}">
+      <div style="{{ statusStyle }}">{{ statusMessage }}</div>
+    </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const DEFAULT_FORM = {
+  emoji: "", title: "", shortTitle: "", description: "", longDescription: "",
+  tag: "Productivity", sourceUrl: "", featuresText: "",
+  buildTool: "", buildDate: "", buildDeploy: "", buildStackText: "", buildNotes: ""
+};
+
+const TAG_GRADIENTS = {
+  Productivity: ["rgba(125,211,252,.55)", "rgba(165,180,252,.4)", "rgba(196,181,253,.4)"],
+  Finance: ["rgba(52,211,153,.5)", "rgba(94,234,212,.4)", "rgba(103,232,249,.4)"],
+  Lifestyle: ["rgba(252,211,77,.55)", "rgba(253,186,116,.4)", "rgba(253,164,175,.4)"],
+  Game: ["rgba(125,211,252,.6)", "rgba(165,180,252,.4)", "rgba(196,181,253,.4)"],
+  Inventory: ["rgba(253,164,175,.55)", "rgba(249,168,212,.4)", "rgba(253,186,116,.4)"]
+};
+
+
+
+function slugify(title) {
+  return (title || "app")
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣]+/g, "-")
+    .replace(/(^-|-$)/g, "") || `app-${Date.now()}`;
+}
+
+function b64EncodeUnicode(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = "";
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+  return btoa(binary);
+}
+
+function b64DecodeUnicode(b64) {
+  const binary = atob(b64.replace(/\n/g, ""));
+  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+class Component extends DCLogic {
+  state = {
+    config: { owner: "", repo: "", branch: "main", path: "apps.json", token: "" },
+    form: { ...DEFAULT_FORM },
+    status: "idle",
+    statusMessage: "",
+    mode: "add",
+    editingSlug: null,
+    existingApps: [],
+    listStatus: "idle"
+  };
+
+  componentDidMount() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("peachcode-admin-config") || "{}");
+      this.setState((s) => ({ config: { ...s.config, ...saved } }), () => {
+        if (saved.owner && saved.repo && saved.token) this.loadExisting();
+      });
+    } catch (e) {}
+  }
+
+  apiUrl() {
+    const { owner, repo, path } = this.state.config;
+    return `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+  }
+
+  headers() {
+    return { Authorization: `token ${this.state.config.token}`, Accept: "application/vnd.github+json" };
+  }
+
+  loadExisting = async () => {
+    const { owner, repo, branch, token } = this.state.config;
+    if (!owner || !repo || !token) {
+      this.setState({ listStatus: "error", statusMessage: "owner, repo, token을 먼저 입력해주세요.", status: "error" });
+      return;
+    }
+    this.setState({ listStatus: "loading" });
+    try {
+      const res = await fetch(`${this.apiUrl()}?ref=${encodeURIComponent(branch || "main")}`, { headers: this.headers() });
+      if (!res.ok) throw new Error(`목록 조회 실패 (${res.status})`);
+      const data = await res.json();
+      const apps = JSON.parse(b64DecodeUnicode(data.content));
+      this.setState({ existingApps: apps, listStatus: "loaded" });
+    } catch (err) {
+      this.setState({ listStatus: "error", status: "error", statusMessage: `목록 조회 실패: ${err.message}` });
+    }
+  };
+
+  selectApp = (slug) => {
+    const app = this.state.existingApps.find((a) => a.slug === slug);
+    if (!app) return;
+    this.setState({
+      mode: "edit",
+      editingSlug: slug,
+      status: "idle",
+      statusMessage: "",
+      form: {
+        emoji: app.emoji || "",
+        title: app.title || "",
+        shortTitle: app.shortTitle || "",
+        description: app.description || "",
+        longDescription: app.longDescription || "",
+        tag: app.tag || "Productivity",
+        sourceUrl: app.sourceUrl || "",
+        featuresText: (app.features || []).join(", "),
+        buildTool: app.buildInfo?.tool || "",
+        buildDate: app.buildInfo?.date || "",
+        buildDeploy: app.buildInfo?.deploy || "",
+        buildStackText: (app.buildInfo?.stack || []).join(", "),
+        buildNotes: app.buildInfo?.notes || ""
+      }
+    });
+  };
+
+  startNewApp = () => {
+    this.setState({ mode: "add", editingSlug: null, status: "idle", statusMessage: "", form: { ...DEFAULT_FORM } });
+  };
+
+  saveConfig(partial) {
+    this.setState((s) => {
+      const config = { ...s.config, ...partial };
+      localStorage.setItem("peachcode-admin-config", JSON.stringify(config));
+      return { config };
+    });
+  }
+
+  setForm(key, value) {
+    this.setState((s) => ({ form: { ...s.form, [key]: value } }));
+  }
+
+  handleSave = async () => {
+    const { owner, repo, branch, token } = this.state.config;
+    const f = this.state.form;
+    const mode = this.state.mode;
+
+    if (!owner || !repo || !token) {
+      this.setState({ status: "error", statusMessage: "owner, repo, token을 먼저 입력해주세요." });
+      return;
+    }
+    if (!f.title) {
+      this.setState({ status: "error", statusMessage: "앱 이름을 입력해주세요." });
+      return;
+    }
+
+    this.setState({ status: "saving", statusMessage: mode === "edit" ? "수정 저장 중..." : "저장 중..." });
+
+    const apiUrl = this.apiUrl();
+    const headers = this.headers();
+
+    try {
+      const getRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch || "main")}`, { headers });
+      let existing = [];
+      let sha = undefined;
+      if (getRes.ok) {
+        const data = await getRes.json();
+        sha = data.sha;
+        existing = JSON.parse(b64DecodeUnicode(data.content));
+      } else if (getRes.status !== 404) {
+        throw new Error(`파일 조회 실패 (${getRes.status})`);
+      }
+
+      const appData = {
+        emoji: f.emoji || "📦",
+        title: f.title,
+        shortTitle: f.shortTitle || f.title,
+        description: f.description,
+        longDescription: f.longDescription || f.description,
+        tag: f.tag,
+        gradient: TAG_GRADIENTS[f.tag] || TAG_GRADIENTS.Productivity,
+        features: f.featuresText.split(",").map((s) => s.trim()).filter(Boolean),
+        sourceUrl: f.sourceUrl || "",
+        buildInfo: {
+          tool: f.buildTool,
+          date: f.buildDate,
+          deploy: f.buildDeploy,
+          stack: f.buildStackText.split(",").map((s) => s.trim()).filter(Boolean),
+          notes: f.buildNotes
+        }
+      };
+
+      let updated;
+      let commitMessage;
+      if (mode === "edit" && this.state.editingSlug) {
+        const slug = this.state.editingSlug;
+        updated = existing.map((a) => (a.slug === slug ? { slug, ...appData } : a));
+        commitMessage = `Update app: ${appData.title}`;
+      } else {
+        const newApp = { slug: slugify(f.shortTitle || f.title), ...appData };
+        updated = [...existing, newApp];
+        commitMessage = `Add app: ${appData.title}`;
+      }
+
+      const content = b64EncodeUnicode(JSON.stringify(updated, null, 2));
+
+      const putRes = await fetch(apiUrl, {
+        method: "PUT",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: commitMessage,
+          content,
+          branch: branch || "main",
+          ...(sha ? { sha } : {})
+        })
+      });
+
+      if (!putRes.ok) {
+        const errBody = await putRes.json().catch(() => ({}));
+        throw new Error(errBody.message || `커밋 실패 (${putRes.status})`);
+      }
+
+      const successMsg = mode === "edit"
+        ? `"${appData.title}" 수정 완료! apps.json에 반영됐어요.`
+        : `"${appData.title}" 추가 완료! apps.json에 커밋됐어요.`;
+
+      this.setState({
+        status: "success",
+        statusMessage: successMsg,
+        existingApps: updated,
+        mode: "add",
+        editingSlug: null,
+        form: { ...DEFAULT_FORM }
+      });
+    } catch (err) {
+      this.setState({ status: "error", statusMessage: `실패: ${err.message}` });
+    }
+  };
+
+  renderVals() {
+    const config = this.state.config;
+    const form = this.state.form;
+    const status = this.state.status;
+    const mode = this.state.mode;
+
+    const appOptions = this.state.existingApps.map((a) => ({
+      slug: a.slug,
+      label: a.shortTitle || a.title,
+      onClick: () => this.selectApp(a.slug),
+      style: a.slug === this.state.editingSlug
+        ? "padding:9px 14px; border-radius:10px; font-size:13px; font-weight:700; background:#1c1a19; color:#fff; cursor:pointer; white-space:nowrap;"
+        : "padding:9px 14px; border-radius:10px; font-size:13px; font-weight:600; background:#f4f2ef; color:#4a4542; cursor:pointer; white-space:nowrap;"
+    }));
+
+    return {
+      config,
+      form,
+      mode,
+      isEditMode: mode === "edit",
+      appOptions,
+      hasApps: appOptions.length > 0,
+      loadExisting: this.loadExisting,
+      startNewApp: this.startNewApp,
+      isListLoading: this.state.listStatus === "loading",
+      loadButtonLabel: this.state.listStatus === "loading" ? "불러오는 중..." : "목록 불러오기",
+      formTitle: mode === "edit" ? `앱 수정: ${form.title || ""}` : "새 앱 추가",
+
+      onOwnerChange: (e) => this.saveConfig({ owner: e.target.value }),
+      onRepoChange: (e) => this.saveConfig({ repo: e.target.value }),
+      onBranchChange: (e) => this.saveConfig({ branch: e.target.value }),
+      onPathChange: (e) => this.saveConfig({ path: e.target.value }),
+      onTokenChange: (e) => this.saveConfig({ token: e.target.value }),
+
+      onEmojiChange: (e) => this.setForm("emoji", e.target.value),
+      onTitleChange: (e) => this.setForm("title", e.target.value),
+      onShortTitleChange: (e) => this.setForm("shortTitle", e.target.value),
+      onDescriptionChange: (e) => this.setForm("description", e.target.value),
+      onLongDescriptionChange: (e) => this.setForm("longDescription", e.target.value),
+      onTagChange: (e) => this.setForm("tag", e.target.value),
+      onSourceUrlChange: (e) => this.setForm("sourceUrl", e.target.value),
+      onFeaturesTextChange: (e) => this.setForm("featuresText", e.target.value),
+      onBuildToolChange: (e) => this.setForm("buildTool", e.target.value),
+      onBuildDateChange: (e) => this.setForm("buildDate", e.target.value),
+      onBuildDeployChange: (e) => this.setForm("buildDeploy", e.target.value),
+      onBuildStackTextChange: (e) => this.setForm("buildStackText", e.target.value),
+      onBuildNotesChange: (e) => this.setForm("buildNotes", e.target.value),
+
+      handleSave: this.handleSave,
+      saveButtonLabel: status === "saving" ? "저장 중..." : mode === "edit" ? "수정 저장하기" : "앱 추가하기",
+      saveButtonStyle: status === "saving"
+        ? "background:#a39e9a; color:#fff; text-align:center; padding:15px; border-radius:14px; font-size:15px; font-weight:700; cursor:default;"
+        : "background:#1c1a19; color:#fff; text-align:center; padding:15px; border-radius:14px; font-size:15px; font-weight:700; cursor:pointer;",
+      hasStatusMessage: status === "success" || status === "error",
+      statusMessage: this.state.statusMessage,
+      statusStyle: status === "success"
+        ? "margin-top:14px; padding:12px 16px; border-radius:12px; background:rgba(52,211,153,0.12); color:#0f7a56; font-size:13px; font-weight:600;"
+        : "margin-top:14px; padding:12px 16px; border-radius:12px; background:rgba(255,107,90,0.1); color:#c9412f; font-size:13px; font-weight:600;"
+    };
+  }
+}
+
+</script>
+</body>
+</html>
