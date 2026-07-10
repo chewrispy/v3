@@ -68,9 +68,9 @@
     "features": ["상황 카드 해결", "간호사 영입", "파벌 영향력 경쟁"],
     "sourceUrl": "https://z43n73.csb.app/",
     "buildInfo": {
-      "tool": "Claude + Gemini",
+      "tool": "Claude, Gemini, StackBlitz",
       "date": "2026-06-05",
-      "deploy": "StackBlitz",
+      "deploy": "CodeSandbox",
       "stack": ["React"],
       "notes": "2023년, 정형외과 병원을 다니며 실제 선생님들의 특징을 보고 카드트레이딩게임으로 만들고 싶다는 아이디어에서 시작. 당시엔 코딩을 몰라 기획안만 구글시트에 만들어두고 몇 년간 방치. 2026년 초 바이브 코딩을 알게 되면서 가장 먼저 구현해본 앱."
     }
@@ -104,7 +104,7 @@
     "tag": "Productivity",
     "gradient": ["rgba(203,213,225,.6)", "rgba(226,232,240,.5)", "rgba(241,245,249,.5)"],
     "features": ["카테고리별 정리", "앱 내장 실행", "GitHub Pages 배포"],
-    "sourceUrl": "https://chewrispy.github.io/portfolio/",
+    "sourceUrl": "https://chewrispy.github.io/v2/",
     "buildInfo": {
       "tool": "ChatGPT, Claude, Playcode",
       "date": "2026-07-07",
