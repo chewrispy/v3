@@ -180,15 +180,15 @@
   {
     "slug": "app-portfolio-v3",
     "emoji": "🍑",
-    "title": "앱 포트폴리오 v3 (PeachCode)",
-    "shortTitle": "앱 포트폴리오 v3 (PeachCode)",
+    "title": "앱 포트폴리오 v3",
+    "shortTitle": "앱 포트폴리오 v3",
     "description": "Claude Design 베타로 만든 세번째 버전",
-    "longDescription": "v1, v2를 거쳐 만든 세번째 정식 버전이에요. 카테고리, 상세 페이지, 소개 페이지에 더해 GitHub와 연동된 'PeachCode Farm' 관리자 페이지까지 갖췄어요. Claude Design의 새 베타 기능 소식을 듣자마자 바로 적용해봤습니다.",
+    "longDescription": "v1, v2를 거쳐 만든 세번째 정식 버전이에요. 카테고리, 상세 페이지, 소개 페이지에 더해 GitHub와 연동된 관리자 페이지까지 갖췄어요. Claude Design의 새 베타 기능 소식을 듣자마자 바로 적용해봤습니다.",
     "tag": "Productivity",
     "gradient": [
-      "rgba(255,138,117,.5)",
-      "rgba(255,107,90,.35)",
-      "rgba(196,181,253,.3)"
+      "rgba(125,211,252,.55)",
+      "rgba(165,180,252,.4)",
+      "rgba(196,181,253,.4)"
     ],
     "features": [
       "카테고리 분류",
@@ -205,7 +205,7 @@
         "JS",
         "GitHub API"
       ],
-      "notes": "Claude에 새로운 디자인 베타 기능이 나왔다는 안내를 보자마자 바로 적용해서 만든 버전. v1·v2의 경험을 살려 실제 앱스토어에 가까운 구조로 다시 설계했어요."
+      "notes": "Claude에 새로운 디자인 베타 기능이 나왔다는 안내를 보자마자 바로 적용해서 만든 버전. v1·v2의 경험을 살려 실제 앱스토어에 가까운 구조로 다시 설계했어요. 이때부터 개발자 이름을 갖고싶다는 생각이 들어 고심하다가, 좋아하는 과일인 복숭아에 개발의 느낌을 가미한 Code를 더해 'PeachCode'라는 이름을 붙였어요. 연동된 관리자 페이지는 'PeachCode Farm'으로 명명했어요. 복숭아를 심는 복숭아밭!"
     }
   },
   {
