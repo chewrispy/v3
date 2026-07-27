@@ -73,8 +73,8 @@
     ],
     "features": [
       "예산 기반 추천",
-      "음식 카테고리 필터",
-      "맛있어/별로 투표"
+      "카테고리 필터",
+      "투표"
     ],
     "sourceUrl": "restaurant-picker.html",
     "buildInfo": {
