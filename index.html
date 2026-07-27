@@ -251,6 +251,24 @@ const FALLBACK_APPS = [
 const TAG_LABELS = { Productivity: "생산성", Finance: "재무", Lifestyle: "라이프스타일", Game: "게임", Inventory: "재고관리" };
 const CATEGORY_ORDER = ["Productivity", "Finance", "Lifestyle", "Game", "Inventory"];
 
+function getTagLabel(tag) {
+  return TAG_LABELS[tag] || tag;
+}
+
+function getOrderedTags(apps) {
+  const tagSet = new Set();
+  apps.forEach((app) => {
+    if (app.tag) tagSet.add(app.tag);
+  });
+
+  const preferred = CATEGORY_ORDER.filter((tag) => tagSet.has(tag));
+  const custom = Array.from(tagSet)
+    .filter((tag) => !CATEGORY_ORDER.includes(tag))
+    .sort((a, b) => a.localeCompare(b));
+
+  return [...preferred, ...custom];
+}
+
 function fmtDate(d) {
   return d.replaceAll("-", ".");
 }
@@ -274,7 +292,7 @@ class Component extends DCLogic {
   buildApp(a) {
     return {
       ...a,
-      tagLabel: TAG_LABELS[a.tag] || a.tag,
+      tagLabel: getTagLabel(a.tag),
       iconBg: `linear-gradient(135deg, ${a.gradient[0]}, ${a.gradient[1]}, ${a.gradient[2]})`,
       hasUrl: !!a.sourceUrl,
       hasNoUrl: !a.sourceUrl,
@@ -294,8 +312,9 @@ class Component extends DCLogic {
     const apps = rawApps.map((a) => this.buildApp(a));
     const isLoading = this.state.apps === null && !this.state.loadError;
     const filterCategory = this.state.filterCategory;
+    const orderedTags = getOrderedTags(apps);
 
-    const chips = [{ key: "all", label: "전체" }, ...CATEGORY_ORDER.map((c) => ({ key: c, label: TAG_LABELS[c] }))].map((c) => {
+    const chips = [{ key: "all", label: "전체" }, ...orderedTags.map((c) => ({ key: c, label: getTagLabel(c) }))].map((c) => {
       const isActive = (c.key === "all" && !filterCategory) || c.key === filterCategory;
       return {
         label: c.label,
@@ -306,9 +325,9 @@ class Component extends DCLogic {
       };
     });
 
-    const categoriesAll = CATEGORY_ORDER.map((tag) => ({
+    const categoriesAll = orderedTags.map((tag) => ({
       key: tag,
-      label: TAG_LABELS[tag],
+      label: getTagLabel(tag),
       apps: apps.filter((a) => a.tag === tag)
     })).filter((c) => c.apps.length > 0);
 
