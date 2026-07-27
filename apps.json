@@ -372,7 +372,7 @@
       "뿌지직",
       "히힝♥️"
     ],
-    "sourceUrl": "",
+    "sourceUrl": "https://chewrispy.github.io/pet/",
     "buildInfo": {
       "tool": "PowerShell 5.1 + WPF 투명 윈도우, 픽셀아트는 PIL로 제작 후 base64 인라인. 행동 상태 머신(질주/서기/풀뜯기/응가), 혼합 배율 다중 모니터 좌표 실측 보정, Claude와 페어 프로그래밍",
       "date": "2026-07-27",
