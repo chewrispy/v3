@@ -1,1 +1,149 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>핏줄 BLOODLINE</title>
+<style>
+  :root{
+    --bg:#0a0a0c; --card:#131316; --border:#242428; --fg:#f2efe9; --muted:#8a8890; --accent:#e0313a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg); color:var(--fg);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{display:block;width:100%;height:auto;}
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:12px 16px; background:rgba(10,10,12,.9); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .topbar .title{font-size:14px; font-weight:900; letter-spacing:.02em;}
+  .topbar .ep{font-size:11px; color:var(--muted);}
+  .topbar a{
+    font-size:12px; font-weight:800; color:var(--fg); text-decoration:none;
+    border:1px solid var(--border); border-radius:999px; padding:6px 12px;
+  }
+  .progress{position:sticky; top:0; z-index:21; height:2px; background:var(--border);}
+  .progress-bar{height:100%; width:0%; background:var(--accent); transition:width .1s linear;}
+  .cover{position:relative;}
+  .cover img{filter:brightness(.92);}
+  .toc-wrap{max-width:720px; margin:0 auto;}
+  .toc-wrap img{cursor:default;}
+  .chapter{max-width:720px; margin:0 auto; position:relative;}
+  .chapter-label{
+    position:sticky; top:37px; z-index:10;
+    display:flex; align-items:center; gap:8px;
+    padding:8px 16px; background:linear-gradient(180deg, rgba(10,10,12,.92), rgba(10,10,12,.75));
+    backdrop-filter:blur(6px); font-size:11px; color:var(--muted); font-weight:800; letter-spacing:.06em;
+  }
+  .chapter-label .num{color:var(--accent); font-weight:900;}
+  .end-card{
+    max-width:720px; margin:0 auto; padding:56px 24px 90px; text-align:center;
+  }
+  .end-card .mark{font-size:11px; color:var(--accent); font-weight:900; letter-spacing:.2em; margin-bottom:10px;}
+  .end-card h2{font-size:22px; font-weight:900; margin-bottom:10px; letter-spacing:-.01em;}
+  .end-card p{font-size:13px; color:var(--muted); line-height:1.8; margin-bottom:24px;}
+  .end-card .btns{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .end-card a{
+    font-size:13px; font-weight:800; color:var(--fg); text-decoration:none;
+    border:1px solid var(--border); border-radius:999px; padding:10px 18px;
+  }
+  .end-card a.primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .loading-hint{
+    max-width:720px; margin:0 auto; padding:40px 24px; text-align:center;
+    color:var(--muted); font-size:12px; letter-spacing:.04em;
+  }
+</style>
+</head>
+<body>
 
+  <div class="topbar">
+    <div>
+      <div class="title">핏줄 BLOODLINE</div>
+      <div class="ep" id="ep-indicator">표지</div>
+    </div>
+    <a href="../" id="back-link">← 포트폴리오</a>
+  </div>
+  <div class="progress"><div class="progress-bar" id="progress-bar"></div></div>
+
+  <div class="cover">
+    <img src="00-cover.jpg" alt="핏줄 BLOODLINE 표지" loading="eager" />
+  </div>
+
+  <div class="toc-wrap">
+    <img src="00-toc.jpg" alt="목차" loading="lazy" />
+  </div>
+
+  <div id="chapters"></div>
+
+  <div class="end-card">
+    <div class="mark">THE END</div>
+    <h2>핏줄 · BLOODLINE</h2>
+    <p>전 9화 완결. 끝까지 읽어주셔서 감사합니다.</p>
+    <div class="btns">
+      <a href="#top" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;">맨 위로</a>
+      <a class="primary" href="../">포트폴리오로 돌아가기</a>
+    </div>
+  </div>
+
+<script>
+  const CHAPTERS = [
+    { num: 1, title: "습격", file: "01.jpg" },
+    { num: 2, title: "패턴", file: "02.jpg" },
+    { num: 3, title: "신체", file: "03.jpg" },
+    { num: 4, title: "흡수", file: "04.jpg" },
+    { num: 5, title: "침투", file: "05.jpg" },
+    { num: 6, title: "동맹", file: "06.jpg" },
+    { num: 7, title: "뿌리", file: "07.jpg" },
+    { num: 8, title: "보호", file: "08.jpg" },
+    { num: 9, title: "대가 (최종화)", file: "09.jpg" },
+  ];
+
+  const wrap = document.getElementById("chapters");
+  CHAPTERS.forEach((c) => {
+    const section = document.createElement("div");
+    section.className = "chapter";
+    section.id = "ep" + c.num;
+    section.innerHTML = `
+      <div class="chapter-label"><span class="num">${String(c.num).padStart(2, "0")}</span><span>${c.title}</span></div>
+      <img src="${c.file}" alt="${c.num}화 ${c.title}" loading="lazy" />
+    `;
+    wrap.appendChild(section);
+  });
+
+  // 진행률 + 현재 화 표시
+  const bar = document.getElementById("progress-bar");
+  const indicator = document.getElementById("ep-indicator");
+  const sections = Array.from(document.querySelectorAll(".chapter"));
+
+  function onScroll() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
+    bar.style.width = pct + "%";
+
+    let current = "표지";
+    for (const sec of sections) {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.5) {
+        const idx = sections.indexOf(sec);
+        current = `${String(CHAPTERS[idx].num).padStart(2, "0")}화 · ${CHAPTERS[idx].title}`;
+      }
+    }
+    indicator.textContent = current;
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  // 상위 프레임(포트폴리오)에서 iframe으로 열렸을 경우 "포트폴리오로 돌아가기" 링크를 숨김
+  if (window.top !== window.self) {
+    document.getElementById("back-link").style.display = "none";
+  }
+</script>
+</body>
+</html>
