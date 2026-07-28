@@ -1,1 +1,150 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>핏줄 · 제작 노트</title>
+<style>
+  :root{
+    --bg:#0a0a0c; --card:#131316; --border:#242428; --fg:#f2efe9; --muted:#9a97a0; --accent:#e0313a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--fg);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:60px;
+  }
+  a{color:inherit;}
+  .topbar{
+    position:sticky; top:0; z-index:20;
+    padding:14px 16px 0;
+    background:rgba(10,10,12,.95); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .topbar-row{display:flex; align-items:center; justify-content:space-between; gap:12px; padding-bottom:12px;}
+  .topbar .title{font-size:15px; font-weight:900;}
+  .topbar .sub{font-size:11px; color:var(--muted); margin-top:2px;}
+  .topbar a.back{
+    font-size:12px; font-weight:800; text-decoration:none; color:var(--fg);
+    border:1px solid var(--border); border-radius:999px; padding:6px 12px; white-space:nowrap;
+  }
+  .tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:12px; -ms-overflow-style:none; scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    flex:none; font-size:13px; font-weight:800; padding:8px 14px; border-radius:999px;
+    border:1px solid var(--border); background:transparent; color:var(--muted); cursor:pointer;
+    white-space:nowrap;
+  }
+  .tab.active{background:var(--accent); border-color:var(--accent); color:#fff;}
+  .ep-tabs{display:none; gap:6px; overflow-x:auto; padding:10px 16px 0; -ms-overflow-style:none; scrollbar-width:none;}
+  .ep-tabs::-webkit-scrollbar{display:none;}
+  .ep-tabs.show{display:flex;}
+  .ep-tab{
+    flex:none; font-size:12px; font-weight:800; padding:6px 12px; border-radius:8px;
+    border:1px solid var(--border); background:var(--card); color:var(--muted); cursor:pointer;
+  }
+  .ep-tab.active{border-color:var(--accent); color:var(--accent);}
 
+  .content{max-width:720px; margin:0 auto; padding:28px 20px 40px;}
+  .content h2{font-size:20px; font-weight:900; margin:28px 0 12px; letter-spacing:-.01em;}
+  .content h2:first-child{margin-top:0;}
+  .content h3{font-size:15px; font-weight:900; margin:20px 0 8px; color:var(--accent);}
+  .content p{font-size:14px; line-height:1.85; color:#d8d5da; margin-bottom:12px;}
+  .content hr{border:none; border-top:1px solid var(--border); margin:24px 0;}
+  .content strong{color:var(--fg);}
+  .content ul, .content ol{padding-left:20px; margin-bottom:12px;}
+  .content li{font-size:14px; line-height:1.85; color:#d8d5da; margin-bottom:6px;}
+  .content blockquote{
+    border-left:3px solid var(--accent); padding:2px 0 2px 14px; margin:10px 0;
+    color:var(--muted); font-size:13px;
+  }
+  .content pre{
+    background:#000; border:1px solid var(--border); border-radius:12px; padding:14px;
+    overflow-x:auto; margin:10px 0 16px;
+  }
+  .content code{
+    font-family:ui-monospace,"SF Mono",Consolas,monospace; font-size:12px; color:#9fe0a8; line-height:1.7;
+  }
+  .content p code{background:#000; padding:2px 6px; border-radius:6px;}
+  .loading{padding:60px 0; text-align:center; color:var(--muted); font-size:13px;}
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <div class="topbar-row">
+      <div>
+        <div class="title">📓 핏줄 · 제작 노트</div>
+        <div class="sub">트리트먼트 · 캐릭터 노트 · 화별 콘티</div>
+      </div>
+      <a class="back" href="../">← 본편으로</a>
+    </div>
+    <div class="tabs" id="main-tabs">
+      <button class="tab active" data-tab="treatment">트리트먼트</button>
+      <button class="tab" data-tab="characters">캐릭터 노트</button>
+      <button class="tab" data-tab="episodes">화별 콘티</button>
+    </div>
+    <div class="ep-tabs" id="ep-tabs">
+      <!-- JS로 채움 -->
+    </div>
+  </div>
+
+  <div class="content" id="content">
+    <div class="loading">불러오는 중...</div>
+  </div>
+
+<script>
+  const EP_COUNT = 9;
+  const contentEl = document.getElementById("content");
+  const mainTabs = document.querySelectorAll("#main-tabs .tab");
+  const epTabsWrap = document.getElementById("ep-tabs");
+
+  // 화별 콘티 서브탭 생성
+  for (let i = 1; i <= EP_COUNT; i++) {
+    const btn = document.createElement("button");
+    btn.className = "ep-tab" + (i === 1 ? " active" : "");
+    btn.textContent = i + "화";
+    btn.dataset.ep = i;
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".ep-tab").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      loadContent("content/ep" + i + ".html");
+    });
+    epTabsWrap.appendChild(btn);
+  }
+
+  async function loadContent(path) {
+    contentEl.innerHTML = '<div class="loading">불러오는 중...</div>';
+    try {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error("파일을 찾을 수 없어요");
+      const html = await res.text();
+      contentEl.innerHTML = html;
+      window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+    } catch (e) {
+      contentEl.innerHTML = '<div class="loading">불러오지 못했어요 (' + e.message + ')</div>';
+    }
+  }
+
+  mainTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      mainTabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      const kind = tab.dataset.tab;
+      if (kind === "episodes") {
+        epTabsWrap.classList.add("show");
+        const activeEp = document.querySelector(".ep-tab.active") || document.querySelector(".ep-tab");
+        loadContent("content/ep" + activeEp.dataset.ep + ".html");
+      } else {
+        epTabsWrap.classList.remove("show");
+        loadContent("content/" + kind + ".html");
+      }
+    });
+  });
+
+  // 초기 로드
+  loadContent("content/treatment.html");
+</script>
+</body>
+</html>
