@@ -415,21 +415,27 @@
     "title": "Naily",
     "shortTitle": "Naily",
     "description": "네일아트 디자인을 추천해주고 지금까지 했던 네일아트 디자인을 아카이빙 할 수 있는 앱",
-    "longDescription": "네일아트 디자인을 추천해주고 지금까지 했던 네일아트 디자인을 아카이빙 할 수 있는 앱",
+    "longDescription": "열 손가락이 슬롯머신처럼 돌아가며 오늘의 네일을 뽑아주는 추천 앱. 완전 랜덤은 물론, 키워드 검색이나 사진 속 색감 분석으로도 추천받을 수 있고, 직접 한 네일은 사진·샵·별점과 함께 아카이브에 기록해서 나중에 \"이 느낌 다시 추천받기\"도 가능해요.",
     "tag": "Lifestyle",
     "gradient": [
       "rgba(252,211,77,.55)",
       "rgba(253,186,116,.4)",
       "rgba(253,164,175,.4)"
     ],
-    "features": [],
-    "sourceUrl": "",
+    "features": [
+      "애니메이션 추천",
+      "키워드 디자인 검색",
+      "아카이빙"
+    ],
+    "sourceUrl": "https://chewrispy.github.io/naily",
     "buildInfo": {
-      "tool": "ChatGPT",
+      "tool": "Claude, Galaxy AI",
       "date": "2026-07-28",
-      "deploy": "",
-      "stack": [],
-      "notes": ""
+      "deploy": "GitHub Pages",
+      "stack": [
+        "HTML/CSS/JS"
+      ],
+      "notes": "3주마다 반복되는 \"다음 네일 뭐하지\" 고민에서 시작. 제미나이로 만든 슬롯머신 참고 영상을 보고 열 손가락이 각각 릴처럼 도는 애니메이션을 구현했고, 실제 손 사진 위에 손톱 좌표를 픽셀 단위로 직접 측정해서 정교하게 맞췄어요. 챗지피티로도 같은 작업을 병행해보면서 방향을 비교・발전시킴."
     }
   }
 ]
