@@ -443,8 +443,8 @@
     "emoji": "🧐",
     "title": "UX Research 요청 시스템",
     "shortTitle": "UX Research 요청 시스템",
-    "description": "양식에 맞춰 간단한 폼만 작성하면 리서치 업무 요청 끝!",
-    "longDescription": "양식에 맞춰 간단한 폼만 작성하면 리서치 업무 요청 끝!",
+    "description": "과제 담당자가 UX 리서치를 요청할 때 필요한 정보를 처음부터 제대로 받기 위한 요청 폼이에요.",
+    "longDescription": "리서치 요청자마다 지식 수준도, 알고 싶은 내용의 정리 정도도 달라서 매번 여러 번 질문하고 회의하며 조사 설계를 다시 잡아야 하는 게 비효율적이라고 느껴서 만들었어요. 처음부터 필요한 정보를 구조화된 폼으로 받으면 왕복 커뮤니케이션이 줄고, 조사 설계도 훨씬 빨라져요.\n",
     "tag": "Productivity",
     "gradient": [
       "rgba(125,211,252,.55)",
@@ -453,15 +453,20 @@
     ],
     "features": [
       "포맷",
-      "이메일연동"
+      "구글시트 자동 적재",
+      "이메일 연동"
     ],
     "sourceUrl": "https://chewrispy.github.io/RFR",
     "buildInfo": {
       "tool": "Claude",
       "date": "2026-08-10",
       "deploy": "Github, AppStack",
-      "stack": [],
-      "notes": ""
+      "stack": [
+        "Google Apps Script",
+        "Google Sheets",
+        "Gmail API"
+      ],
+      "notes": "회사 보안 정책상 구글시트에 직접 접속할 수 없어서, Apps Script로 시트에 데이터가 쌓이는 동시에 같은 내용을 회사 메일로 자동 발송하도록 만듦."
     }
   }
 ]
