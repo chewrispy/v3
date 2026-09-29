@@ -250,8 +250,10 @@ function addScore(n){S.score=Math.max(0,S.score+n);hud()}
 
 /* ---------- tips ---------- */
 let tipTimer;
-function tip(text){
-  if(!S.tips.includes(text))S.tips.push(text);
+const STAGE_ORDER={shop:0,jeon:1,soup:2,interlude:3,table:3,rite:4,nag:5};
+function tip(text,o={}){
+  if(o.learn!==false){const key=o.key||text,stage=o.stage!=null?STAGE_ORDER[o.stage]:(STAGE_ORDER[S.screen]??0);
+    if(!S.tips.some(t=>t.key===key))S.tips.push({text,key,stage})}
   document.querySelectorAll('.tip').forEach(t=>t.remove());
   const el=document.createElement('div');el.className='tip';el.innerHTML='<b>알아두기</b>'+text;
   document.body.appendChild(el);clearTimeout(tipTimer);tipTimer=setTimeout(()=>el.remove(),4200);
@@ -283,6 +285,7 @@ function slap(line,dmg=15){
 /* ---------- screens ---------- */
 function clearTimers(){S.timers.forEach(t=>{clearInterval(t);clearTimeout(t)});S.timers=[];cancelAnimationFrame(raf)}
 function go(screen){
+  if(screen in STAGE_ORDER)S.reached=Math.max(S.reached??-1,STAGE_ORDER[screen]);
   clearTimers();S.screen=screen;
   const showHud=['shop','jeon','soup','table','rite','nag'].includes(screen);
   $('hud').hidden=!showHud;$('sub').hidden=!showHud;
@@ -302,31 +305,31 @@ function intro(){
       <div class="btn-row"><button class="chip-btn" data-jump="table">2부 차례상</button><button class="chip-btn" data-jump="rite">3부 차례</button><button class="chip-btn" data-jump="nag">4부 잔소리</button></div>
     </div>`;
   say('왔니? 앞치마부터 둘러라.');
-  const reset=()=>{S.score=0;S.patience=100;S.budget=100000;S.basket=new Set();S.tips=[];S.mode='';S.unlockMsg='';S.carry={missing:new Set(),burnt:new Set(),soup:'good'};S.mental=100;S.nagDone=false;hud()};
+  const reset=()=>{S.score=0;S.patience=100;S.budget=100000;S.basket=new Set();S.tips=[];S.reached=-1;S.mode='';S.unlockMsg='';S.carry={missing:new Set(),burnt:new Set(),soup:'good'};S.mental=100;S.nagDone=false;hud()};
   $('start').onclick=()=>{reset();go('shop')};
   document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{reset();go(b.dataset.jump)});
 }
 
 /* ---------- 1. 장보기 ---------- */
 const ITEMS=[
-  {id:'dongtae',name:'동태포',ico:'🐟',price:12000,req:1,info:'동태전은 차례상 전의 기본이에요. 생선은 머리가 동쪽을 향하게 놓아요(두동미서).'},
+  {id:'dongtae',name:'동태포',ico:'🐟',price:12000,req:1,info:'동태전은 차례상 전의 기본이에요. 생선은 머리가 동쪽을 향하게 놓아요(두동미서).',infoStage:'table'},
   {id:'pork',name:'다짐육',ico:'🥩',price:9000,req:1},
   {id:'tofu',name:'두부',ico:'⬜',price:2000,req:1},
   {id:'zucchini',name:'애호박',ico:'🥒',price:2500,req:1},
   {id:'egg',name:'계란 한 판',ico:'🥚',price:7000,req:1},
-  {id:'radish',name:'무',ico:'🥕',price:3000,req:1,info:'탕국은 무, 소고기, 두부를 넣고 맑게 끓여요.'},
+  {id:'radish',name:'무',ico:'🥕',price:3000,req:1,info:'탕국은 무, 소고기, 두부를 넣고 맑게 끓여요.',infoStage:'soup'},
   {id:'beef',name:'소고기 양지',ico:'🍖',price:15000,req:1},
-  {id:'apple',name:'사과',ico:'🍎',price:8000,req:1,tag:'금사과',info:'홍동백서: 붉은 과일은 동쪽(오른쪽), 흰 과일은 서쪽(왼쪽)에 놓아요.'},
+  {id:'apple',name:'사과',ico:'🍎',price:8000,req:1,tag:'금사과',info:'홍동백서: 붉은 과일은 동쪽(오른쪽), 흰 과일은 서쪽(왼쪽)에 놓아요.',infoStage:'table'},
   {id:'pear',name:'배',ico:'🍐',price:6000,req:1},
-  {id:'chestnut',name:'밤',ico:'🌰',price:5000,req:1,info:'조율이시: 왼쪽부터 대추, 밤, 배, 감 순서로 놓아요.'},
+  {id:'chestnut',name:'밤',ico:'🌰',price:5000,req:1,info:'조율이시: 왼쪽부터 대추, 밤, 배, 감 순서로 놓아요.',infoStage:'table'},
   {id:'jujube',name:'대추',ico:'🔴',price:4000,req:1},
   {id:'persimmon',name:'곶감',ico:'🟠',price:5000,req:1},
-  {id:'songpyeon',name:'송편',ico:'🍡',price:12000,req:1,info:'추석 차례상엔 밥 대신 송편을, 설 차례상엔 떡국을 올려요.'},
+  {id:'songpyeon',name:'송편',ico:'🍡',price:12000,req:1,info:'추석 차례상엔 밥 대신 송편을, 설 차례상엔 떡국을 올려요.',infoStage:'table',infoKey:'songpyeon'},
   {id:'peach',name:'복숭아',ico:'🍑',price:7000,trap:['복숭아를 왜 샀니! 조상님 못 오시게 할 거냐!','복숭아는 귀신을 쫓는다고 해서 제사상에 올리지 않아요.']},
-  {id:'saury',name:'꽁치',ico:'🐠',price:4000,trap:['이름에 치 자 들어간 생선은 안 올린다!','꽁치, 갈치, 삼치처럼 이름이 ‘치’로 끝나는 생선은 격이 낮다고 여겨 올리지 않는 게 관례예요.']},
-  {id:'hairtail',name:'갈치',ico:'🗡️',price:18000,trap:['비싼 갈치를! 그것도 제사에!','‘치’로 끝나는 생선은 제사상에 올리지 않아요.']},
-  {id:'chili',name:'고춧가루',ico:'🌶️',price:9000,trap:['제사 음식에 고춧가루가 웬 말이냐!','제사 음식은 붉은 양념을 쓰지 않아요. 붉은색이 귀신을 쫓는다고 여겼거든요.']},
-  {id:'garlic',name:'마늘',ico:'🧄',price:3000,trap:['마늘은 넣는 거 아니다!','마늘, 파 같은 향이 강한 채소(오신채)는 제사 음식에 쓰지 않아요.']},
+  {id:'saury',name:'꽁치',ico:'🐠',price:4000,key:'chi',trap:['이름에 치 자 들어간 생선은 안 올린다!','꽁치, 갈치, 삼치처럼 이름이 ‘치’로 끝나는 생선은 격이 낮다고 여겨 올리지 않는 게 관례예요.']},
+  {id:'hairtail',name:'갈치',ico:'🗡️',price:18000,key:'chi',trap:['비싼 갈치를! 그것도 제사에!','‘치’로 끝나는 생선은 제사상에 올리지 않아요.']},
+  {id:'chili',name:'고춧가루',ico:'🌶️',price:9000,key:'red',trap:['제사 음식에 고춧가루가 웬 말이냐!','제사 음식은 붉은 양념을 쓰지 않아요. 붉은색이 귀신을 쫓는다고 여겼거든요.']},
+  {id:'garlic',name:'마늘',ico:'🧄',price:3000,key:'osin',trap:['마늘은 넣는 거 아니다!','마늘, 파 같은 향이 강한 채소(오신채)는 제사 음식에 쓰지 않아요.']},
   {id:'mango',name:'망고',ico:'🥭',price:10000,trap:['요즘 집들은 몰라도 우리 집은 안 된다!','요즘은 바나나나 망고를 올리는 집도 있지만, 전통 차례상은 우리 땅의 과일을 올려요.']},
 ];
 function shop(){
@@ -346,9 +349,9 @@ function shop(){
     const it=ITEMS.find(i=>i.id===id);
     if(S.basket.has(id)){S.basket.delete(id);S.budget+=it.price;render();return}
     if(it.price>S.budget){say('돈이 모자라잖니. 쓸데없는 걸 사니까 그렇지.','angry');return}
-    if(it.trap){S.budget-=it.price;slap(it.trap[0],12);tip(it.trap[1]);addScore(-10);render();return}
+    if(it.trap){S.budget-=it.price;slap(it.trap[0],12);tip(it.trap[1],{key:it.key});addScore(-10);render();return}
     S.basket.add(id);S.budget-=it.price;addScore(5);
-    if(it.info)tip(it.info);
+    if(it.info)tip(it.info,{stage:it.infoStage,key:it.infoKey});
     say(['그래, 그거.','싱싱한 걸로 골라라.','가격 좀 봐라, 사과가 금값이다.','그거 말고 옆에 거… 아니다, 됐다.'][Math.floor(Math.random()*4)]);
     render();
   };
@@ -438,7 +441,7 @@ function runJeon(){
     const over=p.t>J.hi;
     if(p.side===0){p.side=1;p.t=0;p.over=over;addScore(over?4:10);if(over)say('좀 탔다… 아래로 깔아라.')}
     else{const good=!over&&!p.over;stats[p.type][good?0:1]++;plated.push(good);addScore(good?15:5);pans[i]=null;
-      if(good&&plated.filter(x=>x).length===4)tip('전은 차례상 둘째 줄에 올려요. 어동육서: 생선전은 동쪽, 고기전은 서쪽!');
+      if(good&&plated.filter(x=>x).length===4)tip('전은 차례상 둘째 줄에 올려요. 어동육서: 생선전은 동쪽, 고기전은 서쪽!',{stage:'table'});
       say(good?['그렇지.','색 곱다.','이건 네 시아버지 드려라.'][Math.floor(Math.random()*3)]:(p.type==='hobak'?'호박이 흐물흐물하다.':'이건 네가 먹어라.'),good?'happy':'normal');}
     drawPans();
   });
@@ -474,8 +477,8 @@ const SOUP_ING=[
   {id:'beef',name:'소고기',ico:'🍖',req:1},
   {id:'tofu',name:'두부',ico:'⬜',req:1},
   {id:'kelp',name:'다시마',ico:'🟫',bonus:1},
-  {id:'chili',name:'고춧가루',ico:'🌶️',trap:['탕국에 고춧가루?! 육개장 끓이니!','제사 탕국은 붉은 양념 없이 맑게 끓여요.']},
-  {id:'scallion',name:'대파',ico:'🌿',trap:['파는 넣지 말랬지!','파·마늘 같은 오신채는 제사 음식에 쓰지 않는 집이 많아요.']},
+  {id:'chili',name:'고춧가루',ico:'🌶️',key:'red',trap:['탕국에 고춧가루?! 육개장 끓이니!','제사 탕국은 붉은 양념 없이 맑게 끓여요.']},
+  {id:'scallion',name:'대파',ico:'🌿',key:'osin',trap:['파는 넣지 말랬지!','파·마늘 같은 오신채는 제사 음식에 쓰지 않는 집이 많아요.']},
 ];
 function soup(){
   $('stageChip').textContent='3 탕국';
@@ -510,7 +513,7 @@ function soup(){
   const addIng=id=>{
     if(st.served||st.ing.has(id))return;
     const it=SOUP_ING.find(i=>i.id===id);
-    if(it.trap){slap(it.trap[0],12);tip(it.trap[1]);addScore(-10);return}
+    if(it.trap){slap(it.trap[0],12);tip(it.trap[1],{key:it.key});addScore(-10);return}
     st.ing.add(id);addScore(it.bonus?8:5);
     if(it.bonus){say('다시마 넣었구나. 제법이다.','happy');tip('다시마를 넣으면 간을 적게 해도 감칠맛이 나요.')}
     else say('무는 나박나박 썰었지?');
@@ -532,7 +535,7 @@ function soup(){
     st.served=true;
     if(st.salt>HI){S.carry.soup='salty';addScore(-20);slap('애미야, 국이 짜다!',18);tip('제사 탕국은 국간장으로 아주 슴슴하게 간해요. 조상님 입맛은 싱겁답니다.')}
     else if(st.salt<LO){S.carry.soup='bland';addScore(-10);slap('이게 국이냐, 맹물이냐!',12)}
-    else{addScore(60);say('…됐다. 간 잘 봤네.','happy');tip('탕국은 차례상 둘째 줄, 국과 떡 사이에 올려요.')}
+    else{addScore(60);say('…됐다. 간 잘 봤네.','happy');tip('탕국은 차례상 셋째 줄 가운데, 고기 산적과 생선 사이에 올려요.',{stage:'table'})}
     S.timers.push(setTimeout(()=>{if(S.screen==='soup'&&S.patience>0)go('interlude')},1600));
   };
   say('탕국은 맑게. 고춧가루 손대면 혼난다.');
@@ -558,7 +561,7 @@ const FOOD={
   sanjeok:{name:'산적',ico:'🍢'},tang:{name:'탕국',ico:'🍲'},jogi:{name:'조기',ico:'🐟'},dombaegi:{name:'돔배기',ico:'🦈'},hongeo:{name:'홍어찜',ico:'🐠'},
   bugeo:{name:'북어포',ico:'🥓'},namul:{name:'삼색나물',ico:'🥬'},sikhye:{name:'식혜',ico:'🥛'},
   jujube:{name:'대추',ico:'🔴'},chestnut:{name:'밤',ico:'🌰'},pear:{name:'배',ico:'🍐'},persimmon:{name:'곶감',ico:'🟠'},apple:{name:'사과',ico:'🍎'},
-  tteokguk:{name:'떡국',ico:'🥣',decoy:['설날이냐! 추석엔 송편이다!','설 차례상엔 떡국, 추석 차례상엔 송편을 올려요.']},
+  tteokguk:{name:'떡국',ico:'🥣',key:'songpyeon',decoy:['설날이냐! 추석엔 송편이다!','설 차례상엔 떡국, 추석 차례상엔 송편을 올려요.']},
   chicken:{name:'조카가 사온 치킨',ico:'🍗',decoy:['조상님이 치킨을 드시냐!','요즘은 고인이 생전에 좋아하던 음식을 올리는 집도 늘고 있어요. 어머님은 아니지만요.']},
   kimchi:{name:'배추김치',ico:'🫙',decoy:['빨간 김치를 올리는 집이 어딨니!','김치를 올린다면 고춧가루 없는 백김치나 나박김치로 올려요.']},
 };
@@ -706,14 +709,14 @@ function stagedTable(easy){
     $('askH').onclick=()=>{$('ticker2').textContent=HUSBAND_HINTS[husband++%HUSBAND_HINTS.length]};
     $('askM').onclick=()=>{S.patience=Math.max(0,S.patience-5);hud();tip(ROW_TEXT[cur]);say('그것도 모르니. 잘 들어라.','angry');if(S.patience<=0)go('over')};
   };
-  const miss=(i,line,rule)=>{mistakes++;addScore(-8);slap(line,8);tip(rule);if(i!=null){flash.add(i);S.timers.push(setTimeout(()=>{flash.delete(i);if(!done&&S.screen==='table')render()},900))}};
+  const miss=(i,line,rule,key)=>{mistakes++;addScore(-8);slap(line,8);tip(rule,{key});if(i!=null){flash.add(i);S.timers.push(setTimeout(()=>{flash.delete(i);if(!done&&S.screen==='table')render()},900))}};
   const place=i=>{
     if(done)return;const s=slots[i];
     if(s.row!==cur){if(s.row>cur)say('그 줄은 아직이다. 한 줄씩 해라.');return}
     if(s.item)return;
     if(!sel){say('쟁반에서 음식부터 골라라.');return}
     const it=sel;sel=null;
-    if(decoyOf(it)){const d=decoyOf(it);rowTray=rowTray.filter(x=>x!==it);miss(null,d[0],d[1]);render();return}
+    if(decoyOf(it)){const d=decoyOf(it);rowTray=rowTray.filter(x=>x!==it);miss(null,d[0],d[1],FOOD[it].key);render();return}
     if(s.accept.includes(it)){
       if(it==='jogi'&&!fishEast){miss(i,'생선 머리가 왜 서쪽을 보니! 두동미서!',RULES.dudong);render();return}
       s.item=it;addScore(10);say(['그렇지.','옳지.','그래, 거기.','제법이구나.'][Math.floor(Math.random()*4)],'happy');carryReact(it);
@@ -732,7 +735,7 @@ function stagedTable(easy){
   };
   const rowDone=()=>{
     if(cur===4){
-      done=true;let bonus=easy?60:110;if(!mistakes){bonus+=50;tip('실수 없이 완성! 보너스 50점')}
+      done=true;let bonus=easy?60:110;if(!mistakes){bonus+=50;tip('실수 없이 완성! 보너스 50점',{learn:false})}
       addScore(bonus);setUnlock(easy?2:3);
       S.unlockMsg=easy?'10년차 모드가 열렸어요':'종부 모드가 열렸어요';
       say('…그래. 이만하면 조상님도 흡족하시겠다.','happy');
@@ -786,7 +789,7 @@ function fullTable(){
     if(done)return;const s=slots[i];bad.delete(i);
     if(sel){
       const prev=s.item;s.item=sel;sel=null;
-      if(decoyOf(s.item)){const d=decoyOf(s.item);s.item=prev;slap(d[0],10);tip(d[1]);addScore(-10)}else carryReact(s.item)
+      if(decoyOf(s.item)){const d=decoyOf(s.item);const k=FOOD[s.item].key;s.item=prev;slap(d[0],10);tip(d[1],{key:k});addScore(-10)}else carryReact(s.item)
       render();return;
     }
     if(s.item==='jogi'&&s.accept.includes('jogi')){fishEast=!fishEast;render();return}
@@ -809,7 +812,7 @@ function fullTable(){
     const errs=check();
     if(!errs.length){
       done=true;const bonus=Math.ceil(time)*2;addScore(170+bonus);S.unlockMsg='종부 모드 클리어!';
-      say('…그래. 이만하면 조상님도 흡족하시겠다.','happy');tip('차례상 완성! 남은 시간 보너스 '+bonus+'점');
+      say('…그래. 이만하면 조상님도 흡족하시겠다.','happy');tip('차례상 완성! 남은 시간 보너스 '+bonus+'점',{learn:false});
       S.timers.push(setTimeout(()=>go('rite'),1800));return;
     }
     tries++;bad=new Set(errs.map(e=>e[0]));
@@ -875,15 +878,15 @@ function runRite(){
     if($('pourBtn'))$('pourBtn').onclick=()=>{pours++;if(pours>=3){act=null;addScore(8);say('그래, 세 번에 나눠서.','happy');tip('강신: 술을 모사(띠 묶음을 꽂은 그릇)에 세 번 나눠 부어 땅에 계신 조상님을 모셔요.');next()}else render()};
     document.querySelectorAll('[data-bow]').forEach(b=>b.onclick=()=>{
       const n=+b.dataset.bow;
-      if(n===1){mistakes++;addScore(-8);slap('절을 한 번만 하는 법이 어딨니!',8);tip('차례에서는 두 번 절(재배)해요.');return}
+      if(n===1){mistakes++;addScore(-8);slap('절을 한 번만 하는 법이 어딨니!',8);tip('차례에서는 두 번 절(재배)해요.',{key:'bow'});return}
       act=null;
-      if(n===4){addScore(4);say('요즘 누가 네 번 하니. 옛날 얘기다.');tip('예전엔 남자는 두 번, 여자는 네 번 절했지만 요즘은 남녀 모두 두 번 절하는 집이 많아요.')}
+      if(n===4){addScore(4);say('요즘 누가 네 번 하니. 옛날 얘기다.');tip('차례에서는 두 번 절(재배)해요. 예전엔 남자는 두 번, 여자는 네 번 절했지만 요즘은 남녀 모두 두 번 절하는 집이 많아요.',{key:'bow'})}
       else{addScore(8);say('그렇지, 두 번.','happy')}
       next();
     });
     document.querySelectorAll('[data-spoon]').forEach(b=>b.onclick=()=>{
-      if(b.dataset.spoon==='w'){mistakes++;addScore(-8);slap('숟가락이 왜 서쪽을 보니!',8);tip('숟가락은 오목한 면이 동쪽을 향하게 꽂아요.');return}
-      act=null;addScore(8);say('옳지. 젓가락도 가지런히.','happy');tip('숟가락은 오목한 면이 동쪽을 향하게 꽂고, 젓가락은 시접 위에 가지런히 놓아요.');next();
+      if(b.dataset.spoon==='w'){mistakes++;addScore(-8);slap('숟가락이 왜 서쪽을 보니!',8);tip('숟가락은 오목한 면이 동쪽을 향하게 꽂아요.',{key:'spoon'});return}
+      act=null;addScore(8);say('옳지. 젓가락도 가지런히.','happy');tip('숟가락은 오목한 면이 동쪽을 향하게 꽂고, 젓가락은 시접 위에 가지런히 놓아요.',{key:'spoon'});next();
     });
   };
   const next=()=>{
@@ -907,7 +910,7 @@ function runRite(){
     next();
   };
   const finish=()=>{
-    done=true;const bonus=mistakes?30:80;addScore(bonus);if(!mistakes)tip('차례 순서 완벽! 보너스 80점');
+    done=true;const bonus=mistakes?30:80;addScore(bonus);if(!mistakes)tip('차례 순서 완벽! 보너스 80점',{learn:false});
     say('차례 잘 지냈다. 이제 밥 먹자. …친척들 말은 흘려들어라.','happy');
     S.timers.push(setTimeout(()=>go('nag'),1800));
   };
@@ -995,7 +998,7 @@ function nag(){
 }
 
 /* ---------- endings ---------- */
-function learned(){return S.tips.length?`<ol class="learn">${S.tips.map(t=>`<li>${t}</li>`).join('')}</ol>`:'<p class="muted">배운 게 없네요. 실수를 안 했거나, 아무것도 안 했거나.</p>'}
+function learned(){const L=S.tips.filter(t=>t.stage<=S.reached);return L.length?`<ol class="learn">${L.map(t=>`<li>${t.text}</li>`).join('')}</ol>`:'<p class="muted">배운 게 없네요. 실수를 안 했거나, 아무것도 안 했거나.</p>'}
 function result(){
   const ride=!S.nagDone?'':S.mentalBroken?'멘탈이 무너졌다. 귀경길 차 안에서 조용히 울었다.':S.mental>=60?'멘탈 무사! 귀경길 휴게소에서 호두과자까지 먹었다.':S.mental>=30?'귀경길 내내 둘 다 말이 없었다.':'귀경길, 남편이 휴게소마다 커피를 사 왔다.';
   const g=S.score>=800?['종부 인정','어머님이 처음으로 웃으셨다.','happy']:S.score>=550?['합격','내년 설에도 부르신대요.','normal']:['재수강','…내년엔 전은 사다 쓰자.','angry'];
