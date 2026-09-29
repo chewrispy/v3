@@ -1,0 +1,1031 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>차례상 타이쿤</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="장보기부터 전 부치기, 차례상 차리기, 차례 지내기, 친척 잔소리 방어전까지. 어머님 손바닥을 피해 추석을 살아남는 풍자 타이쿤 게임.">
+<meta property="og:title" content="차례상 타이쿤">
+<meta property="og:description" content="애미야, 국이 짜다! 추석을 살아남는 풍자 타이쿤 게임">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#e7b04f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%A1%3C/text%3E%3C/svg%3E">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;height:100%}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
+<style>
+/* Layout: one-screen phone game on a yellow 장판 floor; HUD on top, stage in the middle, 어머님 dialog bar at the bottom */
+:root{
+  color-scheme: light;
+  --floor:#e7b04f;
+  --floor-line:#d49a3c;
+  --paper:#fff7e4;
+  --ink:#2a1c12;
+  --ink-soft:#6d5846;
+  --red:#c73a2c;
+  --green:#2d6a4f;
+  --pan:#34302d;
+  --gold:#e0a43a;
+  --display:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --body:"Gowun Dodum","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+html,body{height:100%}
+body{
+  margin:0;color:var(--ink);font-family:var(--body);font-size:15px;
+  background-color:var(--floor);
+  background-image:
+    linear-gradient(var(--floor-line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--floor-line) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-tap-highlight-color:transparent;
+}
+#app{max-width:460px;margin:0 auto;height:100%;display:flex;flex-direction:column;padding-inline:16px;box-sizing:border-box}
+button{font-family:var(--display);cursor:pointer;color:var(--ink)}
+button:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+
+/* HUD */
+.hud{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding-block:12px 8px}
+.stage-chip{font-family:var(--display);background:var(--ink);color:var(--paper);padding:5px 10px;border-radius:6px;font-size:14px;white-space:nowrap}
+.patience{display:flex;flex-direction:column;gap:3px;min-width:0}
+.patience small{font-size:11px;letter-spacing:.04em;color:var(--ink)}
+.bar{height:10px;background:rgba(42,28,18,.18);border-radius:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--green);transition:width .3s,background .3s}
+.score{font-family:var(--display);font-size:18px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.sub{display:flex;justify-content:space-between;gap:8px;font-family:var(--display);font-size:14px;padding-bottom:8px;font-variant-numeric:tabular-nums}
+
+/* stage */
+.stage{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding-bottom:10px}
+.card{background:var(--paper);border-radius:14px;padding:14px;box-shadow:0 3px 0 rgba(42,28,18,.25)}
+h1,h2{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance}
+h1{font-size:40px;line-height:1.1}
+h2{font-size:22px}
+p{margin:0;line-height:1.6}
+.muted{color:var(--ink-soft);font-size:13px}
+.big-btn{font-size:20px;background:var(--red);color:var(--paper);border:0;border-radius:12px;padding:14px;width:100%;box-shadow:0 4px 0 #7d2219}
+.big-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #7d2219}
+.big-btn.alt{background:var(--green);box-shadow:0 4px 0 #1a4230}
+
+/* shop */
+.shop-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.item{background:var(--paper);border:2px solid transparent;border-radius:10px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:15px;position:relative;box-shadow:0 2px 0 rgba(42,28,18,.25)}
+.item .ico{font-size:26px;line-height:1.2}
+.item .pr{font-family:var(--body);font-size:12px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.item.on{border-color:var(--green);background:#e6f1e9}
+.item.on::after{content:"✓";position:absolute;top:3px;right:7px;color:var(--green);font-size:14px}
+.tag{position:absolute;top:-7px;left:50%;transform:translateX(-50%);background:var(--red);color:var(--paper);font-size:10px;padding:1px 6px;border-radius:8px;white-space:nowrap}
+.list{display:flex;flex-wrap:wrap;gap:6px}
+.list span{font-size:13px;padding:3px 8px;border-radius:12px;background:rgba(42,28,18,.08)}
+.list span.got{background:var(--green);color:var(--paper)}
+
+/* jeon */
+.pans{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pan{aspect-ratio:1;max-width:100%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#55504b,var(--pan) 60%);border:6px solid #1f1c1a;display:flex;align-items:center;justify-content:center;position:relative;padding:0}
+.pan .jeon{width:66%;aspect-ratio:1;border-radius:50%;transition:background .2s;box-shadow:inset 0 -4px 0 rgba(0,0,0,.15)}
+.pan .jeon.square{border-radius:22%}
+.pan .jeon.oval{aspect-ratio:1.4;width:74%;border-radius:50%}
+.pan .lbl{position:absolute;bottom:-24px;left:-6px;right:-6px;text-align:center;font-family:var(--display);font-size:12px;white-space:nowrap}
+.pan .lbl.go{color:var(--green)}
+.pan .lbl.hot{color:var(--red)}
+.pan .empty{color:#9c948c;font-family:var(--display);font-size:13px}
+.pan.smoke::before{content:"";position:absolute;inset:-10px;border-radius:50%;background:radial-gradient(circle,rgba(120,120,120,.5),transparent 70%);animation:smoke .8s infinite alternate}
+@keyframes smoke{to{transform:translateY(-10px) scale(1.1);opacity:.4}}
+.swatch{width:52px;height:52px;flex:none;border-radius:50%;box-shadow:inset 0 -4px 0 rgba(0,0,0,.15),0 0 0 5px var(--pan)}
+.swatch.square{border-radius:22%}
+.swatch.oval{height:40px;width:58px}
+.fire{color:var(--red)}
+.plate-row{display:flex;flex-wrap:wrap;gap:4px;min-height:28px}
+.plate-row i{width:22px;height:22px;border-radius:50%;background:var(--gold);display:block}
+.plate-row i.b{background:#7a4a1c}
+.queue{font-family:var(--display);font-size:14px}
+.ticker{font-size:13px;background:var(--ink);color:var(--paper);border-radius:8px;padding:8px 10px;min-height:20px}
+
+/* soup */
+.pot-wrap{display:flex;justify-content:center}
+.pot{width:190px;height:120px;background:#5b5550;border-radius:0 0 80px 80px;position:relative;overflow:hidden;border-top:10px solid #3c3835}
+.broth{position:absolute;inset:0;background:#d9c7a4;transition:background .4s}
+.bub{position:absolute;bottom:10px;width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.55);animation:bub 1.6s infinite}
+@keyframes bub{0%{transform:translateY(0);opacity:0}30%{opacity:1}100%{transform:translateY(-80px);opacity:0}}
+.pot .in{position:absolute;inset:8px;display:flex;flex-wrap:wrap;gap:4px;align-content:flex-start;justify-content:center;font-size:22px}
+.meter{position:relative;height:22px;border-radius:11px;background:linear-gradient(90deg,#eadfc8,#c9a36b,#7a4a1c);overflow:hidden}
+.meter .zone{position:absolute;top:0;bottom:0;border:2px dashed var(--green);background:rgba(45,106,79,.18)}
+.meter .needle{position:absolute;top:-2px;bottom:-2px;width:4px;background:var(--ink);transition:left .35s}
+.meter-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-soft);margin-top:4px}
+.btn-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.chip-btn{background:var(--paper);border:2px solid rgba(42,28,18,.15);border-radius:10px;padding:10px 4px;font-size:15px;box-shadow:0 2px 0 rgba(42,28,18,.2)}
+.chip-btn.on{border-color:var(--green);background:#e6f1e9}
+.chip-btn:active{transform:translateY(2px)}
+
+/* dialog */
+.dialog{display:flex;gap:10px;align-items:flex-end;padding-block:8px 14px}
+.face{width:64px;height:64px;flex:none}
+.bubble{flex:1;min-width:0;background:var(--paper);border-radius:14px 14px 14px 4px;padding:10px 12px;font-size:14px;line-height:1.5;box-shadow:0 3px 0 rgba(42,28,18,.25)}
+.bubble b{font-family:var(--display);font-weight:400;color:var(--red);display:block;font-size:12px}
+
+/* tip toast */
+.tip{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 70px);width:min(420px,calc(100% - 32px));background:var(--green);color:var(--paper);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.5;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:20;animation:drop .3s}
+.tip b{font-family:var(--display);font-weight:400;display:block;font-size:13px;opacity:.85}
+@keyframes drop{from{transform:translate(-50%,-12px);opacity:0}}
+
+/* slap */
+#slap{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(199,58,44,.35);pointer-events:none}
+#slap .hand{font-size:120px;animation:whack .35s ease-out}
+#slap .line{font-family:var(--display);font-size:30px;color:var(--paper);background:var(--red);padding:10px 18px;border-radius:14px;max-width:88%;text-align:center;box-shadow:0 5px 0 #7d2219;text-wrap:balance}
+#slap .pow{font-family:var(--display);font-size:22px;color:var(--paper);letter-spacing:.1em}
+@keyframes whack{0%{transform:translate(120px,-120px) rotate(40deg)}70%{transform:translate(0,0) rotate(-10deg) scale(1.15)}100%{transform:rotate(0)}}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+
+/* 차례상 */
+.orient{display:flex;justify-content:space-between;align-items:center;font-family:var(--display);font-size:13px;color:var(--ink)}
+.orient .spirit{background:var(--ink);color:var(--paper);padding:3px 10px;border-radius:6px}
+.sang{background:linear-gradient(#8a2c1d,#6e2216);border-radius:10px;padding:10px 8px;display:flex;flex-direction:column;gap:7px;box-shadow:0 6px 0 #3f130c;border:3px solid #4a170e}
+.srow{display:flex;justify-content:center;gap:6px;position:relative}
+.srow .rn{position:absolute;left:-2px;top:50%;transform:translateY(-50%);font-size:10px;color:rgba(255,247,228,.55);font-family:var(--display)}
+.slot{flex:1;max-width:64px;aspect-ratio:1;border-radius:50%;background:#f3eadb;border:2px solid #d8c9ae;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0;font-size:22px;line-height:1;position:relative;box-shadow:0 3px 0 rgba(0,0,0,.3)}
+.slot small{font-family:var(--body);font-size:9.5px;color:var(--ink);margin-top:2px;white-space:nowrap}
+.slot.empty{background:rgba(255,247,228,.1);border:2px dashed rgba(255,247,228,.45);box-shadow:none}
+.slot.ready.empty{border-color:#ffd66b;background:rgba(255,214,107,.18)}
+.slot.bad{outline:3px solid #ffd23f;outline-offset:1px;animation:shake .35s}
+.slot .dir{position:absolute;bottom:-5px;font-size:9px;background:var(--ink);color:var(--paper);padding:1px 4px;border-radius:5px;font-family:var(--display)}
+.flip{display:inline-block;transform:scaleX(-1)}
+.tray{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.titem{background:var(--paper);border:2px solid transparent;border-radius:10px;padding:6px 2px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;box-shadow:0 2px 0 rgba(42,28,18,.25)}
+.titem .ico{font-size:22px}
+.titem.sel{border-color:var(--red);background:#fde7e2;transform:translateY(-2px)}
+.hint-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.twist{background:var(--ink);color:var(--paper)}
+.twist .muted{color:#cdbba5}
+
+.mode{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;border:2px solid transparent;width:100%}
+.mode .mn{font-size:22px}
+.mode .md{font-family:var(--body);font-size:13px;color:var(--ink-soft);line-height:1.5}
+.mode:not(.locked):active{border-color:var(--red)}
+.mode.locked{opacity:.55;cursor:default}
+.srow.cur{outline:2px solid #ffd66b;outline-offset:3px;border-radius:12px;background:rgba(255,214,107,.1)}
+.srow.later{opacity:.3}
+.slot .hint{font-family:var(--display);font-size:11px;color:rgba(255,247,228,.9)}
+.burnt{filter:brightness(.45) saturate(.6)}
+.ctag{position:absolute;top:-6px;right:-4px;background:var(--ink);color:var(--paper);font-family:var(--display);font-size:9px;padding:1px 4px;border-radius:5px}
+.ctag2{font-style:normal;font-size:10px;background:var(--ink);color:var(--paper);padding:0 4px;border-radius:4px;margin-right:2px}
+.act-t{font-family:var(--display);font-weight:400;font-size:18px}
+.rite{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;counter-reset:r}
+.rite li{counter-increment:r;display:grid;grid-template-columns:24px 64px 1fr;gap:6px;align-items:baseline;background:var(--paper);border-radius:8px;padding:6px 8px;font-size:12px;line-height:1.4}
+.rite li::before{content:counter(r);font-family:var(--display);color:var(--ink-soft);font-size:13px}
+.rite li b{font-family:var(--display);font-weight:400;font-size:15px}
+.rite li span{min-width:0;color:var(--ink-soft)}
+.rite li.next{outline:2px solid var(--red)}
+.rite li.later{opacity:.45;padding-block:3px}
+.rcards{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.pour{display:flex;gap:10px;justify-content:center}
+.pour span{width:34px;height:44px;border-radius:4px 4px 14px 14px;border:3px solid var(--ink-soft)}
+.pour span.on{background:linear-gradient(transparent 40%,var(--gold) 40%)}
+.nagq{display:flex;flex-direction:column;gap:8px}
+.nagq .who{font-family:var(--display);color:var(--red);font-size:15px}
+.nagq .q{font-family:var(--display);font-size:22px;line-height:1.35;text-wrap:balance}
+.nag-opts{display:flex;flex-direction:column;gap:8px}
+.nag-opts .chip-btn{text-align:left;padding:12px;font-size:15px}
+.nag-opts .chip-btn:disabled{opacity:.5}
+.reply{font-family:var(--display);font-size:16px;padding:10px 12px;border-radius:10px;background:var(--paper)}
+.reply.good{border-left:4px solid var(--green)}
+.reply.bad{border-left:4px solid var(--red)}
+.terms{margin:0;display:flex;flex-direction:column;gap:10px}
+.terms div{display:grid;grid-template-columns:78px 1fr;gap:8px}
+.terms dt{font-family:var(--display);font-size:17px;display:flex;flex-direction:column}
+.terms dt small{font-family:var(--body);font-size:11px;color:var(--ink-soft)}
+.terms dd{margin:0;font-size:13px;line-height:1.5;color:var(--ink-soft);min-width:0}
+.terms dd b{display:block;color:var(--ink);font-weight:700}
+.rcard{display:flex;flex-direction:column;align-items:center;gap:2px}
+.rcard small{font-family:var(--body);font-size:10.5px;color:var(--ink-soft);line-height:1.3}
+.learn{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5}
+.grade{font-family:var(--display);font-size:30px;color:var(--red)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<div id="app">
+  <div class="hud" id="hud" hidden>
+    <span class="stage-chip" id="stageChip">장보기</span>
+    <div class="patience"><small>어머님 인내심</small><div class="bar"><i id="patBar" style="width:100%"></i></div></div>
+    <span class="score" id="score">0점</span>
+  </div>
+  <div class="sub" id="sub" hidden></div>
+  <main class="stage" id="stage"></main>
+  <div class="dialog" id="dialog">
+    <svg class="face" id="face" viewBox="0 0 64 64" aria-hidden="true"></svg>
+    <div class="bubble" id="bubble"><b>어머님</b><span id="line"></span></div>
+  </div>
+</div>
+<div id="slap" hidden><div class="hand">🖐️</div><div class="pow">찰싹!</div><div class="line" id="slapLine"></div></div>
+
+<script>
+/* ---------- state ---------- */
+const S={house:{region:'seoul',fruit:'joyul'},carry:{missing:new Set(),burnt:new Set(),soup:'good'},reacted:new Set(),score:0,patience:100,budget:100000,basket:new Set(),tips:[],screen:'intro',timers:[]};
+const $=id=>document.getElementById(id);
+
+/* ---------- 어머님 face ---------- */
+function drawFace(mood){
+  const angry=mood==='angry', happy=mood==='happy';
+  const curls=[[14,18],[22,11],[32,8],[42,11],[50,18],[10,28],[54,28]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="8" fill="#3b2f2a"/>`).join('');
+  const brows=angry?'<path d="M20 29 L28 32 M44 29 L36 32" stroke="#2a1c12" stroke-width="2.5" stroke-linecap="round"/>':'<path d="M20 30 Q24 28 28 30 M36 30 Q40 28 44 30" stroke="#2a1c12" stroke-width="2" fill="none" stroke-linecap="round"/>';
+  const mouth=angry?'<path d="M25 48 Q32 42 39 48" stroke="#8c2a20" stroke-width="3" fill="none" stroke-linecap="round"/>':happy?'<path d="M25 44 Q32 51 39 44" stroke="#8c2a20" stroke-width="3" fill="none" stroke-linecap="round"/>':'<path d="M26 46 L38 46" stroke="#8c2a20" stroke-width="3" stroke-linecap="round"/>';
+  $('face').innerHTML=`<circle cx="32" cy="36" r="22" fill="#f1c9a0"/>${curls}<circle cx="24" cy="36" r="6" fill="none" stroke="#6d5846" stroke-width="1.5"/><circle cx="40" cy="36" r="6" fill="none" stroke="#6d5846" stroke-width="1.5"/><path d="M30 36 L34 36" stroke="#6d5846" stroke-width="1.5"/><circle cx="24" cy="36" r="1.8" fill="#2a1c12"/><circle cx="40" cy="36" r="1.8" fill="#2a1c12"/>${brows}${mouth}${angry?'<circle cx="17" cy="44" r="3.5" fill="#e98b7a" opacity=".7"/><circle cx="47" cy="44" r="3.5" fill="#e98b7a" opacity=".7"/>':''}`;
+}
+function say(text,mood='normal'){$('line').textContent=text;drawFace(mood)}
+
+/* ---------- hud ---------- */
+function hud(){
+  $('score').textContent=S.score+'점';
+  $('patBar').style.width=S.patience+'%';
+  $('patBar').style.background=S.patience>60?'var(--green)':S.patience>30?'var(--gold)':'var(--red)';
+}
+function addScore(n){S.score=Math.max(0,S.score+n);hud()}
+
+/* ---------- tips ---------- */
+let tipTimer;
+function tip(text){
+  if(!S.tips.includes(text))S.tips.push(text);
+  document.querySelectorAll('.tip').forEach(t=>t.remove());
+  const el=document.createElement('div');el.className='tip';el.innerHTML='<b>알아두기</b>'+text;
+  document.body.appendChild(el);clearTimeout(tipTimer);tipTimer=setTimeout(()=>el.remove(),4200);
+}
+
+/* ---------- slap ---------- */
+let actx;
+function slapSound(){
+  try{
+    actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    const len=actx.sampleRate*.18,buf=actx.createBuffer(1,len,actx.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,4);
+    const src=actx.createBufferSource(),f=actx.createBiquadFilter(),g=actx.createGain();
+    f.type='lowpass';f.frequency.value=2200;g.gain.value=.9;
+    src.buffer=buf;src.connect(f).connect(g).connect(actx.destination);src.start();
+  }catch(e){}
+}
+let slapTimer;
+function slap(line,dmg=15){
+  S.patience=Math.max(0,S.patience-dmg);hud();
+  $('slapLine').textContent=line;$('slap').hidden=false;
+  const hand=$('slap').querySelector('.hand');hand.style.animation='none';void hand.offsetWidth;hand.style.animation='';
+  $('app').classList.remove('shake');void $('app').offsetWidth;$('app').classList.add('shake');
+  slapSound();try{navigator.vibrate&&navigator.vibrate(120)}catch(e){}
+  say(line,'angry');
+  clearTimeout(slapTimer);slapTimer=setTimeout(()=>{$('slap').hidden=true;if(S.patience<=0)go('over')},1300);
+}
+
+/* ---------- screens ---------- */
+function clearTimers(){S.timers.forEach(t=>{clearInterval(t);clearTimeout(t)});S.timers=[];cancelAnimationFrame(raf)}
+function go(screen){
+  clearTimers();S.screen=screen;
+  const showHud=['shop','jeon','soup','table','rite','nag'].includes(screen);
+  $('hud').hidden=!showHud;$('sub').hidden=!showHud;
+  ({intro,shop,jeon,soup,interlude,table,rite,nag,result,over})[screen]();
+  $('stage').scrollTop=0;
+}
+
+function intro(){
+  $('stage').innerHTML=`
+    <div class="card" style="display:flex;flex-direction:column;gap:14px;margin-top:8px">
+      <p class="muted">추석 전날 · 새벽 6시 · 시댁 부엌</p>
+      <h1>차례상<br>타이쿤</h1>
+      <p>올해 차례 음식은 당신 몫입니다. 장을 보고, 전을 부치고, 탕국을 끓이세요. 실수하면 어머님 손이 날아옵니다.</p>
+      <div class="list"><span>1부 음식 장만</span><span>2부 차례상 차리기</span><span>3부 차례 지내기</span><span>4부 잔소리 방어전</span></div>
+      <button class="big-btn" id="start">부엌으로 들어가기</button>
+      <div class="muted">원하는 부터 바로 해보기</div>
+      <div class="btn-row"><button class="chip-btn" data-jump="table">2부 차례상</button><button class="chip-btn" data-jump="rite">3부 차례</button><button class="chip-btn" data-jump="nag">4부 잔소리</button></div>
+    </div>`;
+  say('왔니? 앞치마부터 둘러라.');
+  const reset=()=>{S.score=0;S.patience=100;S.budget=100000;S.basket=new Set();S.tips=[];S.mode='';S.unlockMsg='';S.carry={missing:new Set(),burnt:new Set(),soup:'good'};S.mental=100;S.nagDone=false;hud()};
+  $('start').onclick=()=>{reset();go('shop')};
+  document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{reset();go(b.dataset.jump)});
+}
+
+/* ---------- 1. 장보기 ---------- */
+const ITEMS=[
+  {id:'dongtae',name:'동태포',ico:'🐟',price:12000,req:1,info:'동태전은 차례상 전의 기본이에요. 생선은 머리가 동쪽을 향하게 놓아요(두동미서).'},
+  {id:'pork',name:'다짐육',ico:'🥩',price:9000,req:1},
+  {id:'tofu',name:'두부',ico:'⬜',price:2000,req:1},
+  {id:'zucchini',name:'애호박',ico:'🥒',price:2500,req:1},
+  {id:'egg',name:'계란 한 판',ico:'🥚',price:7000,req:1},
+  {id:'radish',name:'무',ico:'🥕',price:3000,req:1,info:'탕국은 무, 소고기, 두부를 넣고 맑게 끓여요.'},
+  {id:'beef',name:'소고기 양지',ico:'🍖',price:15000,req:1},
+  {id:'apple',name:'사과',ico:'🍎',price:8000,req:1,tag:'금사과',info:'홍동백서: 붉은 과일은 동쪽(오른쪽), 흰 과일은 서쪽(왼쪽)에 놓아요.'},
+  {id:'pear',name:'배',ico:'🍐',price:6000,req:1},
+  {id:'chestnut',name:'밤',ico:'🌰',price:5000,req:1,info:'조율이시: 왼쪽부터 대추, 밤, 배, 감 순서로 놓아요.'},
+  {id:'jujube',name:'대추',ico:'🔴',price:4000,req:1},
+  {id:'persimmon',name:'곶감',ico:'🟠',price:5000,req:1},
+  {id:'songpyeon',name:'송편',ico:'🍡',price:12000,req:1,info:'추석 차례상엔 밥 대신 송편을, 설 차례상엔 떡국을 올려요.'},
+  {id:'peach',name:'복숭아',ico:'🍑',price:7000,trap:['복숭아를 왜 샀니! 조상님 못 오시게 할 거냐!','복숭아는 귀신을 쫓는다고 해서 제사상에 올리지 않아요.']},
+  {id:'saury',name:'꽁치',ico:'🐠',price:4000,trap:['이름에 치 자 들어간 생선은 안 올린다!','꽁치, 갈치, 삼치처럼 이름이 ‘치’로 끝나는 생선은 격이 낮다고 여겨 올리지 않는 게 관례예요.']},
+  {id:'hairtail',name:'갈치',ico:'🗡️',price:18000,trap:['비싼 갈치를! 그것도 제사에!','‘치’로 끝나는 생선은 제사상에 올리지 않아요.']},
+  {id:'chili',name:'고춧가루',ico:'🌶️',price:9000,trap:['제사 음식에 고춧가루가 웬 말이냐!','제사 음식은 붉은 양념을 쓰지 않아요. 붉은색이 귀신을 쫓는다고 여겼거든요.']},
+  {id:'garlic',name:'마늘',ico:'🧄',price:3000,trap:['마늘은 넣는 거 아니다!','마늘, 파 같은 향이 강한 채소(오신채)는 제사 음식에 쓰지 않아요.']},
+  {id:'mango',name:'망고',ico:'🥭',price:10000,trap:['요즘 집들은 몰라도 우리 집은 안 된다!','요즘은 바나나나 망고를 올리는 집도 있지만, 전통 차례상은 우리 땅의 과일을 올려요.']},
+];
+function shop(){
+  $('stageChip').textContent='1 장보기';
+  const render=()=>{
+    const req=ITEMS.filter(i=>i.req);
+    $('sub').innerHTML=`<span>남은 돈 ${S.budget.toLocaleString()}원</span><span>${req.filter(i=>S.basket.has(i.id)).length} / ${req.length} 담음</span>`;
+    $('stage').innerHTML=`
+      <div class="card"><div class="muted" style="margin-bottom:8px">어머님 쪽지</div>
+        <div class="list">${req.map(i=>`<span class="${S.basket.has(i.id)?'got':''}">${i.name}</span>`).join('')}</div></div>
+      <div class="shop-grid">${ITEMS.map(i=>`<button class="item ${S.basket.has(i.id)?'on':''}" data-id="${i.id}">${i.tag?`<span class="tag">${i.tag}</span>`:''}<span class="ico">${i.ico}</span>${i.name}<span class="pr">${i.price.toLocaleString()}원</span></button>`).join('')}</div>
+      <button class="big-btn" id="checkout">계산하고 집에 가기</button>`;
+    document.querySelectorAll('.item').forEach(b=>b.onclick=()=>pick(b.dataset.id));
+    $('checkout').onclick=checkout;
+  };
+  const pick=id=>{
+    const it=ITEMS.find(i=>i.id===id);
+    if(S.basket.has(id)){S.basket.delete(id);S.budget+=it.price;render();return}
+    if(it.price>S.budget){say('돈이 모자라잖니. 쓸데없는 걸 사니까 그렇지.','angry');return}
+    if(it.trap){S.budget-=it.price;slap(it.trap[0],12);tip(it.trap[1]);addScore(-10);render();return}
+    S.basket.add(id);S.budget-=it.price;addScore(5);
+    if(it.info)tip(it.info);
+    say(['그래, 그거.','싱싱한 걸로 골라라.','가격 좀 봐라, 사과가 금값이다.','그거 말고 옆에 거… 아니다, 됐다.'][Math.floor(Math.random()*4)]);
+    render();
+  };
+  const checkout=()=>{
+    const missing=ITEMS.filter(i=>i.req&&!S.basket.has(i.id));
+    missing.forEach(i=>SHOP2TABLE[i.id]&&S.carry.missing.add(SHOP2TABLE[i.id]));
+    if(missing.length){
+      slap(`${missing[0].name}${missing.length>1?` 말고도 ${missing.length-1}개`:''} 빠졌다! 정신을 어디 두고 다니니!`,10);
+      addScore(-15*missing.length);
+      S.timers.push(setTimeout(()=>go('jeon'),1500));
+      return;
+    }
+    addScore(30+Math.floor(S.budget/1000));
+    say(`잔돈 ${S.budget.toLocaleString()}원 남았네. 빨리 전 부쳐라.`,'happy');
+    S.timers.push(setTimeout(()=>go('jeon'),900));
+  };
+  say('쪽지대로만 사 와라. 딴 거 사면 알지?');
+  render();
+}
+
+/* ---------- 2. 전 부치기 ---------- */
+/* lo~hi: 알맞게 익은 구간, burn: 타서 버리는 시점. 색은 t에 따라 같은 규칙으로 변해서, 전마다 노려야 할 색이 달라요 */
+const JEON={
+  hobak:{name:'호박전',rate:1.6,lo:2.2,hi:3.5,burn:4.9,cls:'square',target:2.85,
+    early:'아직 날것이다!',how:'호박전은 색이 나기 전, 연노랑일 때 건져요. 오래 두면 호박이 물러져요.'},
+  dongtae:{name:'동태전',rate:1.35,lo:3.1,hi:4.5,burn:6.0,cls:'oval',target:3.8,fragile:true,
+    early:'부서졌잖니! 익기도 전에 건드리니까!',how:'동태전은 흰살생선이라 약해요. 노릇해질 때까지 건드리지 말고 딱 한 번만 뒤집어요.'},
+  ttaeng:{name:'동그랑땡',rate:.95,lo:4.3,hi:5.4,burn:6.7,cls:'',target:4.85,
+    early:'속까지 익혀라! 돼지고기다!',how:'동그랑땡은 두툼해서 속까지 익도록 진한 갈색이 될 때까지 기다려요.'},
+};
+const STOPS=[[0,[243,232,196]],[2.2,[240,222,150]],[3.1,[234,196,98]],[4.2,[214,150,52]],[5.4,[160,94,32]],[6.7,[50,28,12]]];
+function jeonColor(t){
+  for(let i=1;i<STOPS.length;i++){if(t<=STOPS[i][0]){const [a,ca]=STOPS[i-1],[b,cb]=STOPS[i],k=(t-a)/(b-a);return`rgb(${ca.map((c,j)=>Math.round(c+(cb[j]-c)*k)).join(',')})`}}
+  return'rgb(40,22,10)';
+}
+let raf;
+const GRUMBLES=['남편: (소파에서) 뭐 도와줄 거 있어? …없지?','작은아버지: 요즘은 전도 사다 쓴다던데~','남편: 엄마, 나 동그랑땡 하나만 먹어봐도 돼?','큰집 사촌: 언니, 애는 언제 가져?','남편: 우리 집 원래 음식을 이렇게 많이 했었나?','시누이: 난 설거지 담당! (아직 안 옴)','작은아버지: 기름 냄새 좋다~ (TV 볼륨 올림)'];
+function jeon(){
+  $('stageChip').textContent='2 전 부치기';
+  $('sub').innerHTML='<span>굽기 견본을 외우세요</span><span></span>';
+  $('stage').innerHTML=`
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
+      <h2>전마다 알맞은 색이 달라요</h2>
+      <p class="muted">부치는 동안엔 "뒤집어!" 알림이 없어요. 색만 보고 판단하세요.</p>
+      ${Object.values(JEON).map(j=>`<div style="display:flex;gap:12px;align-items:center"><span class="swatch ${j.cls}" style="background:${jeonColor(j.target)}"></span><div style="min-width:0"><b style="font-family:var(--display);font-weight:400;font-size:17px">${j.name}</b><p style="font-size:13px">${j.how}</p></div></div>`).join('')}
+      <p class="muted">불 조절은 어머님이 하십니다. 가끔 말없이 불을 올리세요.</p>
+      <button class="big-btn" id="go">외웠어요, 불 켜기</button>
+    </div>`;
+  say('색 잘 봐 둬라. 부치면서 알려주는 사람 없다.');
+  $('go').onclick=runJeon;
+}
+function runJeon(){
+  let queue=[...Array(4).fill('ttaeng'),...Array(4).fill('dongtae'),...Array(4).fill('hobak')].sort(()=>Math.random()-.5);
+  const total=queue.length;
+  let stats={hobak:[0,0],dongtae:[0,0],ttaeng:[0,0]},pans=[null,null,null],plated=[],time=70,last=performance.now(),done=false,heat=1,heatLeft=0,nextHeat=12+Math.random()*6;
+  $('stage').innerHTML=`
+    <div class="card" style="display:flex;flex-direction:column;gap:6px">
+      <p class="queue" id="q"></p>
+      <p class="muted">빈 팬을 누르면 반죽이 올라가요. 알맞은 색일 때 눌러서 뒤집고, 뒷면도 알맞으면 눌러서 건져요.</p>
+    </div>
+    <div class="pans" style="margin-bottom:30px">${pans.map((_,i)=>`<button class="pan" data-i="${i}" aria-label="팬 ${i+1}"></button>`).join('')}</div>
+    <div class="card"><div class="muted" style="margin-bottom:6px">채반</div><div class="plate-row" id="plate"></div></div>
+    <div class="ticker" id="ticker">남편: (소파에서) 추석 특선영화 뭐 하지?</div>`;
+  const panEls=[...document.querySelectorAll('.pan')];
+  const drawPans=()=>{
+    panEls.forEach((el,i)=>{
+      const p=pans[i];
+      if(!p){el.classList.remove('smoke');el.innerHTML=queue.length?'<span class="empty">+ 올리기</span>':'';return}
+      const J=JEON[p.type];
+      el.classList.toggle('smoke',p.t>J.hi+.5);
+      el.innerHTML=`<span class="jeon ${J.cls}" style="background:${jeonColor(p.t)}"></span><span class="lbl">${J.name} · ${p.side?'뒷면':'앞면'}</span>`;
+    });
+    $('q').textContent=`남은 반죽 ${queue.length}장 · 건진 전 ${plated.filter(x=>x).length}/${total}`;
+    $('sub').innerHTML=`<span>남은 시간 ${Math.max(0,Math.ceil(time))}초</span><span class="${heat>1?'fire':''}">${heat>1?'🔥 센불!':'불 세기 보통'}</span>`;
+    $('plate').innerHTML=plated.map(g=>`<i class="${g?'':'b'}"></i>`).join('');
+  };
+  panEls.forEach(el=>el.onclick=()=>{
+    if(done)return;
+    const i=+el.dataset.i,p=pans[i];
+    if(!p){if(queue.length){pans[i]={type:queue.pop(),side:0,t:0};drawPans()}return}
+    const J=JEON[p.type];
+    if(p.t<J.lo){
+      if(J.fragile){stats[p.type][1]++;pans[i]=null;plated.push(false);addScore(-10);slap(J.early,8);tip(J.how)}
+      else{addScore(-4);say(J.early,'angry');if(p.type==='ttaeng'&&!p.warned){p.warned=1;tip(J.how)}}
+      drawPans();return;
+    }
+    const over=p.t>J.hi;
+    if(p.side===0){p.side=1;p.t=0;p.over=over;addScore(over?4:10);if(over)say('좀 탔다… 아래로 깔아라.')}
+    else{const good=!over&&!p.over;stats[p.type][good?0:1]++;plated.push(good);addScore(good?15:5);pans[i]=null;
+      if(good&&plated.filter(x=>x).length===4)tip('전은 차례상 둘째 줄에 올려요. 어동육서: 생선전은 동쪽, 고기전은 서쪽!');
+      say(good?['그렇지.','색 곱다.','이건 네 시아버지 드려라.'][Math.floor(Math.random()*3)]:(p.type==='hobak'?'호박이 흐물흐물하다.':'이건 네가 먹어라.'),good?'happy':'normal');}
+    drawPans();
+  });
+  let tick=0;
+  S.timers.push(setInterval(()=>{if(heat===1)$('ticker').textContent=GRUMBLES[tick++%GRUMBLES.length]},6000));
+  const finish=()=>{
+    done=true;cancelAnimationFrame(raf);
+    Object.keys(stats).forEach(k=>{const[g,b]=stats[k];if(g+b===0)S.carry.missing.add(k);else if(b>g)S.carry.burnt.add(k)});
+    const left=queue.length+pans.filter(Boolean).length;
+    if(left){addScore(-8*left);slap(`반죽이 ${left}장이나 남았다! 손이 그렇게 느려서야!`,10)}
+    else say('수고했다. 탕국 끓여라, 쉬지 말고.','happy');
+    S.timers.push(setTimeout(()=>go('soup'),left?1500:1000));
+  };
+  const loop=now=>{
+    const dt=Math.min(.1,(now-last)/1000);last=now;time-=dt;
+    nextHeat-=dt;
+    if(heat===1&&nextHeat<=0){heat=1.6;heatLeft=5;$('ticker').textContent='🔥 어머님이 말없이 불을 올리셨다!'}
+    if(heat>1){heatLeft-=dt;if(heatLeft<=0){heat=1;nextHeat=12+Math.random()*8;$('ticker').textContent='어머님: 불 줄였다. 정신 차려라.'}}
+    pans.forEach((p,i)=>{if(!p)return;const J=JEON[p.type];p.t+=dt*J.rate*heat;
+      if(p.t>J.burn){stats[p.type][1]++;pans[i]=null;plated.push(false);addScore(-12);slap('집을 다 태워먹을 일 있냐!',15);tip('전은 중약불에서 부쳐요. 센불이면 겉만 타고 속은 안 익어요.')}});
+    drawPans();
+    if(S.screen!=='jeon')return;
+    if(time<=0||(!queue.length&&pans.every(p=>!p)))return finish();
+    raf=requestAnimationFrame(loop);
+  };
+  say('열두 장이다. 타면 알지?');
+  drawPans();raf=requestAnimationFrame(loop);
+}
+
+/* ---------- 3. 탕국 ---------- */
+const SOUP_ING=[
+  {id:'radish',name:'무',ico:'🥕',req:1},
+  {id:'beef',name:'소고기',ico:'🍖',req:1},
+  {id:'tofu',name:'두부',ico:'⬜',req:1},
+  {id:'kelp',name:'다시마',ico:'🟫',bonus:1},
+  {id:'chili',name:'고춧가루',ico:'🌶️',trap:['탕국에 고춧가루?! 육개장 끓이니!','제사 탕국은 붉은 양념 없이 맑게 끓여요.']},
+  {id:'scallion',name:'대파',ico:'🌿',trap:['파는 넣지 말랬지!','파·마늘 같은 오신채는 제사 음식에 쓰지 않는 집이 많아요.']},
+];
+function soup(){
+  $('stageChip').textContent='3 탕국';
+  const st={ing:new Set(),salt:10,water:0,waterWarned:false,served:false};
+  const LO=30,HI=48;
+  const render=()=>{
+    $('sub').innerHTML=`<span>재료 ${SOUP_ING.filter(i=>i.req&&st.ing.has(i.id)).length}/3</span><span>물 ${st.water}번 부음</span>`;
+    const broth=st.salt<LO?'#e3d6ba':st.salt<=HI?'#cfae78':'#9a6a38';
+    $('stage').innerHTML=`
+      <div class="card pot-wrap"><div class="pot"><div class="broth" style="background:${broth}"></div>
+        ${[20,60,100,140].map((x,k)=>`<span class="bub" style="left:${x}px;animation-delay:${k*.4}s"></span>`).join('')}
+        <div class="in">${[...st.ing].map(id=>SOUP_ING.find(i=>i.id===id).ico).join('')}</div></div></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:8px">
+        <div class="muted">재료 넣기</div>
+        <div class="btn-row">${SOUP_ING.map(i=>`<button class="chip-btn ${st.ing.has(i.id)?'on':''}" data-ing="${i.id}">${i.ico} ${i.name}</button>`).join('')}</div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:8px">
+        <div class="muted">간 맞추기 · 제사 탕국은 슴슴하게</div>
+        <div><div class="meter"><span class="zone" style="left:${LO}%;width:${HI-LO}%"></span><span class="needle" style="left:calc(${Math.min(100,st.salt)}% - 2px)"></span></div>
+        <div class="meter-labels"><span>맹탕</span><span>딱 좋음</span><span>소태</span></div></div>
+        <div class="btn-row">
+          <button class="chip-btn" data-s="soy">국간장 한 술</button>
+          <button class="chip-btn" data-s="salt">소금 한 꼬집</button>
+          <button class="chip-btn" data-s="water">물 붓기</button>
+        </div>
+      </div>
+      <button class="big-btn alt" id="serve">어머님께 간 보여드리기</button>`;
+    document.querySelectorAll('[data-ing]').forEach(b=>b.onclick=()=>addIng(b.dataset.ing));
+    document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>season(b.dataset.s));
+    $('serve').onclick=serve;
+  };
+  const addIng=id=>{
+    if(st.served||st.ing.has(id))return;
+    const it=SOUP_ING.find(i=>i.id===id);
+    if(it.trap){slap(it.trap[0],12);tip(it.trap[1]);addScore(-10);return}
+    st.ing.add(id);addScore(it.bonus?8:5);
+    if(it.bonus){say('다시마 넣었구나. 제법이다.','happy');tip('다시마를 넣으면 간을 적게 해도 감칠맛이 나요.')}
+    else say('무는 나박나박 썰었지?');
+    render();
+  };
+  const season=k=>{
+    if(st.served)return;
+    if(k==='soy'){st.salt+=8+Math.random()*6;say('간장은 조금씩!')}
+    if(k==='salt'){st.salt+=3+Math.random()*3;say('한 꼬집이라고 했다.')}
+    if(k==='water'){st.salt=Math.max(0,st.salt-9);st.water++;
+      if(st.water>=4&&!st.waterWarned){st.waterWarned=true;addScore(-10);render();return slap('국이 한강이냐! 물을 얼마나 붓는 거야!',10)}
+      say('물 너무 붓지 마라, 맹탕 된다.')}
+    render();
+  };
+  const serve=()=>{
+    if(st.served)return;
+    const miss=SOUP_ING.filter(i=>i.req&&!st.ing.has(i.id));
+    if(miss.length){addScore(-10);return slap(`${miss[0].name}도 안 넣고 무슨 탕국이냐!`,10)}
+    st.served=true;
+    if(st.salt>HI){S.carry.soup='salty';addScore(-20);slap('애미야, 국이 짜다!',18);tip('제사 탕국은 국간장으로 아주 슴슴하게 간해요. 조상님 입맛은 싱겁답니다.')}
+    else if(st.salt<LO){S.carry.soup='bland';addScore(-10);slap('이게 국이냐, 맹물이냐!',12)}
+    else{addScore(60);say('…됐다. 간 잘 봤네.','happy');tip('탕국은 차례상 둘째 줄, 국과 떡 사이에 올려요.')}
+    S.timers.push(setTimeout(()=>{if(S.screen==='soup'&&S.patience>0)go('interlude')},1600));
+  };
+  say('탕국은 맑게. 고춧가루 손대면 혼난다.');
+  render();
+}
+
+/* ---------- 2부: 차례상 ---------- */
+function interlude(){
+  $('stage').innerHTML=`
+    <div class="card" style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+      <p class="muted">1부 끝 · 지금까지 ${S.score}점</p>
+      <h1 style="font-size:32px">추석 당일<br>아침 7시</h1>
+      <p>큰집 대청마루. 병풍이 펼쳐지고 차례상이 놓였습니다. 어제 만든 음식을 법도대로 올리세요. 친척들이 모두 보고 있습니다.</p>${carrySummary()}
+      <button class="big-btn" id="next">상 차리러 가기</button>
+    </div>`;
+  say('세수는 했니? 상 차리자.');
+  $('next').onclick=()=>go('table');
+}
+
+const FOOD={
+  cup:{name:'술잔',ico:'🍶'},songpyeon:{name:'송편',ico:'🍡'},sijeop:{name:'수저',ico:'🥢'},
+  ttaeng:{name:'동그랑땡',ico:'🧆'},hobak:{name:'호박전',ico:'🥒'},dongtae:{name:'동태전',ico:'🍳'},
+  sanjeok:{name:'산적',ico:'🍢'},tang:{name:'탕국',ico:'🍲'},jogi:{name:'조기',ico:'🐟'},dombaegi:{name:'돔배기',ico:'🦈'},hongeo:{name:'홍어찜',ico:'🐠'},
+  bugeo:{name:'북어포',ico:'🥓'},namul:{name:'삼색나물',ico:'🥬'},sikhye:{name:'식혜',ico:'🥛'},
+  jujube:{name:'대추',ico:'🔴'},chestnut:{name:'밤',ico:'🌰'},pear:{name:'배',ico:'🍐'},persimmon:{name:'곶감',ico:'🟠'},apple:{name:'사과',ico:'🍎'},
+  tteokguk:{name:'떡국',ico:'🥣',decoy:['설날이냐! 추석엔 송편이다!','설 차례상엔 떡국, 추석 차례상엔 송편을 올려요.']},
+  chicken:{name:'조카가 사온 치킨',ico:'🍗',decoy:['조상님이 치킨을 드시냐!','요즘은 고인이 생전에 좋아하던 음식을 올리는 집도 늘고 있어요. 어머님은 아니지만요.']},
+  kimchi:{name:'배추김치',ico:'🫙',decoy:['빨간 김치를 올리는 집이 어딨니!','김치를 올린다면 고춧가루 없는 백김치나 나박김치로 올려요.']},
+};
+/* 제주(절하는 사람)가 상을 바라본 기준: 위=신위 쪽, 왼쪽=서, 오른쪽=동 */
+let ROWS=[
+  {name:'1열',label:'송편·잔 줄',slots:[['cup','songpyeon','sijeop'],['cup','songpyeon','sijeop'],['cup','songpyeon','sijeop']]},
+  {name:'2열',label:'전 줄',slots:[['ttaeng'],['hobak'],['dongtae']]},
+  {name:'3열',label:'적·탕 줄',slots:[['sanjeok'],['tang'],['jogi']]},
+  {name:'4열',label:'포·나물 줄',slots:[['bugeo'],['namul'],['sikhye']]},
+  {name:'5열',label:'과일 줄',slots:[['jujube'],['chestnut'],['pear'],['persimmon'],['apple']]},
+];
+const RULES={
+  row:'차례상은 신위 쪽부터 1열 송편·잔, 2열 전, 3열 적·탕, 4열 포·나물·식혜, 5열 과일 순이에요.',
+  eodong:'어동육서: 생선은 동쪽(오른쪽), 고기는 서쪽(왼쪽)에 놓아요.',
+  dudong:'두동미서: 생선 머리는 동쪽(오른쪽), 꼬리는 서쪽을 향하게 놓아요.',
+  jwapo:'좌포우혜: 포는 왼쪽 끝, 식혜는 오른쪽 끝에 놓아요.',
+  joyul:'조율이시: 왼쪽부터 대추, 밤, 배, 감(곶감) 순서로 놓아요.',
+  hongdong:'홍동백서: 붉은 과일은 동쪽(오른쪽), 흰 과일은 서쪽(왼쪽)에 놓아요.',
+};
+const GRUMBLES2=['남편: (절 순서 기다리며) 이거 언제 끝나?','작은아버지: 우리 집은 원래 사과가 왼쪽이었는데…','큰아버지: 요즘 누가 이렇게까지 해~ (하지만 지적함)','조카: 할머니 치킨 식어요!','남편: 여기 조기 머리 이쪽 아니었나? (모름)','사촌 형: 절은 두 번 반이야, 아니 두 번이야?'];
+const HUSBAND_HINTS=['남편: 글쎄… 엄마한테 물어봐.','남편: 작년에 사진 찍어둔 거 있나? …없네.','남편: 대충 예쁘게 놓으면 되지 않아?','남편: 나 그때 절만 했잖아.'];
+
+let ROW_TEXT=[
+  '추석엔 밥·국 대신 송편을 올려요. 송편, 술잔, 수저가 첫째 줄이에요. 순서는 자유!',
+  '어동육서: 생선전은 동쪽(오른쪽), 고기전은 서쪽(왼쪽), 채소전은 가운데.',
+  '어동육서 + 두동미서: 고기 산적은 서쪽, 조기는 동쪽이고 머리도 동쪽을 봐야 해요. 탕국은 가운데.',
+  '좌포우혜: 포는 왼쪽 끝, 식혜는 오른쪽 끝, 나물은 가운데.',
+  '조율이시: 왼쪽부터 대추(조), 밤(율), 배(이), 감(시). 붉은 사과는 홍동백서에 따라 동쪽 끝.',
+];
+let SLOT_HINT=[['송편·잔','송편·잔','송편·잔'],['고기','채소','생선'],['고기','국','생선'],['포','나물','마실 것'],['조','율','이','시','붉은']];
+const SHOP2TABLE={dongtae:'dongtae',pork:'ttaeng',zucchini:'hobak',beef:'sanjeok',apple:'apple',pear:'pear',chestnut:'chestnut',jujube:'jujube',persimmon:'persimmon',songpyeon:'songpyeon'};
+const REGIONS={
+  seoul:{name:'서울·경기',short:'서울',fish:'jogi'},
+  gyeongsang:{name:'경상도',short:'경상도',fish:'dombaegi'},
+  jeolla:{name:'전라도',short:'전라도',fish:'hongeo'},
+};
+const FRUITS={
+  joyul:{name:'조율이시 우선',order:['jujube','chestnut','pear','persimmon','apple'],hint:['조','율','이','시','붉은'],
+    text:'조율이시: 왼쪽부터 대추(조), 밤(율), 배(이), 감(시). 붉은 사과는 홍동백서에 따라 동쪽 끝.'},
+  hongdong:{name:'홍동백서 우선',order:['pear','chestnut','persimmon','jujube','apple'],hint:['흰','흰','주황','붉은','붉은'],
+    text:'홍동백서: 흰 과일(배, 밤)은 서쪽, 붉은 과일(대추, 사과)은 동쪽. 이 집은 서쪽부터 배, 밤, 곶감, 대추, 사과예요.'},
+};
+function applyHouse(){
+  const R=REGIONS[S.house.region],F=FRUITS[S.house.fruit],fish=R.fish;
+  ROWS[2].slots[2]=[fish];
+  ROWS[4].slots=F.order.map(x=>[x]);
+  ROW_TEXT[2]=fish==='jogi'
+    ?'어동육서 + 두동미서: 고기 산적은 서쪽, 조기는 동쪽이고 머리도 동쪽을 봐야 해요. 탕국은 가운데.'
+    :`어동육서: 고기 산적은 서쪽, 생선인 ${FOOD[fish].name}은(는) 동쪽. ${fish==='dombaegi'?'돔배기는 상어고기 산적으로, 경상도 차례상의 단골이에요.':'전라도 차례상엔 홍어찜이 빠지지 않아요.'} 탕국은 가운데.`;
+  ROW_TEXT[4]=F.text;
+  SLOT_HINT[4]=F.hint;
+  RULES.fish=ROW_TEXT[2];RULES.fruit=F.text;
+}
+function decoyOf(id){
+  if(FOOD[id].decoy)return FOOD[id].decoy;
+  const fishes=['jogi','dombaegi','hongeo'],mine=REGIONS[S.house.region].fish;
+  if(fishes.includes(id)&&id!==mine){
+    const other=Object.values(REGIONS).find(r=>r.fish===id);
+    return[`여기가 ${other.short}냐! 우리 집은 ${FOOD[mine].name}다!`,'지역마다 차례상이 달라요. 서울·경기는 조기, 경상도는 돔배기(상어고기), 전라도는 홍어를 올리는 집이 많아요.'];
+  }
+  return null;
+}
+/* 1부 결과가 차례상 음식에 남기는 흔적 */
+function fv(id){
+  const c=S.carry;
+  if(c.missing.has(id))return{tag:'편의점',cls:''};
+  if(c.burnt.has(id))return{tag:'탄',cls:'burnt'};
+  if(id==='tang'&&c.soup!=='good')return{tag:c.soup==='salty'?'짠':'맹탕',cls:''};
+  return{tag:'',cls:''};
+}
+function carryReact(id){
+  if(S.reacted.has(id))return;const v=fv(id);if(!v.tag)return;S.reacted.add(id);
+  const n=FOOD[id].name;
+  if(v.tag==='탄'){addScore(-6);slap(`탄 ${n}을(를) 조상님 상에 올리니!`,6)}
+  else if(v.tag==='편의점'){addScore(-5);say(`${n}은(는) 어제 빠뜨렸지? 남편이 편의점에서 사 왔다고… 에휴.`,'angry')}
+  else{addScore(-5);say(v.tag==='짠'?'짠 탕국을 조상님께 올리는구나…':'맹탕을 올리는구나… 조상님이 뭐라 하시겠니.','angry')}
+}
+function carrySummary(){
+  const c=S.carry,items=[];
+  c.burnt.forEach(id=>items.push(`탄 ${FOOD[id].name}`));
+  c.missing.forEach(id=>items.push(`편의점 ${FOOD[id].name}`));
+  if(c.soup!=='good')items.push(c.soup==='salty'?'짠 탕국':'맹탕 탕국');
+  return items.length?`<div class="list">${items.map(x=>`<span>${x}</span>`).join('')}</div><p class="muted">어제의 실수가 그대로 상에 올라갑니다.</p>`:'';
+}
+const ROW_DECOY=['tteokguk',null,'chicken','kimchi',null];
+const ROW_SAY_EASY=['첫 줄은 송편이랑 잔이다.','둘째 줄, 전 올려라. 생선이 어디 가는지 알지?','셋째 줄. 조기 머리 조심해라.','넷째 줄. 포랑 식혜 헷갈리지 마라.','마지막 과일 줄. 조율이시!'];
+const ROW_SAY_HARD=['첫 줄.','둘째 줄. 알아서 해 봐라.','셋째 줄.','넷째 줄.','과일. 10년 했으면 알겠지.'];
+const MODES=[['newbie','새댁','한 줄씩 차려요. 자리 힌트와 규칙 설명이 있고 시간제한이 없어요.'],['decade','10년차','한 줄씩 차리지만 힌트가 없어요. 규칙은 어머님께 여쭤봐야 해요.'],['jongbu','종부','17칸을 한 번에, 120초 안에. 채점은 마지막에 한 번.']];
+function getUnlock(){try{return +localStorage.getItem('jesasang-unlock')||1}catch(e){return 1}}
+function setUnlock(n){try{if(n>getUnlock())localStorage.setItem('jesasang-unlock',String(n))}catch(e){}}
+
+function table(){
+  $('stageChip').textContent='2부 차례상';
+  const un=getUnlock();
+  $('sub').innerHTML='<span>난이도를 고르세요</span><span></span>';
+  $('stage').innerHTML=`
+    <div class="card" style="display:flex;flex-direction:column;gap:8px"><h2>우리 집 법도</h2><p class="muted">집안마다 차례상이 달라요. 어머님 말씀이 곧 법도입니다.</p>
+      <div class="muted">지역</div><div class="btn-row">${Object.entries(REGIONS).map(([k,r])=>`<button class="chip-btn ${S.house.region===k?'on':''}" data-region="${k}">${r.name}</button>`).join('')}</div>
+      <div class="muted">과일 줄</div><div class="hint-row">${Object.entries(FRUITS).map(([k,f])=>`<button class="chip-btn ${S.house.fruit===k?'on':''}" data-fruit="${k}">${f.name}</button>`).join('')}</div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:6px"><h2>며느리 몇 년 차세요?</h2><p class="muted">새댁 모드를 깨면 10년차, 10년차를 깨면 종부 모드가 열려요.</p></div>
+    ${MODES.map(([k,n,d],i)=>{const lock=i+1>un;return`<button class="mode card ${lock?'locked':''}" data-m="${k}" ${lock?'disabled':''}><span class="mn">${lock?'🔒 ':''}${n}</span><span class="md">${lock?`${MODES[i-1][1]} 모드를 깨면 열려요.`:d}</span></button>`}).join('')}`;
+  say('상 차리는 건 해 봤니? 우리 집 법도부터 알고 시작해라.');
+  document.querySelectorAll('[data-region]').forEach(b=>b.onclick=()=>{S.house.region=b.dataset.region;table()});
+  document.querySelectorAll('[data-fruit]').forEach(b=>b.onclick=()=>{S.house.fruit=b.dataset.fruit;table()});
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{
+    const m=b.dataset.m;S.mode=MODES.find(x=>x[0]===m)[1];S.unlockMsg='';applyHouse();S.reacted=new Set();
+    m==='jongbu'?fullTable():stagedTable(m==='newbie');
+  });
+}
+
+function stagedTable(easy){
+  const slots=[];ROWS.forEach((r,ri)=>r.slots.forEach((acc,si)=>slots.push({row:ri,idx:si,accept:acc,item:null})));
+  let cur=0,sel=null,fishEast=false,mistakes=0,flash=new Set(),husband=0,done=false,rowTray=[];
+  const buildTray=()=>{const set=new Set();ROWS[cur].slots.forEach(a=>a.forEach(x=>set.add(x)));
+    if(cur===0){rowTray=['cup','songpyeon','sijeop']}else rowTray=[...set];
+    if(ROW_DECOY[cur])rowTray.push(ROW_DECOY[cur]);if(cur===2){const o=['jogi','dombaegi','hongeo'].filter(x=>x!==REGIONS[S.house.region].fish);rowTray.push(o[Math.random()*2|0])}rowTray.sort(()=>Math.random()-.5)};
+  const render=()=>{
+    $('sub').innerHTML=`<span>${S.mode} 모드 · ${cur+1}/5열</span><span>실수 ${mistakes}번</span>`;
+    const inTray=rowTray.filter(id=>!slots.some(s=>s.item===id));
+    let k=0;
+    $('stage').innerHTML=`
+      <div class="card" style="display:flex;flex-direction:column;gap:4px">
+        <b style="font-family:var(--display);font-weight:400;font-size:18px">${ROWS[cur].name} · ${ROWS[cur].label}</b>
+        <p style="font-size:14px">${easy?ROW_TEXT[cur]:'규칙이 기억 안 나면 어머님께 여쭤보세요.'}</p>
+      </div>
+      <div class="orient"><span>서 ◀</span><span class="spirit">신위 (지방·사진)</span><span>▶ 동</span></div>
+      <div class="sang">${ROWS.map((r,ri)=>`<div class="srow ${ri===cur?'cur':ri>cur?'later':''}"><span class="rn">${ri+1}</span>${r.slots.map((_,si)=>{const s=slots[k],i=k++;const f=s.item&&FOOD[s.item];
+        if(f)return`<button class="slot" data-s="${i}" aria-label="${f.name}">${s.item==='jogi'?`<span class="flip">${f.ico}</span><span class="dir">머리 ▶</span>`:`<span class="${fv(s.item).cls}">${f.ico}</span>`}${fv(s.item).tag?`<span class="ctag">${fv(s.item).tag}</span>`:''}<small>${f.name}</small></button>`;
+        return`<button class="slot empty ${ri===cur&&sel?'ready':''} ${flash.has(i)?'bad':''}" data-s="${i}" aria-label="${ri+1}열 빈자리">${easy&&ri===cur?`<span class="hint">${SLOT_HINT[ri][si]}</span>`:''}</button>`}).join('')}</div>`).join('')}</div>
+      <div class="orient" style="justify-content:center"><span class="muted">▲ 제주(절하는 사람)가 이쪽에서 바라봐요</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:8px">
+        <div class="muted">${sel?`<b style="color:var(--red)">${FOOD[sel].name}</b> 을(를) 놓을 자리를 누르세요`:'쟁반에서 음식을 고른 뒤, 반짝이는 줄의 빈자리를 누르세요.'}</div>
+        ${sel==='jogi'?`<button class="chip-btn" id="flipFish">조기 머리 방향 바꾸기 (지금: ${fishEast?'동쪽 ▶':'서쪽 ◀'})</button>`:''}
+        <div class="tray">${inTray.map(id=>`<button class="titem ${sel===id?'sel':''}" data-t="${id}"><span class="ico ${id==='jogi'&&fishEast?'flip':''} ${fv(id).cls}">${FOOD[id].ico}</span>${fv(id).tag?`<em class="ctag2">${fv(id).tag}</em>`:''}${FOOD[id].name}</button>`).join('')}</div>
+      </div>
+      <div class="hint-row">
+        <button class="chip-btn" id="askH">남편에게 물어보기</button>
+        <button class="chip-btn" id="askM">어머님께 여쭤보기</button>
+      </div>
+      <div class="ticker" id="ticker2">${GRUMBLES2[cur%GRUMBLES2.length]}</div>`;
+    document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{sel=sel===b.dataset.t?null:b.dataset.t;render()});
+    document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>place(+b.dataset.s));
+    if($('flipFish'))$('flipFish').onclick=()=>{fishEast=!fishEast;render()};
+    $('askH').onclick=()=>{$('ticker2').textContent=HUSBAND_HINTS[husband++%HUSBAND_HINTS.length]};
+    $('askM').onclick=()=>{S.patience=Math.max(0,S.patience-5);hud();tip(ROW_TEXT[cur]);say('그것도 모르니. 잘 들어라.','angry');if(S.patience<=0)go('over')};
+  };
+  const miss=(i,line,rule)=>{mistakes++;addScore(-8);slap(line,8);tip(rule);if(i!=null){flash.add(i);S.timers.push(setTimeout(()=>{flash.delete(i);if(!done&&S.screen==='table')render()},900))}};
+  const place=i=>{
+    if(done)return;const s=slots[i];
+    if(s.row!==cur){if(s.row>cur)say('그 줄은 아직이다. 한 줄씩 해라.');return}
+    if(s.item)return;
+    if(!sel){say('쟁반에서 음식부터 골라라.');return}
+    const it=sel;sel=null;
+    if(decoyOf(it)){const d=decoyOf(it);rowTray=rowTray.filter(x=>x!==it);miss(null,d[0],d[1]);render();return}
+    if(s.accept.includes(it)){
+      if(it==='jogi'&&!fishEast){miss(i,'생선 머리가 왜 서쪽을 보니! 두동미서!',RULES.dudong);render();return}
+      s.item=it;addScore(10);say(['그렇지.','옳지.','그래, 거기.','제법이구나.'][Math.floor(Math.random()*4)],'happy');carryReact(it);
+      render();
+      if(slots.filter(x=>x.row===cur).every(x=>x.item))rowDone();
+      return;
+    }
+    let line,rule;
+    if(cur===1||cur===2){line='생선은 동쪽, 고기는 서쪽! 어동육서도 모르니!';rule=RULES.eodong}
+    else if(cur===3){line='포는 왼쪽, 식혜는 오른쪽! 좌포우혜!';rule=RULES.jwapo}
+    else{line=S.house.fruit==='joyul'?(it==='apple'||s.accept.includes('apple')?'사과는 동쪽 끝! 홍동백서!':'대추, 밤, 배, 감! 조율이시!'):'흰 건 서쪽, 붉은 건 동쪽! 우리 집은 홍동백서다!';rule=ROW_TEXT[4]}
+    if(cur===1&&(it==='hobak'||s.accept.includes('hobak'))){line='호박전은 가운데다!';rule=ROW_TEXT[1]}
+    if(cur===2&&(it==='tang'||s.accept.includes('tang'))){line='탕국은 가운데 놔라!';rule=ROW_TEXT[2]}
+    if(cur===3&&(it==='namul'||s.accept.includes('namul'))){line='나물은 가운데다!';rule=ROW_TEXT[3]}
+    miss(i,line,rule);render();
+  };
+  const rowDone=()=>{
+    if(cur===4){
+      done=true;let bonus=easy?60:110;if(!mistakes){bonus+=50;tip('실수 없이 완성! 보너스 50점')}
+      addScore(bonus);setUnlock(easy?2:3);
+      S.unlockMsg=easy?'10년차 모드가 열렸어요':'종부 모드가 열렸어요';
+      say('…그래. 이만하면 조상님도 흡족하시겠다.','happy');
+      S.timers.push(setTimeout(()=>go('rite'),1800));return;
+    }
+    S.timers.push(setTimeout(()=>{if(done||S.screen!=='table')return;cur++;buildTray();render();say((easy?ROW_SAY_EASY:ROW_SAY_HARD)[cur])},700));
+  };
+  buildTray();render();say((easy?ROW_SAY_EASY:ROW_SAY_HARD)[0]);
+}
+
+function fullTable(){
+  $('stageChip').textContent='2부 차례상';
+  const slots=[];ROWS.forEach((r,ri)=>r.slots.forEach((acc,si)=>slots.push({row:ri,idx:si,accept:acc,item:null})));
+  const tray=Object.keys(FOOD).sort(()=>Math.random()-.5);
+  let sel=null,fishEast=false,time=120,tries=0,done=false,bad=new Set(),asked=0,husband=0;
+  const ruleKeys=['row','eodong','fish','jwapo','fruit'];
+  const home=id=>{for(let r=0;r<ROWS.length;r++)if(ROWS[r].slots.some(a=>a.includes(id)))return r;return -1};
+  const render=()=>{
+    $('sub').innerHTML=`<span>남은 시간 ${Math.ceil(time)}초</span><span>올린 음식 ${slots.filter(s=>s.item).length}/${slots.length}</span>`;
+    const inTray=tray.filter(id=>!slots.some(s=>s.item===id));
+    let k=0;
+    $('stage').innerHTML=`
+      <div class="orient"><span>서 ◀</span><span class="spirit">신위 (지방·사진)</span><span>▶ 동</span></div>
+      <div class="sang">${ROWS.map((r,ri)=>`<div class="srow"><span class="rn">${ri+1}</span>${r.slots.map(()=>{const s=slots[k],i=k++;const f=s.item&&FOOD[s.item];
+        return f?`<button class="slot ${bad.has(i)?'bad':''}" data-s="${i}" aria-label="${f.name}">${s.item==='jogi'?`<span class="${fishEast?'flip':''}">${f.ico}</span><span class="dir">머리 ${fishEast?'▶':'◀'}</span>`:`<span class="${fv(s.item).cls}">${f.ico}</span>`}${fv(s.item).tag?`<span class="ctag">${fv(s.item).tag}</span>`:''}<small>${f.name.length>4?f.name.slice(0,4):f.name}</small></button>`
+        :`<button class="slot empty ${sel?'ready':''} ${bad.has(i)?'bad':''}" data-s="${i}" aria-label="${ri+1}열 빈자리"></button>`}).join('')}</div>`).join('')}</div>
+      <div class="orient" style="justify-content:center"><span class="muted">▲ 제주(절하는 사람)가 이쪽에서 바라봐요</span></div>
+      <div class="card" style="display:flex;flex-direction:column;gap:8px">
+        <div class="muted">${sel?`<b style="color:var(--red)">${FOOD[sel].name}</b> 을(를) 놓을 자리를 누르세요`:'음식을 고른 뒤 상 위 자리를 누르세요. 올린 음식을 누르면 내려와요.'}</div>
+        ${sel==='jogi'?`<button class="chip-btn" id="flipFish">조기 머리 방향 바꾸기 (지금: ${fishEast?'동쪽 ▶':'서쪽 ◀'})</button>`:''}
+        <div class="tray">${inTray.map(id=>`<button class="titem ${sel===id?'sel':''}" data-t="${id}"><span class="ico ${id==='jogi'&&fishEast?'flip':''} ${fv(id).cls}">${FOOD[id].ico}</span>${fv(id).tag?`<em class="ctag2">${fv(id).tag}</em>`:''}${FOOD[id].name}</button>`).join('')||'<span class="muted">쟁반이 비었어요</span>'}</div>
+      </div>
+      <div class="hint-row">
+        <button class="chip-btn" id="askH">남편에게 물어보기</button>
+        <button class="chip-btn" id="askM">어머님께 여쭤보기</button>
+      </div>
+      <div class="ticker" id="ticker2">${GRUMBLES2[0]}</div>
+      <button class="big-btn" id="submit">차례 올리기</button>`;
+    document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{sel=sel===b.dataset.t?null:b.dataset.t;render()});
+    document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>place(+b.dataset.s));
+    if($('flipFish'))$('flipFish').onclick=()=>{fishEast=!fishEast;render()};
+    $('askH').onclick=()=>{$('ticker2').textContent=HUSBAND_HINTS[husband++%HUSBAND_HINTS.length]};
+    $('askM').onclick=()=>{
+      if(asked>=ruleKeys.length){say('다 알려줬다. 이제 네가 해라.');return}
+      S.patience=Math.max(0,S.patience-6);hud();tip(RULES[ruleKeys[asked++]]);say('그것도 모르니. 잘 들어라.','angry');
+      if(S.patience<=0)go('over');
+    };
+    $('submit').onclick=submit;
+  };
+  const place=i=>{
+    if(done)return;const s=slots[i];bad.delete(i);
+    if(sel){
+      const prev=s.item;s.item=sel;sel=null;
+      if(decoyOf(s.item)){const d=decoyOf(s.item);s.item=prev;slap(d[0],10);tip(d[1]);addScore(-10)}else carryReact(s.item)
+      render();return;
+    }
+    if(s.item==='jogi'&&s.accept.includes('jogi')){fishEast=!fishEast;render();return}
+    if(s.item){s.item=null;render()}
+  };
+  const check=()=>{
+    const errs=[];
+    slots.forEach((s,i)=>{
+      if(!s.item){errs.push([i,'빈자리가 있잖니! 상을 다 채워라.','row']);return}
+      if(s.accept.includes(s.item)){if(s.item==='jogi'&&!fishEast)errs.push([i,'생선 머리가 왜 서쪽을 보니! 두동미서!','dudong']);return}
+      if(home(s.item)!==s.row){errs.push([i,`${FOOD[s.item].name}은(는) ${home(s.item)+1}열 음식이다!`,'row']);return}
+      if(s.row===1)errs.push([i,'생선은 동쪽, 고기는 서쪽! 어동육서도 모르니!','eodong']);else if(s.row===2)errs.push([i,'생선은 동쪽, 고기는 서쪽! 어동육서도 모르니!','fish']);
+      else if(s.row===3)errs.push([i,'포는 왼쪽, 식혜는 오른쪽! 좌포우혜!','jwapo']);
+      else if(s.row===4)errs.push([i,S.house.fruit==='joyul'?(s.item==='apple'||s.accept.includes('apple')?'사과는 동쪽 끝! 홍동백서!':'대추, 밤, 배, 감! 조율이시!'):'흰 건 서쪽, 붉은 건 동쪽! 우리 집은 홍동백서다!','fruit']);
+    });
+    return errs;
+  };
+  const submit=()=>{
+    if(done)return;
+    const errs=check();
+    if(!errs.length){
+      done=true;const bonus=Math.ceil(time)*2;addScore(170+bonus);S.unlockMsg='종부 모드 클리어!';
+      say('…그래. 이만하면 조상님도 흡족하시겠다.','happy');tip('차례상 완성! 남은 시간 보너스 '+bonus+'점');
+      S.timers.push(setTimeout(()=>go('rite'),1800));return;
+    }
+    tries++;bad=new Set(errs.map(e=>e[0]));
+    addScore(-15);tip(RULES[errs[0][2]]);
+    slap(errs[0][1]+(errs.length>1?` (틀린 데 ${errs.length}곳)`:''),12);
+    if(tries>=3&&S.patience>0){done=true;addScore(slots.filter((s,i)=>!bad.has(i)).length*5);
+      S.timers.push(setTimeout(()=>{say('됐다, 내가 고친다. 넌 절이나 해라.','angry');setTimeout(()=>S.screen==='table'&&go('rite'),1400)},1400))}
+    render();
+  };
+  S.timers.push(setInterval(()=>{if(done)return;time-=1;
+    const sub=$('sub');if(sub)sub.firstElementChild.textContent=`남은 시간 ${Math.max(0,time)}초`;
+    if(time%7===0&&$('ticker2'))$('ticker2').textContent=GRUMBLES2[(time/7)%GRUMBLES2.length|0];
+    if(time<=0){submit();if(!done){done=true;S.timers.push(setTimeout(()=>go('rite'),1600))}}},1000));
+  say('신위 쪽이 위다. 제주 기준으로 오른쪽이 동쪽이고.');
+  render();
+}
+
+/* ---------- 3부: 차례 지내기 ---------- */
+const RITE=[
+  {id:'gangsin',hanja:'降神',gloss:'조상님을 모셔 내림',name:'강신',desc:'제주가 향을 피우고 술을 모사 그릇에 세 번 나눠 부어 조상님을 모셔요.',early:'',act:'pour'},
+  {id:'chamsin',hanja:'參神',gloss:'모두 인사드림',name:'참신',desc:'모두 함께 절하며 조상님께 인사드려요.',early:'모시지도 않았는데 절부터 하니!',act:'bow'},
+  {id:'heonjak',hanja:'獻爵',gloss:'술잔을 올림',name:'헌작',desc:'제주가 술 한 잔을 올려요. 차례는 술을 한 번만 올려요(단헌).',early:'모시지도 않고 술부터 올리니!'},
+  {id:'sapsi',hanja:'揷匙正箸',gloss:'숟가락 꽂고 젓가락 놓음',name:'삽시정저',desc:'송편에 숟가락을 꽂고, 젓가락을 가지런히 놓아요.',early:'아직 숟가락 꽂을 때가 아니다!',act:'spoon'},
+  {id:'sirip',hanja:'侍立',gloss:'곁에 서서 기다림',name:'시립',desc:'조상님이 드시는 동안 모두 고개 숙이고 잠시 기다려요.',early:'가만히 서 있을 때가 아니다!'},
+  {id:'cheolsi',hanja:'撤匙',gloss:'수저를 거둠',name:'철시',desc:'꽂아 둔 숟가락과 젓가락을 거둬요.',early:'조상님 아직 드시는 중이다!'},
+  {id:'sasin',hanja:'辭神',gloss:'작별 인사드림',name:'사신',desc:'모두 절하며 조상님을 배웅해요. 지방은 이때 태워요.',early:'조상님을 벌써 보내드리니!',act:'bow'},
+  {id:'cheolsang',hanja:'撤床',gloss:'상을 치움',name:'철상',desc:'차례상을 물려요.',early:'상 치우긴 이르다!'},
+  {id:'eumbok',hanja:'飮福',gloss:'음식을 나눠 먹음',name:'음복',desc:'차례 음식을 나눠 먹으며 조상님의 복을 받아요.',early:'먹는 것부터 챙기니!'},
+];
+const GRUMBLES3=['사촌 형: 절 두 번 반 아니야?','조카: 할머니, 숟가락을 왜 송편에 꽂아요?','남편: (절하다가 무릎에서 딱 소리)','작은아버지: 우리 때는 새벽 5시에 지냈어~','큰아버지: 지방 누가 썼니? 顯 자가 삐뚤다.','조카: 음복은 언제 해요? 배고파요.'];
+function rite(){
+  $('stageChip').textContent='3부 차례';
+  $('sub').innerHTML='<span>차례 용어 미리 보기</span><span></span>';
+  const shuffled=[...RITE].sort(()=>Math.random()-.5);
+  $('stage').innerHTML=`
+    <div class="card" style="display:flex;flex-direction:column;gap:8px">
+      <h2>차례 용어부터 알고 가요</h2>
+      <p style="font-size:14px">차례는 <b>모시고 → 인사드리고 → 대접하고 → 배웅하고 → 정리하는</b> 흐름이에요. 뜻을 읽고 순서는 직접 맞혀 보세요.</p>
+    </div>
+    <div class="card"><dl class="terms">${shuffled.map(r=>`<div><dt>${r.name}<small>${r.hanja}</small></dt><dd><b>${r.gloss}</b>${r.desc}</dd></div>`).join('')}</dl></div>
+    <button class="big-btn" id="riteGo">차례 시작하기</button>`;
+  say('뜻만 알면 순서는 저절로 보인다.');
+  $('riteGo').onclick=runRite;
+}
+function runRite(){
+  const seq=RITE.map(r=>r.id);
+  let pos=0,act=null,pours=0,mistakes=0,tick=0,done=false,swapped=false;
+  const cards=RITE.map(r=>r.id).sort(()=>Math.random()-.5);
+  const R=id=>RITE.find(r=>r.id===id);
+  const render=()=>{
+    $('sub').innerHTML=`<span>차례 순서 ${pos}/${seq.length}</span><span>실수 ${mistakes}번</span>`;
+    const left=cards.filter(id=>!seq.slice(0,pos).includes(id));
+    let panel='';
+    if(act==='pour')panel=`<div class="card" style="display:flex;flex-direction:column;gap:8px"><b class="act-t">강신 · 술 붓기</b><p style="font-size:14px">모사 그릇에 술을 세 번에 나눠 부으세요.</p><div class="pour">${[0,1,2].map(k=>`<span class="${k<pours?'on':''}"></span>`).join('')}</div><button class="big-btn alt" id="pourBtn">쪼르륵</button></div>`;
+    if(act==='bow')panel=`<div class="card" style="display:flex;flex-direction:column;gap:8px"><b class="act-t">${R(seq[pos-1]).name} · 절하기</b><p style="font-size:14px">몇 번 절할까요?</p><div class="btn-row"><button class="chip-btn" data-bow="1">한 번</button><button class="chip-btn" data-bow="2">두 번</button><button class="chip-btn" data-bow="4">네 번</button></div></div>`;
+    if(act==='spoon')panel=`<div class="card" style="display:flex;flex-direction:column;gap:8px"><b class="act-t">삽시정저 · 숟가락 꽂기</b><p style="font-size:14px">숟가락의 오목한 면이 어느 쪽을 보게 꽂을까요?</p><div class="hint-row"><button class="chip-btn" data-spoon="w">◀ 서쪽</button><button class="chip-btn" data-spoon="e">동쪽 ▶</button></div></div>`;
+    $('stage').innerHTML=`
+      <div class="card" style="display:flex;flex-direction:column;gap:4px"><b class="act-t">추석 당일 · 오전 8시</b><p style="font-size:14px">차례상이 차려졌어요. 차례 지내는 순서대로 카드를 누르세요.</p></div>
+      <ol class="rite">${seq.map((id,k)=>k<pos?`<li class="done"><b>${R(id).name}</b><span>${R(id).desc}</span></li>`:k===pos?`<li class="next"><b>?</b><span>다음 순서</span></li>`:`<li class="later"><b>&nbsp;</b></li>`).join('')}</ol>
+      ${panel||`<div class="card"><div class="rcards">${left.map(id=>`<button class="chip-btn rcard" data-r="${id}">${R(id).name}<small>${R(id).gloss}</small></button>`).join('')}</div></div>`}
+      <div class="ticker" id="ticker3">${GRUMBLES3[tick%GRUMBLES3.length]}</div>`;
+    document.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>pick(b.dataset.r));
+    if($('pourBtn'))$('pourBtn').onclick=()=>{pours++;if(pours>=3){act=null;addScore(8);say('그래, 세 번에 나눠서.','happy');tip('강신: 술을 모사(띠 묶음을 꽂은 그릇)에 세 번 나눠 부어 땅에 계신 조상님을 모셔요.');next()}else render()};
+    document.querySelectorAll('[data-bow]').forEach(b=>b.onclick=()=>{
+      const n=+b.dataset.bow;
+      if(n===1){mistakes++;addScore(-8);slap('절을 한 번만 하는 법이 어딨니!',8);tip('차례에서는 두 번 절(재배)해요.');return}
+      act=null;
+      if(n===4){addScore(4);say('요즘 누가 네 번 하니. 옛날 얘기다.');tip('예전엔 남자는 두 번, 여자는 네 번 절했지만 요즘은 남녀 모두 두 번 절하는 집이 많아요.')}
+      else{addScore(8);say('그렇지, 두 번.','happy')}
+      next();
+    });
+    document.querySelectorAll('[data-spoon]').forEach(b=>b.onclick=()=>{
+      if(b.dataset.spoon==='w'){mistakes++;addScore(-8);slap('숟가락이 왜 서쪽을 보니!',8);tip('숟가락은 오목한 면이 동쪽을 향하게 꽂아요.');return}
+      act=null;addScore(8);say('옳지. 젓가락도 가지런히.','happy');tip('숟가락은 오목한 면이 동쪽을 향하게 꽂고, 젓가락은 시접 위에 가지런히 놓아요.');next();
+    });
+  };
+  const next=()=>{
+    if(pos>=seq.length){finish();return}
+    render();
+  };
+  const pick=id=>{
+    if(done||act)return;
+    if(pos===0&&id==='chamsin'&&!swapped){swapped=true;seq[0]='chamsin';seq[1]='gangsin';
+      tip('지방을 모실 땐 강신을 먼저, 신주를 모실 땐 참신을 먼저 하는 게 원칙이지만 집안마다 달라요.')}
+    if(seq[pos]!==id){
+      mistakes++;addScore(-8);
+      const r=R(id);slap(r.early||'순서가 틀렸다!',8);
+      tip(`${R(seq[pos]).name}: ${R(seq[pos]).desc}`);return;
+    }
+    pos++;addScore(12);
+    const r=R(id);
+    if(r.act){act=r.act;pours=0;render();return}
+    say(['그래.','옳지.','됐다, 다음.'][Math.floor(Math.random()*3)],'happy');
+    if(id==='eumbok')tip('음복: 조상님이 드신 음식을 나눠 먹으며 복을 받는다는 뜻이에요.');
+    next();
+  };
+  const finish=()=>{
+    done=true;const bonus=mistakes?30:80;addScore(bonus);if(!mistakes)tip('차례 순서 완벽! 보너스 80점');
+    say('차례 잘 지냈다. 이제 밥 먹자. …친척들 말은 흘려들어라.','happy');
+    S.timers.push(setTimeout(()=>go('nag'),1800));
+  };
+  S.timers.push(setInterval(()=>{tick++;const t=$('ticker3');if(t)t.textContent=GRUMBLES3[tick%GRUMBLES3.length]},6000));
+  say('정신 차려라. 순서 틀리면 큰아버지가 한 말씀 하신다.');
+  render();
+}
+
+/* ---------- 4부: 잔소리 방어전 ---------- */
+const HUSBAND_OK=['남편: 아, 그건 저희가 알아서 할게요~ (처음으로 멋있다)','남편: 그 얘긴 그만하시죠, 큰어머니. (단호)'];
+const HUSBAND_NO=['남편: (휴대폰 보는 척) …어? 뭐라고?','남편: 그러게, 우리 언제 하지? (배신)'];
+const NAGS=[
+  {who:'큰어머니',q:'그래서, 애는 언제 가질 거니?',opts:[
+    {t:'저희도 계획이 있어요~ (없음)',m:-6,p:0,r:'큰어머니: 서둘러라, 나이가 있는데.'},
+    {t:'큰어머니, 전 맛있죠? 제가 부쳤어요!',m:4,p:0,r:'큰어머니: …그래, 동그랑땡이 좀 짜더라.'},
+    {t:'여보, 대답 좀 해 봐.',husband:1}]},
+  {who:'작은아버지',q:'요즘 연봉은 얼마나 받니?',opts:[
+    {t:'그냥 먹고살 만해요.',m:-3,p:0,r:'작은아버지: 먹고살 만하면 됐지~ 근데 얼마야?'},
+    {t:'정확한 액수를 말한다',m:-15,p:0,r:'작은아버지: 그것밖에 안 돼? 우리 민수는 말이야…'},
+    {t:'작은아버지는 은퇴하고 뭐 하세요?',m:10,p:-6,r:'작은아버지: …(헛기침) 술이나 한잔하자.'}]},
+  {who:'사촌 동생',q:'언니, 살 좀 쪘다?',opts:[
+    {t:'명절이라 그래~ 너도 먹어.',m:4,p:0,r:'사촌 동생: 아니 난 다이어트 중이라~'},
+    {t:'(웃으며 송편을 입에 넣는다)',m:-6,p:0,r:'사촌 동생: 봐, 또 먹네~'},
+    {t:'너는 취업했니?',m:10,p:-8,r:'(작은어머니가 조용히 째려본다)'}]},
+  {who:'큰아버지',q:'집은 언제 사니? 요즘 집값이 말이야…',opts:[
+    {t:'청약 넣고 있어요!',m:-3,p:2,r:'큰아버지: 청약 그거 되겠냐? 요즘 경쟁률이…'},
+    {t:'큰아버지 댁은 얼마나 올랐어요?',m:-12,p:0,r:'(큰아버지의 부동산 강의가 30분째 이어진다)'},
+    {t:'여보, 우리 집 얘기 좀 해 봐.',husband:1}]},
+  {who:'시고모',q:'우리 며느리는 명절에 새벽 네 시에 온다더라~',opts:[
+    {t:'대단하시네요~',m:-8,p:0,r:'시고모: 그러니까 너도 좀 배워.'},
+    {t:'저는 세 시 반에 왔는데요?',m:10,p:6,r:'(어머님 어깨가 살짝 올라간다)'},
+    {t:'(말없이 설거지하러 일어난다)',m:0,p:8,r:'시고모: 어머, 착하기도 해라~'}]},
+  {who:'조카',q:'숙모! 용돈 주세요!',opts:[
+    {t:'만 원을 준다',m:-2,p:0,r:'조카: …만 원이요? (표정 관리 실패)'},
+    {t:'오만 원을 준다',m:6,p:4,r:'조카: 숙모 최고! (다른 조카 셋이 줄을 선다)'},
+    {t:'추석엔 용돈 없어~ 설에 줄게',m:-5,p:-6,r:'조카: 으아앙! (작은어머니 한숨)'}]},
+  {who:'큰어머니',q:'회사는 계속 다니게? 여자가 너무 일만 하면…',opts:[
+    {t:'네, 조심할게요.',m:-10,p:2,r:'큰어머니: 그래, 여자는 집이 먼저다.'},
+    {t:'요즘은 다 맞벌이예요~',m:6,p:-3,r:'큰어머니: 요즘 애들은 참…'},
+    {t:'여보, 뭐라고 좀 해 봐.',husband:1}]},
+  {who:'어머님',q:'설에도 일찍 와라.',opts:[
+    {t:'네, 어머님!',m:-5,p:10,r:'어머님: 그래, 새벽 다섯 시.'},
+    {t:'설엔 저희 친정 먼저 가려고요.',m:15,p:-15,r:'(거실에 정적이 흐른다. TV 소리만 들린다)'},
+    {t:'(남편 옆구리를 찌른다)',husband:1}]},
+];
+function nag(){
+  $('stageChip').textContent='4부 잔소리';
+  let i=0,left=10,locked=false;
+  const bar=()=>{$('sub').innerHTML=`<span>멘탈 ${Math.max(0,S.mental)}%</span><span>질문 ${Math.min(i+1,NAGS.length)}/${NAGS.length}</span>`};
+  const apply=(o)=>{
+    if(locked)return;locked=true;
+    let m=o.m,p=o.p,r=o.r;
+    if(o.husband){const ok=Math.random()<.5;m=ok?10:-10;p=ok?-3:0;r=(ok?HUSBAND_OK:HUSBAND_NO)[Math.random()*2|0]}
+    S.mental=Math.max(0,Math.min(100,S.mental+m));
+    if(p){S.patience=Math.max(0,Math.min(100,S.patience+p));hud()}
+    addScore(m>0?m:0);
+    $('reply').innerHTML=`<p class="reply ${m>=0?'good':'bad'}">${r}</p><p class="muted">멘탈 ${m>=0?'+':''}${m}${p?` · 어머님 인내심 ${p>0?'+':''}${p}`:''}</p>`;
+    document.querySelectorAll('[data-o]').forEach(b=>b.disabled=true);
+    if(p<-5)say('…너는 참.','angry');else if(p>5)say('그래, 그래야지.','happy');
+    bar();
+    S.timers.push(setTimeout(()=>{
+      if(S.patience<=0)return go('over');
+      if(S.mental<=0)return endNag(true);
+      i++;i>=NAGS.length?endNag(false):ask()},1900));
+  };
+  const endNag=broken=>{
+    S.nagDone=true;S.mentalBroken=broken;addScore(Math.round(S.mental*1.5));
+    if(broken)slap('얘가 왜 이렇게 기운이 없어!',0);
+    S.timers.push(setTimeout(()=>go('result'),broken?1500:300));
+  };
+  const ask=()=>{
+    const n=NAGS[i];locked=false;left=10;bar();
+    $('stage').innerHTML=`
+      <div class="card" style="display:flex;flex-direction:column;gap:4px"><b class="act-t">추석 당일 · 점심 밥상</b><p style="font-size:14px">친척들의 질문이 쏟아집니다. 10초 안에 대답하지 않으면 어색한 침묵이 흘러요.</p></div>
+      <div class="card nagq"><span class="who">${n.who}</span><p class="q">${n.q}</p><div class="bar"><i id="tbar" style="width:100%"></i></div></div>
+      <div class="nag-opts">${n.opts.map((o,k)=>`<button class="chip-btn" data-o="${k}">${o.t}</button>`).join('')}</div>
+      <div id="reply"></div>`;
+    document.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>apply(n.opts[+b.dataset.o]));
+  };
+  S.timers.push(setInterval(()=>{if(locked)return;left-=.1;const t=$('tbar');if(t)t.style.width=Math.max(0,left*10)+'%';
+    if(left<=0)apply({m:-8,p:0,r:'…(어색한 침묵이 흐른다. 누군가 TV 볼륨을 올린다)'})},100));
+  say('밥 먹자. 대답 잘해라, 다 듣고 있다.');
+  S.mental=S.mental??100;
+  ask();
+}
+
+/* ---------- endings ---------- */
+function learned(){return S.tips.length?`<ol class="learn">${S.tips.map(t=>`<li>${t}</li>`).join('')}</ol>`:'<p class="muted">배운 게 없네요. 실수를 안 했거나, 아무것도 안 했거나.</p>'}
+function result(){
+  const ride=!S.nagDone?'':S.mentalBroken?'멘탈이 무너졌다. 귀경길 차 안에서 조용히 울었다.':S.mental>=60?'멘탈 무사! 귀경길 휴게소에서 호두과자까지 먹었다.':S.mental>=30?'귀경길 내내 둘 다 말이 없었다.':'귀경길, 남편이 휴게소마다 커피를 사 왔다.';
+  const g=S.score>=800?['종부 인정','어머님이 처음으로 웃으셨다.','happy']:S.score>=550?['합격','내년 설에도 부르신대요.','normal']:['재수강','…내년엔 전은 사다 쓰자.','angry'];
+  $('stage').innerHTML=`
+    <div class="card" style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+      <p class="muted">추석 당일 저녁 · 귀경길</p>
+      <div class="grade">${g[0]}</div>
+      <p>${g[1]}</p>${ride?`<p>${ride}</p>`:''}
+      <div class="list"><span>점수 ${S.score}점</span>${S.nagDone?`<span>멘탈 ${S.mental}%</span>`:''}<span>어머님 인내심 ${S.patience}%</span><span>찰싹 ${Math.round((100-S.patience)/12)}회쯤</span>${S.mode?`<span>${S.mode} 모드 · ${REGIONS[S.house.region].name} · ${FRUITS[S.house.fruit].name}</span>`:''}${S.unlockMsg?`<span class="got">${S.unlockMsg}</span>`:''}</div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:8px"><h2>오늘 배운 것</h2>${learned()}</div>
+    <div class="card twist" style="display:flex;flex-direction:column;gap:6px"><h2>그런데 말입니다</h2><p>성균관은 2022년 추석 차례상 표준안에서 홍동백서, 조율이시 같은 배치 규칙이 옛 예법서에는 없는 말이라고 밝혔어요. 전도 굳이 부치지 않아도 되고, 음식은 송편·나물·구이·김치·과일·술 정도면 충분하대요.</p><p class="muted">오늘 맞은 찰싹은… 집안 법도였던 걸로.</p></div>
+    <button class="big-btn" id="again">처음부터 다시</button>`;
+  say(g[2]==='happy'?'애썼다. 설에도 이렇게만 해라.':g[2]==='angry'?'내년엔 좀 일찍 와라.':'됐다, 들어가 쉬어라. 설거지는 이따 하고.',g[2]);
+  $('again').onclick=()=>go('intro');
+}
+function over(){
+  $('stage').innerHTML=`
+    <div class="card" style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+      <div class="grade">부엌 퇴출</div>
+      <p>어머님 인내심이 바닥났습니다. 남은 음식은 어머님이 직접 하신대요.</p>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:8px"><h2>그래도 배운 것</h2>${learned()}</div>
+    <button class="big-btn" id="again">다시 도전하기</button>`;
+  say('됐다, 비켜라. 내가 한다.','angry');
+  $('again').onclick=()=>go('intro');
+}
+
+go('intro');
+</script>
+
+</body>
+</html>
