@@ -203,6 +203,12 @@ p{margin:0;line-height:1.6}
 .terms dd b{display:block;color:var(--ink);font-weight:700}
 .rcard{display:flex;flex-direction:column;align-items:center;gap:2px}
 .rcard small{font-family:var(--body);font-size:10.5px;color:var(--ink-soft);line-height:1.3}
+.dish{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-radius:8px;background:rgba(45,106,79,.1)}
+.dish b{font-family:var(--display);font-weight:400;font-size:16px}
+.dish.ok b{color:var(--green)}
+.dish.no{background:rgba(199,58,44,.1)}
+.dish.no b{color:var(--red)}
+.dish p{font-size:13px;line-height:1.5}
 .learn{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5}
 .grade{font-family:var(--display);font-size:30px;color:var(--red)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -227,7 +233,7 @@ p{margin:0;line-height:1.6}
 
 <script>
 /* ---------- state ---------- */
-const S={house:{region:'seoul',fruit:'joyul'},carry:{missing:new Set(),burnt:new Set(),soup:'good'},reacted:new Set(),score:0,patience:100,budget:100000,basket:new Set(),tips:[],screen:'intro',timers:[]};
+const S={house:{region:'seoul',fruit:'joyul'},carry:{missing:new Set(),burnt:new Set(),soup:'good',jeonBasics:[],soupMissing:[],ugly:false},reacted:new Set(),score:0,patience:100,budget:100000,basket:new Set(),tips:[],screen:'intro',timers:[]};
 const $=id=>document.getElementById(id);
 
 /* ---------- 어머님 face ---------- */
@@ -305,70 +311,117 @@ function intro(){
       <div class="btn-row"><button class="chip-btn" data-jump="table">2부 차례상</button><button class="chip-btn" data-jump="rite">3부 차례</button><button class="chip-btn" data-jump="nag">4부 잔소리</button></div>
     </div>`;
   say('왔니? 앞치마부터 둘러라.');
-  const reset=()=>{S.score=0;S.patience=100;S.budget=100000;S.basket=new Set();S.tips=[];S.reached=-1;S.mode='';S.unlockMsg='';S.carry={missing:new Set(),burnt:new Set(),soup:'good'};S.mental=100;S.nagDone=false;hud()};
+  const reset=()=>{S.score=0;S.patience=100;S.budget=110000;S.basket=new Set();S.tips=[];S.reached=-1;S.mode='';S.unlockMsg='';S.carry={missing:new Set(),burnt:new Set(),soup:'good',jeonBasics:[],soupMissing:[],ugly:false};S.mental=100;S.nagDone=false;hud()};
   $('start').onclick=()=>{reset();go('shop')};
   document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{reset();go(b.dataset.jump)});
 }
 
 /* ---------- 1. 장보기 ---------- */
+/* 쪽지엔 요리 이름만. 재료는 직접 추리해야 해요. */
 const ITEMS=[
-  {id:'dongtae',name:'동태포',ico:'🐟',price:12000,req:1,info:'동태전은 차례상 전의 기본이에요. 생선은 머리가 동쪽을 향하게 놓아요(두동미서).',infoStage:'table'},
-  {id:'pork',name:'다짐육',ico:'🥩',price:9000,req:1},
+  {id:'dongtae',name:'동태포',ico:'🐟',price:9000,req:1},
+  {id:'pork',name:'돼지 다짐육',ico:'🥩',price:8000,req:1},
   {id:'tofu',name:'두부',ico:'⬜',price:2000,req:1},
   {id:'zucchini',name:'애호박',ico:'🥒',price:2500,req:1},
   {id:'egg',name:'계란 한 판',ico:'🥚',price:7000,req:1},
-  {id:'radish',name:'무',ico:'🥕',price:3000,req:1,info:'탕국은 무, 소고기, 두부를 넣고 맑게 끓여요.',infoStage:'soup'},
-  {id:'beef',name:'소고기 양지',ico:'🍖',price:15000,req:1},
-  {id:'apple',name:'사과',ico:'🍎',price:8000,req:1,tag:'금사과',info:'홍동백서: 붉은 과일은 동쪽(오른쪽), 흰 과일은 서쪽(왼쪽)에 놓아요.',infoStage:'table'},
+  {id:'flour',name:'부침가루',ico:'🌾',price:3000,req:1},
+  {id:'oil',name:'식용유',ico:'🫗',price:5000,req:1},
+  {id:'radish',name:'무',ico:'🥕',price:3000,req:1},
+  {id:'beef',name:'소고기',ico:'🍖',price:16000,req:1},
+  {id:'apple',name:'사과',ico:'🍎',price:18000,req:1,tag:'금사과'},
+  {id:'uglyApple',name:'못난이 사과',ico:'🍏',price:7000},
   {id:'pear',name:'배',ico:'🍐',price:6000,req:1},
-  {id:'chestnut',name:'밤',ico:'🌰',price:5000,req:1,info:'조율이시: 왼쪽부터 대추, 밤, 배, 감 순서로 놓아요.',infoStage:'table'},
+  {id:'chestnut',name:'밤',ico:'🌰',price:5000,req:1},
   {id:'jujube',name:'대추',ico:'🔴',price:4000,req:1},
-  {id:'persimmon',name:'곶감',ico:'🟠',price:5000,req:1},
-  {id:'songpyeon',name:'송편',ico:'🍡',price:12000,req:1,info:'추석 차례상엔 밥 대신 송편을, 설 차례상엔 떡국을 올려요.',infoStage:'table',infoKey:'songpyeon'},
+  {id:'persimmon',name:'곶감',ico:'🟠',price:6000,req:1},
+  {id:'songpyeon',name:'송편',ico:'🍡',price:10000,req:1},
+  {id:'potato',name:'감자',ico:'🥔',price:3000,waste:'감자전은 안 한다. 누가 먹는다고.'},
+  {id:'shrimp',name:'새우',ico:'🦐',price:12000,waste:'새우전은 올해 안 한다. 비싸서.'},
   {id:'peach',name:'복숭아',ico:'🍑',price:7000,trap:['복숭아를 왜 샀니! 조상님 못 오시게 할 거냐!','복숭아는 귀신을 쫓는다고 해서 제사상에 올리지 않아요.']},
   {id:'saury',name:'꽁치',ico:'🐠',price:4000,key:'chi',trap:['이름에 치 자 들어간 생선은 안 올린다!','꽁치, 갈치, 삼치처럼 이름이 ‘치’로 끝나는 생선은 격이 낮다고 여겨 올리지 않는 게 관례예요.']},
   {id:'hairtail',name:'갈치',ico:'🗡️',price:18000,key:'chi',trap:['비싼 갈치를! 그것도 제사에!','‘치’로 끝나는 생선은 제사상에 올리지 않아요.']},
   {id:'chili',name:'고춧가루',ico:'🌶️',price:9000,key:'red',trap:['제사 음식에 고춧가루가 웬 말이냐!','제사 음식은 붉은 양념을 쓰지 않아요. 붉은색이 귀신을 쫓는다고 여겼거든요.']},
-  {id:'garlic',name:'마늘',ico:'🧄',price:3000,key:'osin',trap:['마늘은 넣는 거 아니다!','마늘, 파 같은 향이 강한 채소(오신채)는 제사 음식에 쓰지 않아요.']},
+  {id:'garlic',name:'마늘',ico:'🧄',price:3000,key:'osin',trap:['마늘은 넣는 거 아니다!','마늘, 파, 부추 같은 향이 강한 채소(오신채)는 제사 음식에 쓰지 않아요.']},
+  {id:'chives',name:'부추',ico:'🌱',price:2500,key:'osin',trap:['부추전 부칠 거냐! 부추는 안 된다!','마늘, 파, 부추 같은 향이 강한 채소(오신채)는 제사 음식에 쓰지 않아요.']},
   {id:'mango',name:'망고',ico:'🥭',price:10000,trap:['요즘 집들은 몰라도 우리 집은 안 된다!','요즘은 바나나나 망고를 올리는 집도 있지만, 전통 차례상은 우리 땅의 과일을 올려요.']},
 ];
+const DISHES=[
+  {name:'동그랑땡',need:['pork','tofu','egg','flour','oil'],how:'동그랑땡: 돼지 다짐육에 으깬 두부를 섞어 빚고, 부침가루와 계란물을 입혀 기름에 부쳐요.'},
+  {name:'동태전',need:['dongtae','egg','flour','oil'],how:'동태전: 동태포에 부침가루와 계란물을 입혀 부쳐요.'},
+  {name:'호박전',need:['zucchini','egg','flour','oil'],how:'호박전: 애호박을 동글게 썰어 부침가루와 계란물을 입혀 부쳐요.'},
+  {name:'탕국',need:['radish','beef','tofu'],how:'탕국: 무, 소고기, 두부를 넣고 국간장으로 맑게 끓여요.'},
+  {name:'산적',need:['beef'],how:'산적: 소고기를 길게 썰어 양념해 꼬치에 꿰어 구워요.'},
+  {name:'과일 다섯 가지',need:['jujube','chestnut','pear','persimmon',['apple','uglyApple']],how:'과일: 대추, 밤, 배, 곶감(조율이시)에 붉은 사과를 더해요.'},
+  {name:'송편',need:['songpyeon'],how:'추석 차례상엔 밥 대신 송편을, 설 차례상엔 떡국을 올려요.'},
+];
+const SHOP_TIME=50;
 function shop(){
   $('stageChip').textContent='1 장보기';
+  const grid=[...ITEMS].sort(()=>Math.random()-.5);
+  const paid={};
+  let time=SHOP_TIME,infl=1,appleSpike=1,spikeAt=12+Math.random()*14,done=false,news='';
+  const price=it=>Math.round(it.price*infl*(it.id==='apple'?appleSpike:1)/100)*100;
+  const has=id=>id in paid;
+  const dishOk=d=>d.need.every(n=>Array.isArray(n)?n.some(has):has(n));
   const render=()=>{
-    const req=ITEMS.filter(i=>i.req);
-    $('sub').innerHTML=`<span>남은 돈 ${S.budget.toLocaleString()}원</span><span>${req.filter(i=>S.basket.has(i.id)).length} / ${req.length} 담음</span>`;
+    $('sub').innerHTML=`<span>남은 돈 ${S.budget.toLocaleString()}원</span><span class="${time<15?'fire':''}">${Math.max(0,Math.ceil(time))}초 · 물가 +${Math.round((infl-1)*100)}%</span>`;
     $('stage').innerHTML=`
-      <div class="card"><div class="muted" style="margin-bottom:8px">어머님 쪽지</div>
-        <div class="list">${req.map(i=>`<span class="${S.basket.has(i.id)?'got':''}">${i.name}</span>`).join('')}</div></div>
-      <div class="shop-grid">${ITEMS.map(i=>`<button class="item ${S.basket.has(i.id)?'on':''}" data-id="${i.id}">${i.tag?`<span class="tag">${i.tag}</span>`:''}<span class="ico">${i.ico}</span>${i.name}<span class="pr">${i.price.toLocaleString()}원</span></button>`).join('')}</div>
+      <div class="card"><div class="muted" style="margin-bottom:8px">어머님 쪽지 · 재료는 네가 알아서</div>
+        <div class="list">${DISHES.map(d=>`<span>${d.name}</span>`).join('')}</div></div>
+      ${news?`<div class="ticker">${news}</div>`:''}
+      <div class="shop-grid">${grid.map(i=>`<button class="item ${has(i.id)?'on':''}" data-id="${i.id}">${i.tag?`<span class="tag">${i.id==='apple'&&appleSpike>1?'폭등!':i.tag}</span>`:''}<span class="ico">${i.ico}</span>${i.name}<span class="pr">${(has(i.id)?paid[i.id]:price(i)).toLocaleString()}원</span></button>`).join('')}</div>
       <button class="big-btn" id="checkout">계산하고 집에 가기</button>`;
     document.querySelectorAll('.item').forEach(b=>b.onclick=()=>pick(b.dataset.id));
     $('checkout').onclick=checkout;
   };
   const pick=id=>{
+    if(done)return;
     const it=ITEMS.find(i=>i.id===id);
-    if(S.basket.has(id)){S.basket.delete(id);S.budget+=it.price;render();return}
-    if(it.price>S.budget){say('돈이 모자라잖니. 쓸데없는 걸 사니까 그렇지.','angry');return}
-    if(it.trap){S.budget-=it.price;slap(it.trap[0],12);tip(it.trap[1],{key:it.key});addScore(-10);render();return}
-    S.basket.add(id);S.budget-=it.price;addScore(5);
-    if(it.info)tip(it.info,{stage:it.infoStage,key:it.infoKey});
-    say(['그래, 그거.','싱싱한 걸로 골라라.','가격 좀 봐라, 사과가 금값이다.','그거 말고 옆에 거… 아니다, 됐다.'][Math.floor(Math.random()*4)]);
+    if(has(id)){S.budget+=paid[id];delete paid[id];render();return}
+    const p=price(it);
+    if(p>S.budget){say('돈이 모자라잖니. 쓸데없는 걸 사니까 그렇지.','angry');return}
+    if(it.trap){S.budget-=p;slap(it.trap[0],12);tip(it.trap[1],{key:it.key});addScore(-10);render();return}
+    paid[id]=p;S.budget-=p;
+    if(it.waste){say(it.waste,'angry');addScore(-3)}
+    else if(id==='uglyApple'){say('조상님 상에 못난이를 올리게? …돈이 없으면 할 수 없지.');if(has('apple')){S.budget+=paid.apple;delete paid.apple}}
+    else if(id==='apple'){say(appleSpike>1?'그 값을 주고 샀니? 손이 크구나.':'사과는 좋은 걸로 올려야지.','happy');if(has('uglyApple')){S.budget+=paid.uglyApple;delete paid.uglyApple}}
+    else say(['그래, 그거.','싱싱한 걸로 골라라.','그거 말고 옆에 거… 아니다, 됐다.','빨리빨리 담아라, 값 오른다.'][Math.floor(Math.random()*4)]);
     render();
   };
   const checkout=()=>{
-    const missing=ITEMS.filter(i=>i.req&&!S.basket.has(i.id));
-    missing.forEach(i=>SHOP2TABLE[i.id]&&S.carry.missing.add(SHOP2TABLE[i.id]));
-    if(missing.length){
-      slap(`${missing[0].name}${missing.length>1?` 말고도 ${missing.length-1}개`:''} 빠졌다! 정신을 어디 두고 다니니!`,10);
-      addScore(-15*missing.length);
-      S.timers.push(setTimeout(()=>go('jeon'),1500));
-      return;
-    }
-    addScore(30+Math.floor(S.budget/1000));
-    say(`잔돈 ${S.budget.toLocaleString()}원 남았네. 빨리 전 부쳐라.`,'happy');
-    S.timers.push(setTimeout(()=>go('jeon'),900));
+    if(done)return;done=true;
+    const bad=DISHES.filter(d=>!dishOk(d));
+    const wasted=ITEMS.filter(i=>i.waste&&has(i.id));
+    // 차례상·다음 스테이지로 넘길 흔적
+    ITEMS.filter(i=>i.req&&!has(i.id)&&SHOP2TABLE[i.id]).forEach(i=>{if(i.id==='apple'&&has('uglyApple'))return;S.carry.missing.add(SHOP2TABLE[i.id])});
+    if(!has('tofu'))S.carry.missing.add('ttaeng');
+    S.carry.ugly=has('uglyApple')&&!has('apple');
+    S.carry.jeonBasics=['egg','flour','oil'].filter(x=>!has(x));
+    S.carry.soupMissing=['radish','beef','tofu'].filter(x=>!has(x));
+    bad.forEach(d=>tip(d.how,{key:'dish-'+d.name}));
+    const okN=DISHES.length-bad.length;
+    addScore(okN*8+(bad.length?0:20+Math.floor(S.budget/1000)));
+    $('sub').innerHTML=`<span>남은 돈 ${S.budget.toLocaleString()}원</span><span>요리 ${okN}/${DISHES.length}</span>`;
+    $('stage').innerHTML=`
+      <div class="card" style="display:flex;flex-direction:column;gap:10px">
+        <h2>어머님의 장바구니 검사</h2>
+        ${DISHES.map(d=>{const ok=dishOk(d);return`<div class="dish ${ok?'ok':'no'}"><b>${ok?'✓':'✗'} ${d.name}</b>${ok?'':`<p>${d.how}</p>`}</div>`}).join('')}
+        ${wasted.length?`<p class="muted">쓸데없이 산 것: ${wasted.map(i=>i.name).join(', ')}</p>`:''}
+        ${S.carry.ugly?'<p class="muted">못난이 사과는 차례상에서 한 소리 들을 거예요.</p>':''}
+        <button class="big-btn" id="toJeon">집에 가서 전 부치기</button>
+      </div>`;
+    if(bad.length)slap(`${bad[0].name}${bad.length>1?` 말고도 ${bad.length-1}개`:''} 재료가 빠졌다! 뭘 보고 장을 본 거니!`,Math.min(20,6*bad.length));
+    else say(`잔돈 ${S.budget.toLocaleString()}원. 제법이구나.`,'happy');
+    $('toJeon').onclick=()=>go('jeon');
   };
-  say('쪽지대로만 사 와라. 딴 거 사면 알지?');
+  S.timers.push(setInterval(()=>{
+    if(done)return;time-=1;
+    if(time%10===0&&time>0){infl+=.08;news=`📈 추석 전날 시장이 붐빈다! 물가 +${Math.round((infl-1)*100)}%`}
+    if(appleSpike===1&&SHOP_TIME-time>=spikeAt){appleSpike=1.5;news='🍎 속보: 사과값 폭등! 한 봉지 금값… 못난이 사과는 그대로';tip('기후변화로 사과 수확이 줄면서 명절마다 사과값이 뉴스에 나와요. 요즘은 못난이 과일이나 대체 과일로 차례상을 차리는 집도 많아요.',{key:'gold-apple'})}
+    if(time<=0){say('언제 오니! 전 부칠 시간 없다!','angry');checkout();return}
+    render();
+  },1000));
+  say('쪽지 보고 알아서 사 와라. 늦을수록 값 오른다.');
   render();
 }
 
@@ -406,7 +459,7 @@ function jeon(){
 function runJeon(){
   let queue=[...Array(4).fill('ttaeng'),...Array(4).fill('dongtae'),...Array(4).fill('hobak')].sort(()=>Math.random()-.5);
   const total=queue.length;
-  let stats={hobak:[0,0],dongtae:[0,0],ttaeng:[0,0]},pans=[null,null,null],plated=[],time=70,last=performance.now(),done=false,heat=1,heatLeft=0,nextHeat=12+Math.random()*6;
+  const lost=(S.carry.jeonBasics||[]).length*8;let stats={hobak:[0,0],dongtae:[0,0],ttaeng:[0,0]},pans=[null,null,null],plated=[],time=70-lost,last=performance.now(),done=false,heat=1,heatLeft=0,nextHeat=12+Math.random()*6;
   $('stage').innerHTML=`
     <div class="card" style="display:flex;flex-direction:column;gap:6px">
       <p class="queue" id="q"></p>
@@ -467,7 +520,8 @@ function runJeon(){
     if(time<=0||(!queue.length&&pans.every(p=>!p)))return finish();
     raf=requestAnimationFrame(loop);
   };
-  say('열두 장이다. 타면 알지?');
+  if(lost){const nm={egg:'계란',flour:'부침가루',oil:'식용유'};slap(`${S.carry.jeonBasics.map(x=>nm[x]).join(', ')}도 안 사 왔니! 남편 편의점 보내라!`,8);tip('전은 부침가루를 묻히고 계란물을 입혀 기름에 부쳐요. 계란, 부침가루, 식용유는 전의 기본이에요.',{key:'jeon-basics'});S.timers.push(setTimeout(()=>say(`남편 기다리느라 ${lost}초 날렸다.`,'angry'),1500))}
+  else say('열두 장이다. 타면 알지?');
   drawPans();raf=requestAnimationFrame(loop);
 }
 
@@ -514,6 +568,7 @@ function soup(){
     if(st.served||st.ing.has(id))return;
     const it=SOUP_ING.find(i=>i.id===id);
     if(it.trap){slap(it.trap[0],12);tip(it.trap[1],{key:it.key});addScore(-10);return}
+    if((S.carry.soupMissing||[]).includes(id)){st.ing.add(id);addScore(-3);say(`${it.name}은(는) 어제 안 사 왔지? 남편이 편의점에서 사 왔다.`,'angry');render();return}
     st.ing.add(id);addScore(it.bonus?8:5);
     if(it.bonus){say('다시마 넣었구나. 제법이다.','happy');tip('다시마를 넣으면 간을 적게 해도 감칠맛이 나요.')}
     else say('무는 나박나박 썰었지?');
@@ -629,6 +684,7 @@ function fv(id){
   const c=S.carry;
   if(c.missing.has(id))return{tag:'편의점',cls:''};
   if(c.burnt.has(id))return{tag:'탄',cls:'burnt'};
+  if(id==='apple'&&c.ugly)return{tag:'못난이',cls:''};
   if(id==='tang'&&c.soup!=='good')return{tag:c.soup==='salty'?'짠':'맹탕',cls:''};
   return{tag:'',cls:''};
 }
@@ -637,12 +693,14 @@ function carryReact(id){
   const n=FOOD[id].name;
   if(v.tag==='탄'){addScore(-6);slap(`탄 ${n}을(를) 조상님 상에 올리니!`,6)}
   else if(v.tag==='편의점'){addScore(-5);say(`${n}은(는) 어제 빠뜨렸지? 남편이 편의점에서 사 왔다고… 에휴.`,'angry')}
+  else if(v.tag==='못난이'){addScore(-3);say('못난이 사과… 조상님이 이해하시겠지. 금사과 시대니까.')}
   else{addScore(-5);say(v.tag==='짠'?'짠 탕국을 조상님께 올리는구나…':'맹탕을 올리는구나… 조상님이 뭐라 하시겠니.','angry')}
 }
 function carrySummary(){
   const c=S.carry,items=[];
   c.burnt.forEach(id=>items.push(`탄 ${FOOD[id].name}`));
   c.missing.forEach(id=>items.push(`편의점 ${FOOD[id].name}`));
+  if(c.ugly)items.push('못난이 사과');
   if(c.soup!=='good')items.push(c.soup==='salty'?'짠 탕국':'맹탕 탕국');
   return items.length?`<div class="list">${items.map(x=>`<span>${x}</span>`).join('')}</div><p class="muted">어제의 실수가 그대로 상에 올라갑니다.</p>`:'';
 }
