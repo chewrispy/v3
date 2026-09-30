@@ -108,7 +108,7 @@
     ],
     "sourceUrl": "https://yos-sigma.vercel.app",
     "buildInfo": {
-      "tool": "Claude, Gemini, StackBlitz",
+      "tool": "Claude, Gemini, Cursor, StackBlitz",
       "date": "2026-06-05",
       "deploy": "CodeSandbox, Vercel",
       "stack": [
@@ -286,7 +286,7 @@
     ],
     "sourceUrl": "https://star-phi-two.vercel.app/",
     "buildInfo": {
-      "tool": "ChatGPT",
+      "tool": "ChatGPT, GitHub Codespaces",
       "date": "2026-07-15",
       "deploy": "GitHub, Vercel",
       "stack": [
