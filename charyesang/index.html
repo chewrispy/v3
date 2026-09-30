@@ -87,6 +87,7 @@ p{margin:0;line-height:1.6}
 /* jeon */
 .pans{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .pan{aspect-ratio:1;max-width:100%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#55504b,var(--pan) 60%);border:6px solid #1f1c1a;display:flex;align-items:center;justify-content:center;position:relative;padding:0}
+.pan *{pointer-events:none}
 .pan .jeon{width:66%;aspect-ratio:1;border-radius:50%;transition:background .2s;box-shadow:inset 0 -4px 0 rgba(0,0,0,.15)}
 .pan .jeon.square{border-radius:22%}
 .pan .jeon.oval{aspect-ratio:1.4;width:74%;border-radius:50%}
@@ -247,6 +248,10 @@ p{margin:0;line-height:1.6}
 /* ---------- state ---------- */
 const S={stageScore:{},house:{region:'seoul',fruit:'joyul'},carry:{missing:new Set(),burnt:new Set(),soup:'good',jeonBasics:[],soupMissing:[],ugly:false},reacted:new Set(),score:0,patience:100,budget:100000,basket:new Set(),tips:[],screen:'intro',timers:[]};
 const $=id=>document.getElementById(id);
+let ptrDown=false;
+addEventListener('pointerdown',()=>ptrDown=true,true);
+addEventListener('pointerup',()=>setTimeout(()=>ptrDown=false,0),true);
+addEventListener('pointercancel',()=>ptrDown=false,true);
 
 /* ---------- 어머님 face ---------- */
 function drawFace(mood){
@@ -447,7 +452,7 @@ function shop(){
     if(time%10===0&&time>0){infl+=.08;news=`📈 추석 전날 시장이 붐빈다! 물가 +${Math.round((infl-1)*100)}%`}
     if(appleSpike===1&&SHOP_TIME-time>=spikeAt){appleSpike=1.5;news='🍎 속보: 사과값 폭등! 한 봉지 금값… 못난이 사과는 그대로';tip('기후변화로 사과 수확이 줄면서 명절마다 사과값이 뉴스에 나와요. 요즘은 못난이 과일이나 대체 과일로 차례상을 차리는 집도 많아요.',{key:'gold-apple'})}
     if(time<=0){say('언제 오니! 전 부칠 시간 없다!','angry');checkout();return}
-    render();
+    if(!ptrDown)render();
   },1000));
   say('쪽지 보고 알아서 사 와라. 늦을수록 값 오른다.');
   render();
