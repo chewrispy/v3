@@ -209,6 +209,18 @@ p{margin:0;line-height:1.6}
 .dish.no{background:rgba(199,58,44,.1)}
 .dish.no b{color:var(--red)}
 .dish p{font-size:13px;line-height:1.5}
+.scoreboard{display:flex;flex-direction:column;gap:6px;padding-block:4px}
+.srow2{display:grid;grid-template-columns:84px 1fr 64px;gap:8px;align-items:center;font-size:13px}
+.srow2 .sn{font-family:var(--display);font-size:14px}
+.srow2 .sv{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-soft)}
+.sbar{position:relative;height:10px;border-radius:5px;background:rgba(42,28,18,.12);overflow:visible}
+.sbar i{display:block;height:100%;border-radius:5px;background:var(--gold)}
+.srow2.weak .sn,.srow2.weak .sv{color:var(--red)}
+.srow2.weak .sbar i{background:var(--red)}
+.srow2.total{border-top:1px dashed rgba(42,28,18,.25);padding-top:6px}
+.srow2.total .sbar i{background:var(--green)}
+.srow2.total .sv{color:var(--ink);font-family:var(--display);font-size:15px}
+.sbar em{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink)}
 .learn{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.5}
 .grade{font-family:var(--display);font-size:30px;color:var(--red)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -233,7 +245,7 @@ p{margin:0;line-height:1.6}
 
 <script>
 /* ---------- state ---------- */
-const S={house:{region:'seoul',fruit:'joyul'},carry:{missing:new Set(),burnt:new Set(),soup:'good',jeonBasics:[],soupMissing:[],ugly:false},reacted:new Set(),score:0,patience:100,budget:100000,basket:new Set(),tips:[],screen:'intro',timers:[]};
+const S={stageScore:{},house:{region:'seoul',fruit:'joyul'},carry:{missing:new Set(),burnt:new Set(),soup:'good',jeonBasics:[],soupMissing:[],ugly:false},reacted:new Set(),score:0,patience:100,budget:100000,basket:new Set(),tips:[],screen:'intro',timers:[]};
 const $=id=>document.getElementById(id);
 
 /* ---------- 어머님 face ---------- */
@@ -252,7 +264,22 @@ function hud(){
   $('patBar').style.width=S.patience+'%';
   $('patBar').style.background=S.patience>60?'var(--green)':S.patience>30?'var(--gold)':'var(--red)';
 }
-function addScore(n){S.score=Math.max(0,S.score+n);hud()}
+const STAGES=[['shop','장보기'],['jeon','전 부치기'],['soup','탕국'],['table','차례상'],['rite','차례 지내기'],['nag','잔소리 방어전']];
+const GRADE={jongbu:.7,pass:.45};
+function stageMax(k){
+  if(k==='table')return S.mode==='종부'?290:S.mode==='10년차'?330:280;
+  return {shop:86,jeon:300,soup:83,rite:220,nag:220}[k];
+}
+function addScore(n){
+  S.score=Math.max(0,S.score+n);
+  const k=S.screen;if(k in (S.stageScore||{}))S.stageScore[k]+=n;
+  hud();
+}
+function gradeInfo(){
+  const rows=STAGES.filter(([k])=>k in S.stageScore).map(([k,name])=>{const max=stageMax(k),got=Math.max(0,Math.min(max,S.stageScore[k]));return{k,name,max,got}});
+  const got=rows.reduce((a,r)=>a+r.got,0),max=rows.reduce((a,r)=>a+r.max,0);
+  return{rows,got,max,pct:max?got/max:0};
+}
 
 /* ---------- tips ---------- */
 let tipTimer;
@@ -291,6 +318,7 @@ function slap(line,dmg=15){
 /* ---------- screens ---------- */
 function clearTimers(){S.timers.forEach(t=>{clearInterval(t);clearTimeout(t)});S.timers=[];cancelAnimationFrame(raf)}
 function go(screen){
+  if(STAGES.some(([k])=>k===screen)&&!(screen in S.stageScore))S.stageScore[screen]=0;
   if(screen in STAGE_ORDER)S.reached=Math.max(S.reached??-1,STAGE_ORDER[screen]);
   clearTimers();S.screen=screen;
   const showHud=['shop','jeon','soup','table','rite','nag'].includes(screen);
@@ -311,7 +339,7 @@ function intro(){
       <div class="btn-row"><button class="chip-btn" data-jump="table">2부 차례상</button><button class="chip-btn" data-jump="rite">3부 차례</button><button class="chip-btn" data-jump="nag">4부 잔소리</button></div>
     </div>`;
   say('왔니? 앞치마부터 둘러라.');
-  const reset=()=>{S.score=0;S.patience=100;S.budget=110000;S.basket=new Set();S.tips=[];S.reached=-1;S.mode='';S.unlockMsg='';S.carry={missing:new Set(),burnt:new Set(),soup:'good',jeonBasics:[],soupMissing:[],ugly:false};S.mental=100;S.nagDone=false;hud()};
+  const reset=()=>{S.score=0;S.patience=100;S.budget=110000;S.basket=new Set();S.tips=[];S.reached=-1;S.stageScore={};S.mode='';S.unlockMsg='';S.carry={missing:new Set(),burnt:new Set(),soup:'good',jeonBasics:[],soupMissing:[],ugly:false};S.mental=100;S.nagDone=false;hud()};
   $('start').onclick=()=>{reset();go('shop')};
   document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{reset();go(b.dataset.jump)});
 }
@@ -1059,13 +1087,19 @@ function nag(){
 function learned(){const L=S.tips.filter(t=>t.stage<=S.reached);return L.length?`<ol class="learn">${L.map(t=>`<li>${t.text}</li>`).join('')}</ol>`:'<p class="muted">배운 게 없네요. 실수를 안 했거나, 아무것도 안 했거나.</p>'}
 function result(){
   const ride=!S.nagDone?'':S.mentalBroken?'멘탈이 무너졌다. 귀경길 차 안에서 조용히 울었다.':S.mental>=60?'멘탈 무사! 귀경길 휴게소에서 호두과자까지 먹었다.':S.mental>=30?'귀경길 내내 둘 다 말이 없었다.':'귀경길, 남편이 휴게소마다 커피를 사 왔다.';
-  const g=S.score>=800?['종부 인정','어머님이 처음으로 웃으셨다.','happy']:S.score>=550?['합격','내년 설에도 부르신대요.','normal']:['재수강','…내년엔 전은 사다 쓰자.','angry'];
+  const G=gradeInfo(),pct=Math.round(G.pct*100);
+  const g=G.pct>=GRADE.jongbu?['종부 인정','어머님이 처음으로 웃으셨다.','happy']:G.pct>=GRADE.pass?['합격','내년 설에도 부르신대요.','normal']:['재수강','…내년엔 전은 사다 쓰자.','angry'];
+  const weakest=G.rows.length>1?G.rows.reduce((a,r)=>r.got/r.max<a.got/a.max?r:a):null;
+  const board=`<div class="scoreboard">${G.rows.map(r=>{const p=Math.round(r.got/r.max*100);return`<div class="srow2 ${weakest&&r.k===weakest.k&&p<GRADE.pass*100?'weak':''}"><span class="sn">${r.name}</span><span class="sbar"><i style="width:${p}%"></i></span><span class="sv">${r.got}/${r.max}</span></div>`}).join('')}
+    <div class="srow2 total"><span class="sn">합계</span><span class="sbar"><i style="width:${pct}%"></i><em style="left:${GRADE.pass*100}%"></em><em style="left:${GRADE.jongbu*100}%"></em></span><span class="sv">${pct}%</span></div>
+    <p class="muted">플레이한 스테이지 만점 대비 · 합격 ${GRADE.pass*100}% 이상 · 종부 인정 ${GRADE.jongbu*100}% 이상${weakest&&Math.round(weakest.got/weakest.max*100)<GRADE.pass*100?` · 점수를 가장 많이 잃은 곳: <b>${weakest.name}</b>`:''}</p></div>`;
   $('stage').innerHTML=`
     <div class="card" style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
       <p class="muted">추석 당일 저녁 · 귀경길</p>
       <div class="grade">${g[0]}</div>
       <p>${g[1]}</p>${ride?`<p>${ride}</p>`:''}
-      <div class="list"><span>점수 ${S.score}점</span>${S.nagDone?`<span>멘탈 ${S.mental}%</span>`:''}<span>어머님 인내심 ${S.patience}%</span><span>찰싹 ${Math.round((100-S.patience)/12)}회쯤</span>${S.mode?`<span>${S.mode} 모드 · ${REGIONS[S.house.region].name} · ${FRUITS[S.house.fruit].name}</span>`:''}${S.unlockMsg?`<span class="got">${S.unlockMsg}</span>`:''}</div>
+      ${board}
+      <div class="list"><span>총점 ${S.score}점</span>${S.nagDone?`<span>멘탈 ${S.mental}%</span>`:''}<span>어머님 인내심 ${S.patience}%</span><span>찰싹 ${Math.round((100-S.patience)/12)}회쯤</span>${S.mode?`<span>${S.mode} 모드 · ${REGIONS[S.house.region].name} · ${FRUITS[S.house.fruit].name}</span>`:''}${S.unlockMsg?`<span class="got">${S.unlockMsg}</span>`:''}</div>
     </div>
     <div class="card" style="display:flex;flex-direction:column;gap:8px"><h2>오늘 배운 것</h2>${learned()}</div>
     <div class="card twist" style="display:flex;flex-direction:column;gap:6px"><h2>그런데 말입니다</h2><p>성균관은 2022년 추석 차례상 표준안에서 홍동백서, 조율이시 같은 배치 규칙이 옛 예법서에는 없는 말이라고 밝혔어요. 전도 굳이 부치지 않아도 되고, 음식은 송편·나물·구이·김치·과일·술 정도면 충분하대요.</p><p class="muted">오늘 맞은 찰싹은… 집안 법도였던 걸로.</p></div>
