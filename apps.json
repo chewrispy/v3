@@ -682,7 +682,7 @@
     ],
     "sourceUrl": "",
     "buildInfo": {
-      "tool": "Claude, Leonardo.Ai, Gemini",
+      "tool": "Claude, Leonardo.Ai (Gemini Image 2 모델)",
       "date": "2026-09-16",
       "deploy": "개발 중 (미배포)",
       "stack": [
