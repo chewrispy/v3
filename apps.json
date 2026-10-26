@@ -682,7 +682,7 @@
     ],
     "sourceUrl": "",
     "buildInfo": {
-      "tool": "Claude",
+      "tool": "Claude, Leonardo.Ai",
       "date": "2026-09-16",
       "deploy": "개발 중 (미배포)",
       "stack": [
