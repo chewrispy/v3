@@ -278,6 +278,7 @@
   /* ───────── 오늘의 메뉴 ───────── */
   var FOOD_POOL = [
     { name: '매운 김치찜', tags: ['stressed'], w: 3,
+      orderTitle: '메가폭탄김치찜으로 시켜요',
       why: { stressed: '스트레스 받는 날엔 매운 김치찜으로 풀어야지!!' } },
     { name: '떡볶이', tags: ['stressed', 'playful'], w: 2,
       brands: ['엽기떡볶이', '신전떡볶이', '감탄떡볶이', '죠스떡볶이'],
