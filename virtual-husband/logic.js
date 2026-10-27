@@ -294,6 +294,8 @@
     { name: '파스타', tags: ['happy'], w: 2,
       why: { happy: '기분 좋은 날엔 파스타지!!' } },
     { name: '피자', tags: ['happy', 'playful'], w: 2,
+      orderTitle: '슈퍼슈프림으로 시켜요',
+      notes: ['피자는 슈퍼슈프림 (어느 피자집이든 기본 메뉴)', '보미는 피자를 잘 안 먹으니 사이드로 치즈오븐파스타 꼭 시키기'],
       why: { happy: '기분 좋은 날엔 피자 파티다!!', playful: '오늘은 장난기 모드니까 피자 한 판 시켜서 나눠 먹자ㅋㅋ' } },
     { name: '햄버거', tags: ['happy', 'playful'], w: 2,
       why: { happy: '기분 좋은 날엔 햄버거 크게 한 입 먹자!!', playful: '오늘은 장난기 모드니까 햄버거 먹으면서 놀자ㅋㅋ' } },
@@ -322,7 +324,7 @@
       drink: DRINK,
       reason: (matched && chosen.why[ctx.mood]) || ('오늘은 그냥 ' + chosen.name + ' 땡긴다능...'),
       friday: false,
-      brand: chosen.brands ? pick(chosen.brands, rng) : null,
+      orderTitle: chosen.brands ? pick(chosen.brands, rng) + '로 시켜요' : (chosen.orderTitle || null),
       notes: chosen.notes || null
     };
   }
