@@ -153,6 +153,10 @@
     ],
     wishYes: ['오예 최고!!', '역시 사랑한닷!! 오늘만 칭찬해주겠다능!!', '와아아 약속했닷!! 물리기 없기다냥!!'],
     wishNo: ['치... 알겠다능... 근데 꼭 먹고 만다냥', '쳇 다음에는 꼭 사랏!!', '삐진다... 아주 조금만 삐진다능'],
+    // 사용자가 "사랑해라!/안아줘라!/뽀뽀해조라!"처럼 장난스럽게 명령할 때: 청개구리처럼 한 번 튕기고 들어준다
+    demandLove: ['사랑하라고 시키니까 사랑하기 싫어진다냥ㅋㅋ ...근데 사랑한닷!!', '명령하지 말랏ㅋㅋ 이미 사랑하고 있다냥!!', '사랑한데이~~ 시키지 않아도 하고 있다냥!!'],
+    demandHug: ['누가 누굴 안으라는 거냥ㅋㅋ 이리 오랏!!', '안아달라고?? 못 이기는 척 안아준다냥...', '꼬옥 안아줬닷!! 됐느냥??'],
+    demandKiss: ['뽀뽀는 무슨 뽀뽀냐ㅋㅋ 눈 감아랏!!', '쪽!! 됐닷!!', '뽀뽀해달라는 말투가 귀엽다냥ㅋㅋ 쪽!!'],
     // 늦은 밤에 가볍게·액체로 먹자고 할 때 나오는 단골 말
     lightFood: ['something substantial 한걸 먹고싶다아~', 'something substantial 한걸 먹고싶다아~ 그런 걸론 안 찬다냥', '간단한 건 싫다아~ something substantial 한걸 먹고싶다아~'],
     foodUnlocked: ['오늘 메뉴 정해놨닷!! 메뉴 탭 보랏!!', '메뉴는 이미 정했다냥!! 메뉴 탭에서 확인하랏!!'],
@@ -220,6 +224,9 @@
     tired: ['피곤', '졸려', '졸림', '졸리', '지쳐', '지쳤', '기운', '나른', '잠와', '눕고', '늘어'],
     happy: ['기분 좋', '기분좋', '좋아!', '신나', '행복', '최고', '기뻐', '설레', '대박', '좋은 일', '합격', '칭찬', '맛있'],
     playful: ['심심', '장난', '놀자', '놀아', 'ㅋㅋ', 'ㅎㅎ', '뭐해', '뭐하'],
+    demandLove: ['사랑해라', '사랑하라', '사랑을 줘'],
+    demandHug: ['안아줘', '안아조', '안아라', '안아줄', '안아봐'],
+    demandKiss: ['뽀뽀해', '뽀뽀 해', '뽀뽀를'],
     love: ['사랑', '보고싶', '보고 싶', '좋아해'],
     light: ['간단', '가볍게', '가벼운', '국물만', '주스', '스무디', '음료', '마시', '우유', '수프', '과일', '샐러드', '요거트', '시리얼'],
     food: ['배고', '뭐 먹', '뭐먹', '저녁', '메뉴', '점심', '밥 먹', '야식']
@@ -232,6 +239,9 @@
     var t = String(text || '').trim();
     var stress = has(t, KW.stress);
     if (has(t, KW.practical)) return 'practical';
+    if (has(t, KW.demandHug)) return 'demandHug';
+    if (has(t, KW.demandKiss)) return 'demandKiss';
+    if (has(t, KW.demandLove)) return 'demandLove';
     if (opts && opts.late && has(t, KW.light) && !stress) return 'light';
     if (stress) return 'stress';
     if (has(t, KW.tired)) return 'tired';
@@ -241,7 +251,7 @@
     if (has(t, KW.playful)) return 'playful';
     return 'casual';
   }
-  var TOPIC_MOOD = { stress: 'stressed', tired: 'tired', happy: 'happy', love: 'happy', playful: 'playful' };
+  var TOPIC_MOOD = { stress: 'stressed', tired: 'tired', happy: 'happy', love: 'happy', demandLove: 'happy', demandHug: 'happy', demandKiss: 'happy', playful: 'playful' };
 
   /* ctx: { count, unlocked, last }  →  { text, topic, mood, serious, nick } */
   function reply(text, ctx, rng) {
@@ -256,6 +266,9 @@
       case 'happy':     line = pick(LINES.chatHappy, rng); break;
       case 'playful':   line = pick(LINES.chatPlayful, rng); break;
       case 'love':      line = pick(LINES.chatLove, rng); break;
+      case 'demandLove': line = pick(LINES.demandLove, rng); break;
+      case 'demandHug':  line = pick(LINES.demandHug, rng); break;
+      case 'demandKiss': line = pick(LINES.demandKiss, rng); break;
       case 'light':     line = pick(LINES.lightFood, rng); break;
       case 'food':
         line = ctx.unlocked ? pick(LINES.foodUnlocked, rng)
