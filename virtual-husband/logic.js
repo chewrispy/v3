@@ -272,6 +272,7 @@
     { name: '피자',         tags: ['happy', 'playful'],    w: 2 },
     { name: '햄버거',       tags: ['happy', 'playful'],    w: 2 },
     { name: '싱가폴 누들', tags: ['happy', 'calm'], w: 1 },
+    { name: '차오미엔',    tags: ['happy', 'playful'],    w: 1 },
     { name: '빵',           tags: ['calm'],                w: 1 }
   ];
   var DRINK = '식혜'; // 제일 좋아하는 음료
