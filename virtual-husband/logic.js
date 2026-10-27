@@ -112,8 +112,8 @@
       playful:  ['오늘은 장난치고 싶다닷ㅋㅋ', '찔러볼 테면 찔러보랏ㅋㅋ']
     },
     hungry: ['배고프닷!! 밥 달랏!!', '꼬르륵 소리 들리느냥?? 밥 주랏!!'],
-    poke:  ['왜 찌르느냥ㅋㅋ', '아파 살살하랏', '심심하느냥?? 말을 걸랏', '자꾸 찌르면 삐진다닷', '콕콕 찌르지 말랏ㅋㅋ'],
-    pet:   ['헤헿 좋다느냥', '더 쓰다듬어달랏', '기분 좋아진다능', '머리 부스스해진다닷ㅋㅋ', '그렇게 쓰다듬으면 잠든다능...'],
+    poke:  ['왜 찌르느냥ㅋㅋ', '아파 살살하랏', '심심하느냥?? 말을 걸랏', '자꾸 찌르면 삐진다닷', '콕콕 찌르지 말랏ㅋㅋ', '찔렀으면 책임지고 간식 내놓으랏!!', '어허 이건 폭행이닷ㅋㅋ'],
+    pet:   ['헤헿 좋다느냥', '더 쓰다듬어달랏', '기분 좋아진다능', '머리 부스스해진다닷ㅋㅋ', '오구오구 잘한다고 해보랏!!', '이대로 소파에 녹아버릴 것 같다능', '그렇게 쓰다듬으면 잠든다능...'],
     touch: ['거긴 안 된다느냥!!!', '깜짝이야 뭐하는거느냥ㅋㅋ', '음흉하구나...', '잠깐 잠깐 거기는 반칙이닷!!', '이건 신고감이닷ㅋㅋ'],
     feed:  ['냠냠 고맙닷!!', '더 달랏', '맛있다능 사랑한다닷', '꿀꺽 잘 먹겠닷!!', '배가 빵빵해진다닷ㅋㅋ'],
     full:  ['배불러서 더 못 먹는다닷...', '이제 숨도 못 쉬겠다능ㅋㅋ'],
@@ -132,7 +132,7 @@
     chatHappy: ['오오 기분 좋은 날이닷!! 나도 신난다능!!', '그런 날엔 맛있는 거 먹어야 한다닷!!', '좋은 일 있었느냥?? 자세히 말해보랏!!'],
     chatPlayful: ['심심하느냥?? 나랑 놀자닷!!', 'ㅋㅋㅋ 장난치고 싶구나 좋다닷!!', '뭐하고 있었느냥?? 궁금하다닷!!'],
     chatLove: ['사랑한데이~~', '사랑한닷!!', '사랑한다 사랑한다 사랑한다닷!!!', '안 물어봤는데 말할게닷. 사랑해. 끝.', '나도 사랑한다능!! 빨리 보고싶다닷!!'],
-    chatCasual: ['오호 그렇느냥?? 더 얘기해보랏!!', '음음 계속 말해보랏!!', '그래서 그래서?? 궁금하다닷!!', '오늘 컨디션 어떠느냥??', '밥은 챙겨 먹었느냥??', '오늘 있었던 일 하나만 말해보랏!!'],
+    chatCasual: ['오호 그렇느냥?? 더 얘기해보랏!!', '음음 계속 말해보랏!!', '그래서 그래서?? 궁금하다닷!!', '오늘 컨디션 어떠느냥??', '밥은 챙겨 먹었느냥??', '오늘 있었던 일 하나만 말해보랏!!', '아니 그게 무슨 소리냥ㅋㅋㅋ 다시 말해보랏!!', '오늘도 무사히 살아있다니 장하다닷!!', '잠깐 나 지금 게임 중이닷 근데 듣고 있다능!!', '그래서 결론이 뭐냥?? 맛있는 거냥??'],
     // 대출·계약 같은 실무 얘기: 애교 없이 원래의 차분한 말투
     chatPractical: [
       '그렇구나. 하나씩 같이 정리해보자.',
@@ -141,6 +141,14 @@
       '내가 옆에서 같이 챙길게. 급한 것부터 말해줘.',
       '확인할 게 많겠다. 기한이 언제인지부터 같이 보자.'
     ],
+    wishAsk: [
+      '이것 좀 보랏!! 이거 먹고싶다닷!!',
+      '인스타에서 이거 봤는데 안 먹으면 병나겠다능!!',
+      '이거 사줘랏!! 아니 사주세요닷!!',
+      '이거 보고 군침 흘렸닷ㅋㅋ 같이 먹자능!!'
+    ],
+    wishYes: ['오예 최고닷!!', '역시 사랑한다닷!! 오늘만 칭찬해준다능!!', '와아아 약속했닷!! 물리기 없다능!!'],
+    wishNo: ['치... 알겠다능... 근데 꼭 먹고 만다닷', '쳇 다음에는 꼭 사달랏!!', '삐진다닷... 아주 조금만 삐진다능'],
     foodUnlocked: ['오늘 메뉴 정해놨닷!! 메뉴 탭 보랏!!', '메뉴는 이미 정했다능!! 메뉴 탭에서 확인하랏!!'],
     foodLocked: ['아직 대화가 모자란다닷ㅋㅋ 조금만 더 얘기하랏!!'],
     unlock: ['오늘 메뉴 정했닷!! 메뉴 탭에서 확인하랏!!'],
@@ -284,6 +292,26 @@
     };
   }
 
+  var WISHES = [
+    { item: '마라탕', note: '국물이 새빨갛다능' },
+    { item: '크로플', note: '바삭바삭 소리가 들리는 것 같다닷' },
+    { item: '치즈 듬뿍 피자', note: '치즈가 쭈우욱 늘어난다닷' },
+    { item: '매운 떡볶이', note: '국물에 밥까지 비벼야 한다능' },
+    { item: '수제 햄버거', note: '패티가 두 장이라닷' },
+    { item: '얼큰 김치찜', note: '밥도둑이 따로 없다능' },
+    { item: '빙수', note: '식혜 빙수면 더 좋다닷' },
+    { item: '편의점 신상 과자', note: '리뷰가 엄청 좋다능' }
+  ];
+  function wish(rng) {
+    var w = pick(WISHES, rng);
+    var n = attachNickname(pick(LINES.wishAsk, rng), rng, { prob: 0.7 });
+    return { item: w.item, note: w.note, text: n.text, nick: n.nick };
+  }
+  function wishAnswer(accepted, rng, last) {
+    var n = attachNickname(pick(accepted ? LINES.wishYes : LINES.wishNo, rng), rng, { prob: 0.5, last: last });
+    return { text: n.text, nick: n.nick };
+  }
+
   var DATE_IDEAS = {
     stressed: ['노래방 가서 소리 지르기', '동네 한 바퀴 빠르게 걷기'],
     tired:    ['집에서 영화 한 편 보기', '근처에서 짧게 산책하기'],
@@ -323,6 +351,8 @@
       state.mood = randomMood(rng);
       state.chatCount = 0;
       state.unlockAnnounced = false;
+      state.wishToday = false;
+      state.confirmed = false;
       state.shown = [];
       state.pick = null;
       if (state.history.length > 30) state.history = state.history.slice(-30);
@@ -349,6 +379,7 @@
     attachNickname: attachNickname, allLines: allLines,
     greeting: greeting, idleLine: idleLine, reaction: reaction, attack: attack, rollAttack: rollAttack,
     classify: classify, reply: reply,
+    wish: wish, wishAnswer: wishAnswer, WISHES: WISHES,
     recommend: recommend, dateIdea: dateIdea, recentFoods: recentFoods,
     defaultState: defaultState, rollDay: rollDay, fullnessNow: fullnessNow, feed: feed
   };
