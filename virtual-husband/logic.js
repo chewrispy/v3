@@ -312,7 +312,7 @@
   /* ctx: { mood, dow(0=일..5=금), exclude:Set } */
   function recommend(ctx, rng) {
     if (ctx.dow === 5) {
-      return { food: '삼겹살', drink: DRINK, reason: LINES.reasonFriday, friday: true };
+      return { food: '삼겹살', drink: DRINK, reason: LINES.reasonFriday, friday: true, v: 2 };
     }
     var exclude = ctx.exclude || new Set();
     var pool = FOOD_POOL.filter(function (f) { return !exclude.has(f.name); });
@@ -325,6 +325,7 @@
       drink: DRINK,
       reason: (matched && chosen.why[ctx.mood]) || ('오늘은 그냥 ' + chosen.name + ' 땡긴다능...'),
       friday: false,
+      v: 2,
       orderTitle: chosen.brands ? pick(chosen.brands, rng) + '로 시켜요' : (chosen.orderTitle || null),
       notes: chosen.notes || null
     };
@@ -362,6 +363,19 @@
   ];
   var MIMIC_ANSWER = ['그~래~~~'];
   function mimic(rng) { return { voice: pick(MIMIC, rng), answer: pick(MIMIC_ANSWER, rng) }; }
+
+  /* 저장돼 있던 오늘의 메뉴에 최신 이유·주문 메모를 다시 입힌다 (메뉴 이름과 날짜 아이디어는 그대로) */
+  function refreshPick(cur, mood, rng) {
+    if (!cur || cur.friday) return cur;
+    var f = FOOD_POOL.filter(function (x) { return x.name === cur.food; })[0];
+    if (!f) return cur;
+    var matched = f.tags.indexOf(mood) !== -1;
+    cur.reason = (matched && f.why[mood]) || ('오늘은 그냥 ' + f.name + ' 땡긴다능...');
+    cur.orderTitle = f.brands ? (cur.orderTitle && f.brands.some(function (b) { return cur.orderTitle.indexOf(b) === 0; }) ? cur.orderTitle : pick(f.brands, rng) + '로 시켜요') : (f.orderTitle || null);
+    cur.notes = f.notes || null;
+    cur.v = 2;
+    return cur;
+  }
 
   var DATE_IDEAS = {
     stressed: ['노래방 가서 소리 지르기', '동네 한 바퀴 빠르게 걷기'],
@@ -430,7 +444,7 @@
     attachNickname: attachNickname, allLines: allLines,
     greeting: greeting, idleLine: idleLine, reaction: reaction, attack: attack, rollAttack: rollAttack,
     classify: classify, reply: reply,
-    mimic: mimic, MIMIC: MIMIC,
+    mimic: mimic, MIMIC: MIMIC, refreshPick: refreshPick,
     wish: wish, wishAnswer: wishAnswer, WISHES: WISHES,
     recommend: recommend, dateIdea: dateIdea, recentFoods: recentFoods,
     defaultState: defaultState, rollDay: rollDay, fullnessNow: fullnessNow, feed: feed

@@ -533,6 +533,7 @@ nav .dot.on { display: block; }
     b.addEventListener('click', function () { tab(b.dataset.tab); });
   });
 
+  if (S.pick && S.pick.v !== 2) { VH.refreshPick(S.pick, S.mood, rng); save(); }
   var first = !S.greeted || S.greeted !== S.day;
   settle(first);
   if (first) {
