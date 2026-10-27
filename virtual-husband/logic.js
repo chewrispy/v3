@@ -164,13 +164,6 @@
     foodLocked: ['아직 대화가 모자란다냥ㅋㅋ 조금만 더 얘기하랏!!'],
     unlock: ['오늘 메뉴 정했닷!! 메뉴 탭에서 확인하랏!!'],
     confirm: ['콜이닷!! 맛있게 먹자!!', '좋았어 그걸로 가자!!'],
-    reasonMatched: {
-      stressed: '오늘은 스트레스 받는 날이니까 매운 걸로 풀어야지!!',
-      tired: '피곤한 날엔 속 편한 게 최고다냥~',
-      calm: '평온한 날엔 담백하게 가자~',
-      happy: '기분 좋은 날엔 신나는 메뉴로 가자!!',
-      playful: '오늘은 장난기 모드니까 손으로 집어먹는 걸로 가자ㅋㅋ'
-    },
     reasonOther: '오늘은 그냥 이게 땡긴다능...',
     reasonFriday: '금요일은 삼겹살데이닷!! 다른 건 안 받는다냥!!'
   };
@@ -284,18 +277,30 @@
 
   /* ───────── 오늘의 메뉴 ───────── */
   var FOOD_POOL = [
-    { name: '매운 김치찜',  tags: ['stressed'],           w: 3 },
-    { name: '떡볶이',       tags: ['stressed', 'playful'], w: 2 },
-    { name: '죽',           tags: ['tired'],               w: 2 },
-    { name: '흰쌀밥 정식',  tags: ['tired', 'calm'],       w: 2 },
-    { name: '막국수',       tags: ['calm'],                w: 1 },
-    { name: '우동',         tags: ['calm', 'tired'],       w: 1 },
-    { name: '파스타',       tags: ['happy'],               w: 2 },
-    { name: '피자',         tags: ['happy', 'playful'],    w: 2 },
-    { name: '햄버거',       tags: ['happy', 'playful'],    w: 2 },
-    { name: '싱가폴 누들', tags: ['happy', 'calm'], w: 1 },
-    { name: '차오미엔',    tags: ['happy', 'playful'],    w: 1 },
-    { name: '빵',           tags: ['calm'],                w: 1 }
+    { name: '매운 김치찜', tags: ['stressed'], w: 3,
+      why: { stressed: '스트레스 받는 날엔 매운 김치찜으로 풀어야지!!' } },
+    { name: '떡볶이', tags: ['stressed', 'playful'], w: 2,
+      why: { stressed: '스트레스엔 매운 떡볶이지!! 국물에 밥도 비벼 먹자!!', playful: '오늘은 장난기 모드니까 떡볶이 시켜놓고 놀자ㅋㅋ' } },
+    { name: '죽', tags: ['tired'], w: 2,
+      why: { tired: '피곤한 날엔 속 편한 죽이 최고다냥~' } },
+    { name: '흰쌀밥 정식', tags: ['tired', 'calm'], w: 2,
+      why: { tired: '피곤한 날엔 따끈한 밥 먹고 일찍 쉬자~', calm: '평온한 날엔 집밥 같은 정식이 딱이다능~' } },
+    { name: '막국수', tags: ['calm'], w: 1,
+      why: { calm: '평온한 날엔 시원한 막국수 후루룩~' } },
+    { name: '우동', tags: ['calm', 'tired'], w: 1,
+      why: { calm: '평온한 날엔 따뜻한 우동 후루룩~', tired: '피곤한 날엔 따끈한 우동 한 그릇 먹고 쉬자~' } },
+    { name: '파스타', tags: ['happy'], w: 2,
+      why: { happy: '기분 좋은 날엔 파스타지!!' } },
+    { name: '피자', tags: ['happy', 'playful'], w: 2,
+      why: { happy: '기분 좋은 날엔 피자 파티다!!', playful: '오늘은 장난기 모드니까 피자 한 판 시켜서 나눠 먹자ㅋㅋ' } },
+    { name: '햄버거', tags: ['happy', 'playful'], w: 2,
+      why: { happy: '기분 좋은 날엔 햄버거 크게 한 입 먹자!!', playful: '오늘은 장난기 모드니까 햄버거 먹으면서 놀자ㅋㅋ' } },
+    { name: '싱가폴 누들', tags: ['happy', 'calm'], w: 1,
+      why: { happy: '기분 좋은 날엔 싱가폴 누들이지!!', calm: '평온한 날엔 싱가폴 누들 후루룩~' } },
+    { name: '차오미엔', tags: ['happy', 'playful'], w: 1,
+      why: { happy: '기분 좋은 날엔 차오미엔이지!!', playful: '오늘은 장난기 모드니까 차오미엔 시켜서 놀면서 먹자ㅋㅋ' } },
+    { name: '빵', tags: ['calm'], w: 1,
+      why: { calm: '평온한 날엔 빵 사다 놓고 느긋하게 쉬자~' } }
   ];
   var DRINK = '식혜'; // 제일 좋아하는 음료
 
@@ -313,7 +318,7 @@
     return {
       food: chosen.name,
       drink: DRINK,
-      reason: matched ? LINES.reasonMatched[ctx.mood] : LINES.reasonOther,
+      reason: (matched && chosen.why[ctx.mood]) || ('오늘은 그냥 ' + chosen.name + ' 땡긴다능...'),
       friday: false
     };
   }
