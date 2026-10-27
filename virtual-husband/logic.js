@@ -336,6 +336,17 @@
     return { text: n.text, nick: n.nick };
   }
 
+  /* 먹고 싶은 게 있을 때: 보미 목소리를 가늘게 흉내 내 "해줄게"라고 말하고, 바로 자기가 "그~래~~"라고 대답하는 장난 */
+  var MIMIC = [
+    '오빠! 내가 집에 가서 키위 깎아줄게!',
+    '오빠~ 내가 집에 가서 딸기 씻어줄게!',
+    '오빠! 내가 집에 가서 김치찜 해줄게!',
+    '오빠~ 내가 집에 가서 식혜 따라줄게!',
+    '오빠! 내가 집에 가서 떡볶이 만들어줄게!'
+  ];
+  var MIMIC_ANSWER = ['그~래~~', '그~래~~ 얼른 와~~', '그~래~~ 고마워~~'];
+  function mimic(rng) { return { voice: pick(MIMIC, rng), answer: pick(MIMIC_ANSWER, rng) }; }
+
   var DATE_IDEAS = {
     stressed: ['노래방 가서 소리 지르기', '동네 한 바퀴 빠르게 걷기'],
     tired:    ['집에서 영화 한 편 보기', '근처에서 짧게 산책하기'],
@@ -403,6 +414,7 @@
     attachNickname: attachNickname, allLines: allLines,
     greeting: greeting, idleLine: idleLine, reaction: reaction, attack: attack, rollAttack: rollAttack,
     classify: classify, reply: reply,
+    mimic: mimic, MIMIC: MIMIC,
     wish: wish, wishAnswer: wishAnswer, WISHES: WISHES,
     recommend: recommend, dateIdea: dateIdea, recentFoods: recentFoods,
     defaultState: defaultState, rollDay: rollDay, fullnessNow: fullnessNow, feed: feed

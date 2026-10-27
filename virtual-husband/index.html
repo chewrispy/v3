@@ -118,6 +118,7 @@ main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .msg { max-width: 82%; padding: 9px 14px; border-radius: 18px; word-break: keep-all; overflow-wrap: anywhere; }
 .msg.him { align-self: flex-start; background: #f1f2f8; border-bottom-left-radius: 6px; font-family: 'Jua', sans-serif; font-size: 17px; }
 .msg.him.serious { font-family: 'Noto Sans KR', sans-serif; font-size: 15px; }
+.msg.him.mimic { background: #fdf2f8; font-size: 15px; letter-spacing: .02em; font-style: italic; }
 .msg.me { align-self: flex-end; background: linear-gradient(135deg, #bae6fd, #ddd6fe); border-bottom-right-radius: 6px; font-size: 15px; }
 .chips { display: flex; gap: 6px; overflow-x: auto; padding: 4px 2px 8px; scrollbar-width: none; }
 .chips::-webkit-scrollbar { display: none; }
@@ -317,6 +318,7 @@ nav .dot.on { display: block; }
       setLast(a.nick); S.affection = clamp(S.affection - 2);
       say(a.text, a.img, 3800); save(); return;
     }
+    if (kind === 'poke' && rng() < (hungryNow() ? 0.4 : 0.1)) { doMimic(false); return; }
     var r = VH.reaction(kind, rng, S.lastNick);
     setLast(r.nick);
     if (kind === 'poke') S.affection = clamp(S.affection + 1);
@@ -338,7 +340,7 @@ nav .dot.on { display: block; }
     S.chat.forEach(function (m, idx) {
       if (m.who === 'wish') { log.appendChild(wishCard(m, idx)); return; }
       var d = document.createElement('div');
-      d.className = 'msg ' + (m.who === 'me' ? 'me' : 'him' + (m.s ? ' serious' : ''));
+      d.className = 'msg ' + (m.who === 'me' ? 'me' : 'him' + (m.s ? ' serious' : '') + (m.mimic ? ' mimic' : ''));
       d.textContent = m.text; log.appendChild(d);
     });
     log.scrollTop = log.scrollHeight;
@@ -376,6 +378,21 @@ nav .dot.on { display: block; }
     addMsg('him', r.text); homeText = r.text; homeSerious = false;
     save(); renderLog(); renderHome();
   }
+  /* 보미 목소리를 얇게 흉내 내고 바로 자기가 대답하는 장난 */
+  var mimicBusy = false;
+  function hungryNow() { return VH.fullnessNow(S, Date.now()) < 40; }
+  function doMimic(inChat) {
+    if (mimicBusy) return; mimicBusy = true;
+    var m = VH.mimic(rng);
+    S.chat.push({ who: 'him', text: '(가는 목소리로) ' + m.voice, mimic: true });
+    homeText = m.voice; homeSerious = false; override = 'tease'; renderHome(); renderLog();
+    setTimeout(function () {
+      addMsg('him', m.answer); homeText = m.answer; homeSerious = false;
+      S.affection = clamp(S.affection + 1);
+      save(); renderLog(); renderHome();
+      setTimeout(function () { override = null; mimicBusy = false; renderHome(); }, 2200);
+    }, 1500);
+  }
   function maybeWish() {
     if (S.wishToday || S.chatCount < 2 || rng() > 0.35) return;
     S.wishToday = true;
@@ -403,6 +420,7 @@ nav .dot.on { display: block; }
     }
     homeText = r.text; homeSerious = r.serious;
     if (r.topic !== 'practical') maybeWish();
+    if (r.topic !== 'practical' && rng() < (hungryNow() ? 0.3 : 0.08)) doMimic(true);
     save(); renderLog(); renderHome(); renderMenu();
   }
 
