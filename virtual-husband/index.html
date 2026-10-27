@@ -327,7 +327,7 @@ nav .dot.on { display: block; }
   }
 
   /* ── 대화 ── */
-  var CHIPS = ['오늘 힘들었어', '피곤해', '기분 좋아!', '심심해', '저녁 뭐 먹지?', '사랑해', '대출 서류 챙겨야 해'];
+  var CHIPS = ['오늘 힘들었어', '피곤해', '기분 좋아!', '심심해', '저녁 뭐 먹지?', '사랑해', '간단하게 먹을까?', '대출 서류 챙겨야 해'];
 
   function addMsg(who, text, serious) {
     S.chat.push({ who: who, text: text, s: !!serious });
@@ -391,7 +391,7 @@ nav .dot.on { display: block; }
     S.chatCount++;
     S.affection = clamp(S.affection + 2);
     addMsg('me', text);
-    var r = VH.reply(text, { count: S.chatCount, unlocked: S.chatCount > VH.UNLOCK_AT, last: S.lastNick }, rng);
+    var r = VH.reply(text, { count: S.chatCount, unlocked: S.chatCount > VH.UNLOCK_AT, last: S.lastNick, slot: slot() }, rng);
     setLast(r.nick);
     if (r.mood) S.mood = r.mood;
     addMsg('him', r.text, r.serious);

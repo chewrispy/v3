@@ -151,6 +151,8 @@
     ],
     wishYes: ['오예 최고!!', '역시 사랑한닷!! 오늘만 칭찬해주겠다능!!', '와아아 약속했닷!! 물리기 없기다냥!!'],
     wishNo: ['치... 알겠다능... 근데 꼭 먹고 만다냥', '쳇 다음에는 꼭 사랏!!', '삐진다... 아주 조금만 삐진다능'],
+    // 늦은 밤에 가볍게·액체로 먹자고 할 때 나오는 단골 말
+    lightFood: ['something substantial 한걸 먹고싶다아~', 'something substantial 한걸 먹고싶다아~ 그런 걸론 안 찬다냥', '간단한 건 싫다아~ something substantial 한걸 먹고싶다아~'],
     foodUnlocked: ['오늘 메뉴 정해놨닷!! 메뉴 탭 보랏!!', '메뉴는 이미 정했다냥!! 메뉴 탭에서 확인하랏!!'],
     foodLocked: ['아직 대화가 모자란다냥ㅋㅋ 조금만 더 얘기하랏!!'],
     unlock: ['오늘 메뉴 정했닷!! 메뉴 탭에서 확인하랏!!'],
@@ -217,16 +219,18 @@
     happy: ['기분 좋', '기분좋', '좋아!', '신나', '행복', '최고', '기뻐', '설레', '대박', '좋은 일', '합격', '칭찬', '맛있'],
     playful: ['심심', '장난', '놀자', '놀아', 'ㅋㅋ', 'ㅎㅎ', '뭐해', '뭐하'],
     love: ['사랑', '보고싶', '보고 싶', '좋아해'],
+    light: ['간단', '가볍게', '가벼운', '국물만', '주스', '스무디', '음료', '마시', '우유', '수프', '과일', '샐러드', '요거트', '시리얼'],
     food: ['배고', '뭐 먹', '뭐먹', '저녁', '메뉴', '점심', '밥 먹', '야식']
   };
   function has(text, list) {
     for (var i = 0; i < list.length; i++) if (text.indexOf(list[i]) !== -1) return true;
     return false;
   }
-  function classify(text) {
+  function classify(text, opts) {
     var t = String(text || '').trim();
     var stress = has(t, KW.stress);
     if (has(t, KW.practical) && !stress) return 'practical';
+    if (opts && opts.late && has(t, KW.light) && !stress) return 'light';
     if (stress) return 'stress';
     if (has(t, KW.tired)) return 'tired';
     if (has(t, KW.love)) return 'love';
@@ -240,7 +244,7 @@
   /* ctx: { count, unlocked, last }  →  { text, topic, mood, serious, nick } */
   function reply(text, ctx, rng) {
     ctx = ctx || {};
-    var topic = classify(text);
+    var topic = classify(text, { late: ctx.slot === 'night' || ctx.slot === 'evening' });
     var serious = topic === 'practical';
     var line;
     switch (topic) {
@@ -250,6 +254,7 @@
       case 'happy':     line = pick(LINES.chatHappy, rng); break;
       case 'playful':   line = pick(LINES.chatPlayful, rng); break;
       case 'love':      line = pick(LINES.chatLove, rng); break;
+      case 'light':     line = pick(LINES.lightFood, rng); break;
       case 'food':
         line = ctx.unlocked ? pick(LINES.foodUnlocked, rng)
           : pick(LINES.foodLocked, rng) + ' (' + Math.min(ctx.count || 0, UNLOCK_AT) + '/' + UNLOCK_AT + ')';
