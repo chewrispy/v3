@@ -462,6 +462,14 @@ nav .dot.on { display: block; }
     card.appendChild(el('div', 'reason', p.reason));
     m.appendChild(card);
 
+    if (p.brand) {
+      var ord = el('div', 'info');
+      ord.appendChild(el('small', null, '주문 메모'));
+      var t = el('b', null, p.brand + '로 시켜요'); t.style.display = 'block'; t.style.marginBottom = '4px';
+      ord.appendChild(t);
+      (p.notes || []).forEach(function (n) { var li = el('div', null, '· ' + n); li.style.fontSize = '14px'; ord.appendChild(li); });
+      m.appendChild(ord);
+    }
     var info = el('div', 'info');
     info.appendChild(el('small', null, '오늘 기분'));
     info.appendChild(document.createTextNode(VH.MOOD_LABEL[S.mood]));

@@ -280,6 +280,8 @@
     { name: '매운 김치찜', tags: ['stressed'], w: 3,
       why: { stressed: '스트레스 받는 날엔 매운 김치찜으로 풀어야지!!' } },
     { name: '떡볶이', tags: ['stressed', 'playful'], w: 2,
+      brands: ['엽기떡볶이', '신전떡볶이', '감탄떡볶이', '죠스떡볶이'],
+      notes: ['보미는 매워서 계란찜과 야채죽을 같이 시키기', '야채죽은 남편 것까지 2개 시키기', '야채죽은 김가루 빼달라고 요청하기 (남편은 김을 안 먹어요)'],
       why: { stressed: '스트레스엔 매운 떡볶이지!! 국물에 밥도 비벼 먹자!!', playful: '오늘은 장난기 모드니까 떡볶이 시켜놓고 놀자ㅋㅋ' } },
     { name: '죽', tags: ['tired'], w: 2,
       why: { tired: '피곤한 날엔 속 편한 죽이 최고다냥~' } },
@@ -319,7 +321,9 @@
       food: chosen.name,
       drink: DRINK,
       reason: (matched && chosen.why[ctx.mood]) || ('오늘은 그냥 ' + chosen.name + ' 땡긴다능...'),
-      friday: false
+      friday: false,
+      brand: chosen.brands ? pick(chosen.brands, rng) : null,
+      notes: chosen.notes || null
     };
   }
 
