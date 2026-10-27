@@ -159,8 +159,9 @@
     demandHug: ['누가 누굴 안으라는 거냥ㅋㅋ 이리 오랏!!', '안아달라고?? 못 이기는 척 안아준다냥...', '꼬옥 안아줬닷!! 됐느냥??'],
     demandKiss: ['뽀뽀는 무슨 뽀뽀냐ㅋㅋ 눈 감아랏!!', '쪽!! 됐닷!!', '뽀뽀해달라는 말투가 귀엽다냥ㅋㅋ 쪽!!'],
     // 사용자가 애매하거나 내키지 않을 때 하는 말 "쪼꼼 그래..."
-    mehAsk: ['쪼꼼 그래?? 뭐가 마음에 안 드느냥?? 말해보랏!!', '쪼꼼 그래...?? 이유를 말해보랏!!'],
-    mehReroll: ['쪼꼼 그래?? 알겠다냥 다른 걸로 다시 골라본다능!!', '쪼꼼 그래...?? 그럼 다시 골라보랏!!'],
+    // 남편은 "쪼꼼 그래!"를 먼저 따라 한 다음 다른 이야기로 넘어간다. {food}는 다시 고른 메뉴 이름
+    mehAsk: ['쪼꼼 그래! 근데 오늘 하루는 어땠느냥??', '쪼꼼 그래! 그건 그렇고 밥은 챙겨 먹었느냥??'],
+    mehReroll: ['쪼꼼 그래! 그럼 {food} 어떠냥??', '쪼꼼 그래! 아니면 {food} 먹을까??'],
     // 늦은 밤에 가볍게·액체로 먹자고 할 때 나오는 단골 말
     lightFood: ['something substantial 한걸 먹고싶다아~', 'something substantial 한걸 먹고싶다아~ 그런 걸론 안 찬다냥', '간단한 건 싫다아~ something substantial 한걸 먹고싶다아~'],
     foodUnlocked: ['오늘 메뉴 정해놨닷!! 메뉴 탭 보랏!!', '메뉴는 이미 정했다냥!! 메뉴 탭에서 확인하랏!!'],
@@ -277,7 +278,7 @@
         break;
       default:          line = pick(LINES.chatCasual, rng);
     }
-    var n = attachNickname(line, rng, { prob: serious ? 0.4 : (topic === 'light' ? 0 : 0.6), onlyBbo: serious, last: ctx.last });
+    var n = attachNickname(line, rng, { prob: serious ? 0.4 : ((topic === 'light' || topic === 'meh') ? 0 : 0.6), onlyBbo: serious, last: ctx.last });
     return { text: n.text, topic: topic, mood: TOPIC_MOOD[topic] || null, serious: serious, nick: n.nick };
   }
 

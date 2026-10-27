@@ -411,6 +411,7 @@ nav .dot.on { display: block; }
     var r = VH.reply(text, { count: S.chatCount, unlocked: S.chatCount > VH.UNLOCK_AT, last: S.lastNick, slot: slot(), canReroll: canReroll() }, rng);
     setLast(r.nick);
     if (r.mood) S.mood = r.mood;
+    if (r.topic === 'meh' && canReroll()) { S.pick = null; ensurePick(); r.text = r.text.replace('{food}', S.pick.food); toast('다른 메뉴로 다시 골랐어요'); }
     addMsg('him', r.text, r.serious);
     if (wasLocked && S.chatCount >= VH.UNLOCK_AT && !S.unlockAnnounced) {
       S.unlockAnnounced = true; S.menuSeen = false;
@@ -419,7 +420,6 @@ nav .dot.on { display: block; }
       toast('오늘 메뉴가 정해졌어요');
     }
     homeText = r.text; homeSerious = r.serious;
-    if (r.topic === 'meh' && canReroll()) { S.pick = null; ensurePick(); toast('다른 메뉴로 다시 골랐어요'); }
     if (r.topic !== 'practical') maybeWish();
     if (r.topic !== 'practical' && rng() < (hungryNow() ? 0.3 : 0.08)) doMimic();
     save(); renderLog(); renderHome(); renderMenu();
