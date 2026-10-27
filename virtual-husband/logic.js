@@ -261,7 +261,7 @@
         break;
       default:          line = pick(LINES.chatCasual, rng);
     }
-    var n = attachNickname(line, rng, { prob: serious ? 0.4 : 0.6, onlyBbo: serious, last: ctx.last });
+    var n = attachNickname(line, rng, { prob: serious ? 0.4 : (topic === 'light' ? 0 : 0.6), onlyBbo: serious, last: ctx.last });
     return { text: n.text, topic: topic, mood: TOPIC_MOOD[topic] || null, serious: serious, nick: n.nick };
   }
 
