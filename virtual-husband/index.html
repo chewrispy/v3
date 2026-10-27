@@ -330,7 +330,7 @@ nav .dot.on { display: block; }
   }
 
   /* ── 대화 ── */
-  var CHIPS = ['오늘 힘들었어', '피곤해', '기분 좋아!', '심심해', '저녁 뭐 먹지?', '사랑해', '나를 사랑해라!', '안아줘라!', '뽀뽀해조라!', '간단하게 먹을까?', '대출 서류 챙겨야 해'];
+  var CHIPS = ['오늘 힘들었어', '피곤해', '기분 좋아!', '심심해', '저녁 뭐 먹지?', '사랑해', '쪼꼼 그래...', '나를 사랑해라!', '안아줘라!', '뽀뽀해조라!', '간단하게 먹을까?', '대출 서류 챙겨야 해'];
 
   function addMsg(who, text, serious) {
     S.chat.push({ who: who, text: text, s: !!serious });
@@ -400,6 +400,7 @@ nav .dot.on { display: block; }
     S.chat.push({ who: 'wish', item: w.item, note: w.note, answer: null });
     toast('남편이 인스타 링크를 보냈어요');
   }
+  function canReroll() { return S.chatCount >= VH.UNLOCK_AT && S.pick && !S.pick.friday && !S.confirmed; }
   function send(text) {
     text = String(text || '').trim();
     if (!text) return;
@@ -407,7 +408,7 @@ nav .dot.on { display: block; }
     S.chatCount++;
     S.affection = clamp(S.affection + 2);
     addMsg('me', text);
-    var r = VH.reply(text, { count: S.chatCount, unlocked: S.chatCount > VH.UNLOCK_AT, last: S.lastNick, slot: slot() }, rng);
+    var r = VH.reply(text, { count: S.chatCount, unlocked: S.chatCount > VH.UNLOCK_AT, last: S.lastNick, slot: slot(), canReroll: canReroll() }, rng);
     setLast(r.nick);
     if (r.mood) S.mood = r.mood;
     addMsg('him', r.text, r.serious);
@@ -418,6 +419,7 @@ nav .dot.on { display: block; }
       toast('오늘 메뉴가 정해졌어요');
     }
     homeText = r.text; homeSerious = r.serious;
+    if (r.topic === 'meh' && canReroll()) { S.pick = null; ensurePick(); toast('다른 메뉴로 다시 골랐어요'); }
     if (r.topic !== 'practical') maybeWish();
     if (r.topic !== 'practical' && rng() < (hungryNow() ? 0.3 : 0.08)) doMimic();
     save(); renderLog(); renderHome(); renderMenu();
@@ -481,7 +483,7 @@ nav .dot.on { display: block; }
     m.appendChild(di);
 
     var row = el('div', 'row');
-    var re = el('button', 'btn', '다른 메뉴 보기');
+    var re = el('button', 'btn', '쪼꼼 그래... 다른 메뉴');
     if (p.friday || S.confirmed) re.disabled = true;
     re.addEventListener('click', function () {
       S.pick = null; ensurePick(); renderMenu();

@@ -158,6 +158,9 @@
     demandLove: ['사랑하라고 시키니까 사랑하기 싫어진다냥ㅋㅋ ...근데 사랑한닷!!', '명령하지 말랏ㅋㅋ 이미 사랑하고 있다냥!!', '사랑한데이~~ 시키지 않아도 하고 있다냥!!'],
     demandHug: ['누가 누굴 안으라는 거냥ㅋㅋ 이리 오랏!!', '안아달라고?? 못 이기는 척 안아준다냥...', '꼬옥 안아줬닷!! 됐느냥??'],
     demandKiss: ['뽀뽀는 무슨 뽀뽀냐ㅋㅋ 눈 감아랏!!', '쪽!! 됐닷!!', '뽀뽀해달라는 말투가 귀엽다냥ㅋㅋ 쪽!!'],
+    // 사용자가 애매하거나 내키지 않을 때 하는 말 "쪼꼼 그래..."
+    mehAsk: ['쪼꼼 그래?? 뭐가 마음에 안 드느냥?? 말해보랏!!', '쪼꼼 그래...?? 이유를 말해보랏!!'],
+    mehReroll: ['쪼꼼 그래?? 알겠다냥 다른 걸로 다시 골라본다능!!', '쪼꼼 그래...?? 그럼 다시 골라보랏!!'],
     // 늦은 밤에 가볍게·액체로 먹자고 할 때 나오는 단골 말
     lightFood: ['something substantial 한걸 먹고싶다아~', 'something substantial 한걸 먹고싶다아~ 그런 걸론 안 찬다냥', '간단한 건 싫다아~ something substantial 한걸 먹고싶다아~'],
     foodUnlocked: ['오늘 메뉴 정해놨닷!! 메뉴 탭 보랏!!', '메뉴는 이미 정했다냥!! 메뉴 탭에서 확인하랏!!'],
@@ -223,6 +226,7 @@
     demandHug: ['안아줘', '안아조', '안아라', '안아줄', '안아봐'],
     demandKiss: ['뽀뽀해', '뽀뽀 해', '뽀뽀를'],
     love: ['사랑', '보고싶', '보고 싶', '좋아해'],
+    meh: ['쪼꼼 그래', '조금 그래', '쫌 그래', '좀 그래', '쪼금 그래'],
     light: ['간단', '가볍게', '가벼운', '국물만', '주스', '스무디', '음료', '마시', '우유', '수프', '과일', '샐러드', '요거트', '시리얼'],
     food: ['배고', '뭐 먹', '뭐먹', '저녁', '메뉴', '점심', '밥 먹', '야식']
   };
@@ -234,6 +238,7 @@
     var t = String(text || '').trim();
     var stress = has(t, KW.stress);
     if (has(t, KW.practical)) return 'practical';
+    if (has(t, KW.meh)) return 'meh';
     if (has(t, KW.demandHug)) return 'demandHug';
     if (has(t, KW.demandKiss)) return 'demandKiss';
     if (has(t, KW.demandLove)) return 'demandLove';
@@ -261,6 +266,7 @@
       case 'happy':     line = pick(LINES.chatHappy, rng); break;
       case 'playful':   line = pick(LINES.chatPlayful, rng); break;
       case 'love':      line = pick(LINES.chatLove, rng); break;
+      case 'meh':       line = pick(ctx.canReroll ? LINES.mehReroll : LINES.mehAsk, rng); break;
       case 'demandLove': line = pick(LINES.demandLove, rng); break;
       case 'demandHug':  line = pick(LINES.demandHug, rng); break;
       case 'demandKiss': line = pick(LINES.demandKiss, rng); break;
