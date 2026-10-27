@@ -283,7 +283,7 @@
     { name: '떡볶이', tags: ['stressed', 'playful'], w: 2,
       brands: ['엽기떡볶이', '신전떡볶이', '감탄떡볶이', '죠스떡볶이'],
       notes: ['보미는 매워서 계란찜과 야채죽을 같이 시키기', '야채죽은 남편 것까지 2개 시키기', '야채죽은 김가루 빼달라고 요청하기 (남편은 김을 안 먹어요)'],
-      why: { stressed: '스트레스엔 매운 떡볶이지!! 국물에 밥도 비벼 먹자!!', playful: '오늘은 장난기 모드니까 떡볶이 시켜놓고 놀자ㅋㅋ' } },
+      why: { stressed: '스트레스엔 매운 떡볶이지!! 국물에 밥도 비벼 먹자!!', playful: '오늘은 매운 거 먹고싶은데 신당동 갈까, 시켜먹을까?' } },
     { name: '죽', tags: ['tired'], w: 2,
       why: { tired: '피곤한 날엔 속 편한 죽이 최고다냥~' } },
     { name: '흰쌀밥 정식', tags: ['tired', 'calm'], w: 2,
@@ -297,13 +297,13 @@
     { name: '피자', tags: ['happy', 'playful'], w: 2,
       orderTitle: '슈퍼슈프림으로 시켜요',
       notes: ['피자는 슈퍼슈프림 (어느 피자집이든 기본 메뉴)', '보미는 피자를 잘 안 먹으니 사이드로 치즈오븐파스타 꼭 시키기'],
-      why: { happy: '기분 좋은 날엔 피자 파티다!!', playful: '오늘은 장난기 모드니까 피자 한 판 시켜서 나눠 먹자ㅋㅋ' } },
+      why: { happy: '기분 좋은 날엔 피자 파티다!!', playful: '오늘은 피자를 먹고싶다~ 피자 시켜달라능!' } },
     { name: '햄버거', tags: ['happy', 'playful'], w: 2,
-      why: { happy: '기분 좋은 날엔 햄버거 크게 한 입 먹자!!', playful: '오늘은 장난기 모드니까 햄버거 먹으면서 놀자ㅋㅋ' } },
+      why: { happy: '기분 좋은 날엔 햄버거 크게 한 입 먹자!!', playful: '오늘은 햄버거를 먹고싶다~ 햄버거 시켜달라능!' } },
     { name: '싱가폴 누들', tags: ['happy', 'calm'], w: 1,
       why: { happy: '기분 좋은 날엔 싱가폴 누들이지!!', calm: '평온한 날엔 싱가폴 누들 후루룩~' } },
     { name: '차오미엔', tags: ['happy', 'playful'], w: 1,
-      why: { happy: '기분 좋은 날엔 차오미엔이지!!', playful: '오늘은 장난기 모드니까 차오미엔 시켜서 놀면서 먹자ㅋㅋ' } },
+      why: { happy: '기분 좋은 날엔 차오미엔이지!!', playful: '오늘은 차오미엔을 먹고싶다~ 차오미엔 시켜달라능!' } },
     { name: '빵', tags: ['calm'], w: 1,
       why: { calm: '평온한 날엔 빵 사다 놓고 느긋하게 쉬자~' } }
   ];
@@ -312,7 +312,7 @@
   /* ctx: { mood, dow(0=일..5=금), exclude:Set } */
   function recommend(ctx, rng) {
     if (ctx.dow === 5) {
-      return { food: '삼겹살', drink: DRINK, reason: LINES.reasonFriday, friday: true, v: 2 };
+      return { food: '삼겹살', drink: DRINK, reason: LINES.reasonFriday, friday: true, v: 3 };
     }
     var exclude = ctx.exclude || new Set();
     var pool = FOOD_POOL.filter(function (f) { return !exclude.has(f.name); });
@@ -325,7 +325,7 @@
       drink: DRINK,
       reason: (matched && chosen.why[ctx.mood]) || ('오늘은 그냥 ' + chosen.name + ' 땡긴다능...'),
       friday: false,
-      v: 2,
+      v: 3,
       orderTitle: chosen.brands ? pick(chosen.brands, rng) + '로 시켜요' : (chosen.orderTitle || null),
       notes: chosen.notes || null
     };
@@ -373,7 +373,7 @@
     cur.reason = (matched && f.why[mood]) || ('오늘은 그냥 ' + f.name + ' 땡긴다능...');
     cur.orderTitle = f.brands ? (cur.orderTitle && f.brands.some(function (b) { return cur.orderTitle.indexOf(b) === 0; }) ? cur.orderTitle : pick(f.brands, rng) + '로 시켜요') : (f.orderTitle || null);
     cur.notes = f.notes || null;
-    cur.v = 2;
+    cur.v = 3;
     return cur;
   }
 
