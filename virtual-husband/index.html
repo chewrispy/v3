@@ -102,7 +102,7 @@ main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .bubble.serious { font-family: 'Noto Sans KR', sans-serif; font-weight: 500; font-size: 16px; }
 .mood-tag { position: absolute; left: 12px; bottom: 10px; font-size: 12px; padding: 3px 10px; border-radius: 99px; background: rgba(255,255,255,.8); }
 
-.actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
 .act {
   border: 1px solid var(--line); background: #fff; border-radius: 16px;
   padding: 11px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -210,6 +210,7 @@ nav .dot.on { display: block; }
         <button class="act" data-act="poke"><span>👉</span>찌르기</button>
         <button class="act" data-act="pet"><span>🫳</span>쓰다듬기</button>
         <button class="act" data-act="touch"><span>🙈</span>XX 만지기</button>
+        <button class="act" data-act="nip"><span>🫣</span>찌찌 만지기</button>
         <button class="act" data-act="feed"><span>🍙</span>밥주기</button>
       </div>
       <p class="hint">가끔 반격이 날아와요.</p>
@@ -323,7 +324,7 @@ nav .dot.on { display: block; }
     setLast(r.nick);
     if (kind === 'poke') S.affection = clamp(S.affection + 1);
     if (kind === 'pet') { S.affection = clamp(S.affection + 4); if (rng() < .3) S.mood = 'happy'; }
-    if (kind === 'touch') S.affection = clamp(S.affection - 1);
+    if (kind === 'touch' || kind === 'nip') S.affection = clamp(S.affection - 1);
     if (kind === 'feed') { VH.feed(S, nowMs); S.affection = clamp(S.affection + 3); }
     say(r.text, r.img); save();
   }

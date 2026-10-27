@@ -117,6 +117,7 @@
     poke:  ['왜 찌르느냥ㅋㅋ', '아파 살살하랏', '심심하느냥?? 말을 걸랏', '자꾸 찌르면 삐진다ㅋㅋ', '콕콕 찌르지 말랏ㅋㅋ', '찔렀으면 책임지고 간식 내놓으랏!!', '어허 이건 폭행이닷ㅋㅋ'],
     pet:   ['헤헿 좋다느냥', '더 쓰다듬어달랏', '기분 좋아진다능', '머리 부스스해진다ㅋㅋ', '오구오구 잘한다고 해보랏!!', '이대로 소파에 녹을 것 같다능', '그렇게 쓰다듬으면 잠든다냥...'],
     touch: ['안됀다아~~~', '부끄럽다능!', '터진다!!', 'One-balled James 된다능!!', '뭐하냥ㅋㅋㅋ', 'Balls 찾아봐라~~~', '잠깐 거기는 반칙이닷!!', '이건 신고감이닷ㅋㅋ'],
+    nip:   ['찌찌 따진다~~~~', '히히히히힣힣헤힣히ㅣㅎ', '레로레로레로롤롤ㄹㄹ로로레로', '그~만~해~라아~~~', '찌를테면 찔러봐랏! (방어중)', '자꾸 이러면 블랙 사파이어 포도 된다아~~~'],
     feed:  ['냠냠 고맙닷!!', '더 달랏', '맛있다능 사랑한닷', '잘 먹겠닷!!', '배가 빵빵해진다ㅋㅋ'],
     full:  ['배불러서 더 못 먹는다냥...', '이제 숨도 못 쉬겠다능ㅋㅋ'],
     attackBodyslam: ['으라차차 무게 공격이닷!! 찌부시켜주마!!', '엉덩이 폭탄 투하!! 으악 비켜랏!!'],
@@ -188,6 +189,7 @@
     poke:  { img: 'tease',   lines: LINES.poke },
     pet:   { img: 'excited', lines: LINES.pet },
     touch: { img: 'sulk',    lines: LINES.touch },
+    nip:   { img: 'tease',   lines: LINES.nip },
     feed:  { img: 'idle',    lines: LINES.feed }
   };
   var ATTACKS = [
@@ -207,7 +209,7 @@
   function reaction(kind, rng, last, extra) {
     var r = REACTIONS[kind];
     var line = (extra && extra.line) || pick(r.lines, rng);
-    var n = attachNickname(line, rng, { prob: 0.5, last: last });
+    var n = attachNickname(line, rng, { prob: (kind === 'touch' || kind === 'nip') ? 0 : 0.5, last: last });
     return { img: r.img, text: n.text, nick: n.nick };
   }
   function attack(rng, last) {
