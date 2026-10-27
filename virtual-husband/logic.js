@@ -231,7 +231,7 @@
   function classify(text, opts) {
     var t = String(text || '').trim();
     var stress = has(t, KW.stress);
-    if (has(t, KW.practical) && !stress) return 'practical';
+    if (has(t, KW.practical)) return 'practical';
     if (opts && opts.late && has(t, KW.light) && !stress) return 'light';
     if (stress) return 'stress';
     if (has(t, KW.tired)) return 'tired';
