@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>사원 — 온라인 사원</title>
+<meta name="description" content="말없이 함께 머무는 온라인 사원. 성당, 교회, 모스크, 절 중 마음 가는 곳으로.">
+<meta name="theme-color" content="#17151b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#ecd9a8;--text:#f5f0e6;--sub:rgba(245,240,230,.62);--line:rgba(255,255,255,.12)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;color:var(--text);font-family:'Noto Sans KR',system-ui,sans-serif;
+  background:radial-gradient(120% 70% at 50% 0%,#2c2731 0%,#18161c 55%,#111014 100%) fixed}
+main{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 64px) 22px calc(env(safe-area-inset-bottom) + 40px)}
+header{text-align:center;margin-bottom:40px}
+h1{margin:0;font-family:'Gowun Batang',serif;font-size:42px;letter-spacing:.14em;font-weight:700}
+.sub{margin-top:12px;font-family:'Gowun Batang',serif;color:var(--sub);font-size:15px;line-height:1.6}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:20px 18px 18px;border-radius:22px;border:1px solid var(--line);
+  background:rgba(255,255,255,.035);color:inherit;text-decoration:none;min-height:190px;overflow:hidden;transition:transform .25s,border-color .25s,background .25s}
+.card svg{width:40px;height:40px;color:var(--gold)}
+.card b{font-family:'Gowun Batang',serif;font-size:21px;font-weight:700;margin-top:auto}
+.card small{font-size:12.5px;color:var(--sub);line-height:1.5;word-break:keep-all}
+.card .glow{position:absolute;inset:-40% -40% auto auto;width:160px;height:160px;border-radius:50%;filter:blur(30px);opacity:.35}
+a.card:hover,a.card:active{transform:translateY(-2px);border-color:rgba(236,217,168,.45);background:rgba(255,255,255,.06)}
+.card.soon{opacity:.48;cursor:default}
+.card.wide{grid-column:1/-1;flex-direction:row;align-items:center;gap:16px;min-height:0;padding:18px}
+.card.wide b{margin:0}.card.wide svg{flex:0 0 auto}
+.card .tag{position:absolute;top:16px;right:14px;font-size:11px;padding:3px 9px;border-radius:10px;border:1px solid var(--line);color:var(--sub)}
+.card.open .tag{border-color:rgba(236,217,168,.5);color:var(--gold)}
+footer{margin-top:36px;text-align:center;font-size:12px;color:rgba(245,240,230,.38);line-height:1.8}
+footer a{color:inherit}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>사원</h1>
+    <div class="sub">말없이 함께 머무는 온라인 사원<br>마음 가는 곳으로 들어가 보세요</div>
+  </header>
+  <div class="grid">
+    <a class="card open" href="cathedral/">
+      <span class="glow" style="background:#2a64d0"></span><span class="tag">열림</span>
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 4v10M20 8h8"/><path d="M12 44V26c0-7 5-11 12-14 7 3 12 7 12 14v18"/><path d="M6 44h36"/><path d="M19.5 44V35a4.5 4.5 0 0 1 9 0v9"/><circle cx="24" cy="24" r="3"/></svg>
+      <b>성당</b><small>스테인드글라스 아래에서 미사, 묵주기도, 초 봉헌</small>
+    </a>
+    <div class="card soon">
+      <span class="glow" style="background:#c9a36a"></span><span class="tag">준비 중</span>
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 3v9M20.5 6.5h7"/><path d="M15 44V22l9-8 9 8v22"/><path d="M8 44V30h7M40 44V30h-7"/><path d="M5 44h38"/><path d="M21 44v-8h6v8"/><path d="M21 26h6"/></svg>
+      <b>교회</b><small>찬양과 예배, 함께 드리는 기도</small>
+    </div>
+    <div class="card soon">
+      <span class="glow" style="background:#3f9a86"></span><span class="tag">준비 중</span>
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 44V24c0-6 4.5-10 10-12 5.5 2 10 6 10 12v20"/><path d="M24 12V6"/><path d="M22.5 5.5a2.2 2.2 0 1 0 3 0"/><path d="M5 44V18M5 18l2-4 2 4M9 44V18M39 44V18l2-4 2 4v26"/><path d="M3 44h42"/><path d="M20 44v-7a4 4 0 0 1 8 0v7"/></svg>
+      <b>모스크</b><small>기도 시간의 아잔과 고요한 기도실</small>
+    </div>
+    <div class="card soon">
+      <span class="glow" style="background:#8a6b4a"></span><span class="tag">준비 중</span>
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c6 0 10-3 20-8 10 5 14 8 20 8"/><path d="M9 20v24M39 20v24"/><path d="M7 27h34"/><path d="M5 44h38"/><path d="M19 44V33h10v11"/><path d="M14 24l-2 3M34 24l2 3"/></svg>
+      <b>절</b><small>합장, 절하기, 염주와 목탁 소리</small>
+    </div>
+    <div class="card soon wide">
+      <span class="glow" style="background:#5d7fb8"></span><span class="tag">언젠가</span>
+      <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 40V14a7 7 0 0 1 14 0v26"/><path d="M24 40V14a7 7 0 0 1 14 0v26"/><path d="M6 40h36"/><path d="M14 18h6M14 23h6M14 28h6M28 18h6M28 23h6M28 28h6"/></svg>
+      <div><b>시나고그</b><br><small>아직 직접 가 보지 못한 곳. 언젠가 다녀온 뒤에 문을 열게요</small></div>
+    </div>
+  </div>
+  <footer>직접 다녀온 곳만, 하나씩 차근차근 문을 열어갈게요.<br>by <a href="https://bomi.kim">bomi.kim</a></footer>
+</main>
+</body>
+</html>
