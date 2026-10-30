@@ -699,7 +699,7 @@
   {
     "slug": "online-temple",
     "emoji": "⛪",
-    "title": "사원 — 온라인 사원",
+    "title": "사원 · Sanctuary",
     "shortTitle": "온라인 사원",
     "description": "말없이 함께 머무는 3D 온라인 사원. 성당부터 하나씩 문을 열어요.",
     "longDescription": "성당·교회·모스크·절 중 마음 가는 곳을 골라 들어가는 온라인 사원이에요. 첫 번째로 연 성당에서는 스테인드글라스 빛 아래를 걸으며 성호를 긋고, 묵주기도를 바치고, 봉헌함에 1달러를 넣고 초를 켜요. 미사 참례·복사 체험·성가대·고해성사·찰고까지 담았어요.",
@@ -714,7 +714,7 @@
       "미사 참례·복사 체험",
       "봉헌함 & 초 봉헌"
     ],
-    "sourceUrl": "https://bomi.kim/temple",
+    "sourceUrl": "https://chewrispy.github.io/sanctuary/",
     "buildInfo": {
       "tool": "Claude",
       "date": "2026-10-30",
