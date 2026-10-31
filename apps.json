@@ -520,11 +520,11 @@
       "한/영 자막 구성",
       "배경음악 편집"
     ],
-    "sourceUrl": "",
+    "sourceUrl": "https://youtu.be/UwO4VflcL3I",
     "buildInfo": {
       "tool": "Claude, Seedance 2.5, CapCut, ElevenLabs",
       "date": "2026-08-14",
-      "deploy": "비공개 (사내 제출용, 외부 미공개)",
+      "deploy": "YouTube (일부 공개)",
       "stack": [
         "Seedance 2.5",
         "CapCut",

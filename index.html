@@ -96,8 +96,14 @@
         </div>
       </div>
 
+      <sc-if value="{{ selected.hasVideo }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative; width:100%; aspect-ratio:16/9; border-radius:16px; overflow:hidden; background:#000; margin-bottom:16px; box-shadow:0 8px 24px rgba(0,0,0,0.12);">
+          <iframe src="{{ selected.videoEmbedUrl }}" title="{{ selected.title }}" style="position:absolute; inset:0; width:100%; height:100%; border:0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+      </sc-if>
+
       <sc-if value="{{ selected.hasUrl }}" hint-placeholder-val="{{ false }}">
-        <div style="background:#1c1a19; color:#fff; text-align:center; padding:15px; border-radius:16px; font-size:16px; font-weight:700; cursor:pointer; margin-bottom:28px;" onClick="{{ selected.openUrl }}">앱 열어보기 ↗</div>
+        <div style="background:#1c1a19; color:#fff; text-align:center; padding:15px; border-radius:16px; font-size:16px; font-weight:700; cursor:pointer; margin-bottom:28px;" onClick="{{ selected.openUrl }}">{{ selected.openLabel }}</div>
       </sc-if>
       <sc-if value="{{ selected.hasNoUrl }}" hint-placeholder-val="{{ false }}">
         <div style="background:rgba(0,0,0,0.05); color:#918c88; text-align:center; padding:15px; border-radius:16px; font-size:16px; font-weight:700; margin-bottom:28px;">아직 배포 링크가 없어요</div>
@@ -281,6 +287,11 @@ function pickLatest(list) {
   return best ? best.a : null;
 }
 
+function getYouTubeId(url) {
+  const m = (url || "").match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : "";
+}
+
 function fmtDate(d) {
   return d.replaceAll("-", ".");
 }
@@ -310,6 +321,9 @@ class Component extends DCLogic {
       tagLabel: getTagLabel(a.tag),
       iconBg: `linear-gradient(135deg, ${a.gradient[0]}, ${a.gradient[1]}, ${a.gradient[2]})`,
       hasUrl: !!a.sourceUrl,
+      hasVideo: !!getYouTubeId(a.sourceUrl),
+      videoEmbedUrl: "https://www.youtube.com/embed/" + getYouTubeId(a.sourceUrl),
+      openLabel: getYouTubeId(a.sourceUrl) ? "YouTube에서 보기 ↗" : "앱 열어보기 ↗",
       hasNoUrl: !a.sourceUrl,
       featuresLabel: a.features.join(" · "),
       open: () => this.openApp(a.slug),
@@ -350,7 +364,7 @@ class Component extends DCLogic {
 
     const selected = apps.find((a) => a.slug === this.state.selectedSlug) || apps[0] || {
       emoji: "📦", title: "", tagLabel: "", iconBg: "linear-gradient(135deg,#eee,#ddd)",
-      hasUrl: false, hasNoUrl: false, longDescription: "", features: [],
+      hasUrl: false, hasNoUrl: false, hasVideo: false, videoEmbedUrl: "", openLabel: "", longDescription: "", features: [],
       buildInfo: { tool: "", dateLabel: "", deploy: "", stackLabel: "", notes: "" }, openUrl: () => {}
     };
 
