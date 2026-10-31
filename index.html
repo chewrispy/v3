@@ -44,10 +44,10 @@
       <div style="border-radius:28px; padding:36px 32px; margin-bottom:36px; position:relative; overflow:hidden; background:linear-gradient(135deg, rgba(125,211,252,.35), rgba(165,180,252,.22), rgba(196,181,253,.22)), #fff; border:1px solid rgba(0,0,0,0.06); cursor:pointer;" onClick="{{ openFeatured }}">
         <div style="font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#ff6b5a; margin-bottom:14px;">오늘의 앱</div>
         <div style="display:flex; align-items:center; gap:22px; flex-wrap:wrap;">
-          <div style="width:88px; height:88px; border-radius:22px; background:linear-gradient(135deg,#7dd3fc,#a5b4fc,#c4b5fd); display:flex; align-items:center; justify-content:center; font-size:44px; box-shadow:0 8px 20px rgba(0,0,0,0.12); flex-shrink:0;">🃏</div>
+          <div style="width:88px; height:88px; border-radius:22px; background:{{ featured.iconBg }}; display:flex; align-items:center; justify-content:center; font-size:44px; box-shadow:0 8px 20px rgba(0,0,0,0.12); flex-shrink:0;">{{ featured.emoji }}</div>
           <div style="flex:1; min-width:220px;">
-            <div style="font-size:28px; font-weight:800; letter-spacing:-0.02em; margin-bottom:6px;">캐주얼 카드 게임</div>
-            <div style="font-size:16px; line-height:1.5; color:#4a4542; max-width:520px;">의료진 캐릭터 카드로 상황을 해결하고 영향력을 겨루는 TCG예요. 몇 년간 묵혀둔 기획을 바이브코딩으로 처음 완성한 첫 작품.</div>
+            <div style="font-size:28px; font-weight:800; letter-spacing:-0.02em; margin-bottom:6px;">{{ featured.title }}</div>
+            <div style="font-size:16px; line-height:1.5; color:#4a4542; max-width:520px;">{{ featured.description }}</div>
           </div>
           <div style="background:#1c1a19; color:#fff; padding:12px 22px; border-radius:100px; font-size:15px; font-weight:600; white-space:nowrap;">자세히 보기 →</div>
         </div>
@@ -289,7 +289,11 @@ class Component extends DCLogic {
   goHome = () => this.setState({ view: "home", selectedSlug: null });
   goAbout = () => this.setState({ view: "about" });
   openApp = (slug) => this.setState({ view: "detail", selectedSlug: slug });
-  openFeatured = () => this.setState({ view: "detail", selectedSlug: "casual-card-game" });
+  openFeatured = () => {
+    const list = this.state.apps || [];
+    const last = list[list.length - 1];
+    if (last) this.openApp(last.slug);
+  };
   setFilter = (cat) => this.setState({ filterCategory: cat });
 
   buildApp(a) {
@@ -342,6 +346,9 @@ class Component extends DCLogic {
       buildInfo: { tool: "", dateLabel: "", deploy: "", stackLabel: "", notes: "" }, openUrl: () => {}
     };
 
+    // 오늘의 앱 = 가장 최근에 등록한 앱 (apps.json 맨 마지막)
+    const featured = apps[apps.length - 1] || { emoji: "🍑", title: "", description: "", iconBg: "linear-gradient(135deg,#eee,#ddd)" };
+
     const timeline = [...apps]
       .sort((a, b) => a.buildInfo.date.localeCompare(b.buildInfo.date))
       .map((a) => ({ dateLabel: fmtDate(a.buildInfo.date), title: a.shortTitle }));
@@ -352,6 +359,7 @@ class Component extends DCLogic {
 
     return {
       chips,
+      featured,
       visibleCategories,
       selected,
       timeline,
