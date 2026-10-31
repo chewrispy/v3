@@ -272,6 +272,15 @@ function getOrderedTags(apps) {
   return [...preferred, ...custom];
 }
 
+function pickLatest(list) {
+  let best = null;
+  list.forEach((a) => {
+    const d = (a.buildInfo && a.buildInfo.date) || "";
+    if (!best || d >= best.d) best = { d, a };
+  });
+  return best ? best.a : null;
+}
+
 function fmtDate(d) {
   return d.replaceAll("-", ".");
 }
@@ -290,9 +299,8 @@ class Component extends DCLogic {
   goAbout = () => this.setState({ view: "about" });
   openApp = (slug) => this.setState({ view: "detail", selectedSlug: slug });
   openFeatured = () => {
-    const list = this.state.apps || [];
-    const last = list[list.length - 1];
-    if (last) this.openApp(last.slug);
+    const f = pickLatest(this.state.apps || []);
+    if (f) this.openApp(f.slug);
   };
   setFilter = (cat) => this.setState({ filterCategory: cat });
 
@@ -346,8 +354,8 @@ class Component extends DCLogic {
       buildInfo: { tool: "", dateLabel: "", deploy: "", stackLabel: "", notes: "" }, openUrl: () => {}
     };
 
-    // 오늘의 앱 = 가장 최근에 등록한 앱 (apps.json 맨 마지막)
-    const featured = apps[apps.length - 1] || { emoji: "🍑", title: "", description: "", iconBg: "linear-gradient(135deg,#eee,#ddd)" };
+    // 오늘의 앱 = 제작일이 가장 최근인 앱 (같은 날이면 나중에 등록한 앱)
+    const featured = pickLatest(apps) || { emoji: "🍑", title: "", description: "", iconBg: "linear-gradient(135deg,#eee,#ddd)" };
 
     const timeline = [...apps]
       .sort((a, b) => a.buildInfo.date.localeCompare(b.buildInfo.date))
